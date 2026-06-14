@@ -24,3 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Griefy"
 include(":app")
+include(":domain")
+include(":data")
