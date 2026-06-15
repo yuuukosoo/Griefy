@@ -4,9 +4,9 @@ data class Memory(
     val id: Int = 0,
     val content: String,
     val imageUris: List<String>,
-    val createAt : Long,
+    val createdAt : Long,
     val tags : List<String>,
     val isPublic : Boolean = false,
-    val songTracked: String? = null,
+    val songTrackId: String? = null,
     val isTrashed: Boolean = false
 )
