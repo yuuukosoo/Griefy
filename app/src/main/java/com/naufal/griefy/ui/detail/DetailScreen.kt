@@ -96,7 +96,7 @@ fun DetailScreen(
                     }
                 }
 
-               
+
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = if (mem.isPublic) "Status: Publik 🌐" else "Status: Privat 🔒",

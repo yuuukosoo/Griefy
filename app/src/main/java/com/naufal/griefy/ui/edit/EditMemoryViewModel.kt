@@ -1,5 +1,6 @@
 package com.naufal.griefy.ui.edit
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -27,6 +28,10 @@ class EditMemoryViewModel @Inject constructor(
     var isPublic by mutableStateOf(false)
         private set
 
+
+    var selectedImageUris by mutableStateOf<List<Uri>>(emptyList())
+        private set
+
     init {
 
         viewModelScope.launch {
@@ -34,6 +39,8 @@ class EditMemoryViewModel @Inject constructor(
             currentMemory?.let {
                 contentText = it.content
                 isPublic = it.isPublic
+
+                selectedImageUris = it.imageUris.map { uriString -> Uri.parse(uriString) }
             }
         }
     }
@@ -46,13 +53,25 @@ class EditMemoryViewModel @Inject constructor(
         isPublic = newStatus
     }
 
+
+    fun addImages(newUris: List<Uri>) {
+        val combinedList = (selectedImageUris + newUris).distinct().take(5)
+        selectedImageUris = combinedList
+    }
+
+
+    fun removeImage(uriToRemove: Uri) {
+        selectedImageUris = selectedImageUris.filter { it != uriToRemove }
+    }
+
     fun updateMemory(onUpdateSuccess: () -> Unit) {
         viewModelScope.launch {
             currentMemory?.let { oldMemory ->
-
                 val updatedMemory = oldMemory.copy(
                     content = contentText,
-                    isPublic = isPublic
+                    isPublic = isPublic,
+
+                    imageUris = selectedImageUris.map { it.toString() }
                 )
                 repository.updateMemory(updatedMemory)
                 onUpdateSuccess()
