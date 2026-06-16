@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.naufal.griefy.ui.home.CreateMemoryScreen
+import com.naufal.griefy.ui.create.CreateMemoryScreen
 import com.naufal.griefy.ui.home.HomeScreen
 import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.ui.theme.GriefyTheme
@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.Home.route 
+                        startDestination = Screen.Home.route
                     ) {
 
                         composable(Screen.Home.route) {

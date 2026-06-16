@@ -66,12 +66,3 @@ fun MemoryCard(memory: Memory) {
 }
 
 
-@Composable
-fun CreateMemoryScreen(navController: NavController) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Ini Halaman Tambah Kenangan Baru")
-            Button(onClick = { navController.navigateUp() }) { Text("Kembali") }
-        }
-    }
-}
