@@ -25,7 +25,7 @@ class CreateMemoryViewModel @Inject constructor(
                 isTrashed = false
             )
 
-            repository.addMemory(newMemory) 
+            repository.addMemory(newMemory)
             onSaveSuccess()
         }
     }
