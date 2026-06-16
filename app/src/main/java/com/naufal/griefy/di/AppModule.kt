@@ -29,7 +29,7 @@ object AppModule {
             GriefyDatabase::class.java,
             GriefyDatabase.DATABASE_NAME
         )
-
+            .fallbackToDestructiveMigration()
             .build()
     }
 

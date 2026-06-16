@@ -33,7 +33,6 @@ fun EditMemoryScreen(
 ) {
     val context = LocalContext.current
 
-
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5)
     ) { uris ->
@@ -42,7 +41,7 @@ fun EditMemoryScreen(
                 val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 context.contentResolver.takePersistableUriPermission(uri, flag)
             }
-            viewModel.addImages(uris) 
+            viewModel.addImages(uris)
         }
     }
 
@@ -58,7 +57,7 @@ fun EditMemoryScreen(
                 actions = {
                     Button(
                         onClick = {
-                            if (viewModel.contentText.isNotBlank() || viewModel.selectedImageUris.isNotEmpty()) {
+                            if (viewModel.titleText.isNotBlank() || viewModel.contentText.isNotBlank() || viewModel.selectedImageUris.isNotEmpty()) {
                                 viewModel.updateMemory(
                                     onUpdateSuccess = { navController.navigateUp() }
                                 )
@@ -79,7 +78,6 @@ fun EditMemoryScreen(
                 .padding(16.dp)
         ) {
 
-  
             Button(
                 onClick = {
                     multiplePhotoPickerLauncher.launch(
@@ -94,12 +92,10 @@ fun EditMemoryScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-          
             if (viewModel.selectedImageUris.isNotEmpty()) {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(viewModel.selectedImageUris) { uri ->
                         Box(modifier = Modifier.size(100.dp)) {
-                           
                             AsyncImage(
                                 model = uri,
                                 contentDescription = "Foto Pilihan",
@@ -109,7 +105,6 @@ fun EditMemoryScreen(
                                 contentScale = ContentScale.Crop
                             )
 
-                          
                             IconButton(
                                 onClick = { viewModel.removeImage(uri) },
                                 modifier = Modifier
@@ -131,6 +126,22 @@ fun EditMemoryScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
+            // --- KOLOM INPUT JUDUL (BARU) ---
+            OutlinedTextField(
+                value = viewModel.titleText,
+                onValueChange = { viewModel.onTitleChange(it) },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Judul Kenangan...") },
+                singleLine = true,
+                textStyle = MaterialTheme.typography.titleLarge,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // --- KOLOM INPUT TEKS CURHATAN ---
             OutlinedTextField(
                 value = viewModel.contentText,
                 onValueChange = { viewModel.onContentChange(it) },

@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -84,7 +85,6 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
-
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first(),
@@ -97,6 +97,14 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
+
+
+            Text(
+                text = memory.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
 
 
             Text(text = memory.content, style = MaterialTheme.typography.bodyLarge)

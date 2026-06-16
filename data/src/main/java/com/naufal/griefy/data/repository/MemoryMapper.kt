@@ -9,6 +9,7 @@ import com.naufal.griefy.domain.model.Song
 fun MemoryEntity.toDomain(): Memory {
     return Memory(
         id = id,
+        title = title,
         content = content,
         imageUris = imageUris,
         createdAt = createdAt,
@@ -33,6 +34,7 @@ fun TrackDto.toSong(): Song {
 fun Memory.toEntity(): MemoryEntity {
     return MemoryEntity(
         id = id,
+        title = title,
         content = content,
         imageUris = imageUris,
         createdAt = createdAt,

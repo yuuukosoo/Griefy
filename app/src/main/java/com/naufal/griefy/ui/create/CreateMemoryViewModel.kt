@@ -13,9 +13,10 @@ class CreateMemoryViewModel @Inject constructor(
     private val repository: MemoryRepository
 ) : ViewModel() {
 
-    fun saveMemory(content: String, isPublic: Boolean, imageUris: List<String>, onSaveSuccess: () -> Unit) {
+    fun saveMemory(title: String ,content: String, isPublic: Boolean, imageUris: List<String>, onSaveSuccess: () -> Unit) {
         viewModelScope.launch {
             val newMemory = Memory(
+                title = title,
                 content = content,
                 imageUris = imageUris,
                 createdAt = System.currentTimeMillis(), 

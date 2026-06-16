@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -39,7 +40,6 @@ fun DetailScreen(
                     }
                 },
                 actions = {
-
                     IconButton(
                         onClick = {
                             memory?.let { mem ->
@@ -49,7 +49,6 @@ fun DetailScreen(
                     ) {
                         Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
                     }
-
 
                     IconButton(
                         onClick = {
@@ -96,7 +95,6 @@ fun DetailScreen(
                     }
                 }
 
-
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = if (mem.isPublic) "Status: Publik 🌐" else "Status: Privat 🔒",
@@ -114,6 +112,15 @@ fun DetailScreen(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
+
+
+                    Text(
+                        text = mem.title,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
 
                     Text(
                         text = mem.content,

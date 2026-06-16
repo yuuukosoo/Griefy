@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class MemoryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val title: String,
     val content: String,
     val imageUris: List<String>,
     val createdAt: Long,

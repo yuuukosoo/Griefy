@@ -22,6 +22,8 @@ class EditMemoryViewModel @Inject constructor(
     private val memoryId: Int = checkNotNull(savedStateHandle["memoryId"])
     private var currentMemory: Memory? = null
 
+    var titleText by mutableStateOf("")
+        private set
 
     var contentText by mutableStateOf("")
         private set
@@ -37,6 +39,7 @@ class EditMemoryViewModel @Inject constructor(
         viewModelScope.launch {
             currentMemory = repository.getMemoryById(memoryId)
             currentMemory?.let {
+                titleText = it.title
                 contentText = it.content
                 isPublic = it.isPublic
 
@@ -47,6 +50,10 @@ class EditMemoryViewModel @Inject constructor(
 
     fun onContentChange(newText: String) {
         contentText = newText
+    }
+
+    fun onTitleChange(newTitle: String) {
+        titleText = newTitle
     }
 
     fun onPrivacyChange(newStatus: Boolean) {
@@ -68,6 +75,7 @@ class EditMemoryViewModel @Inject constructor(
         viewModelScope.launch {
             currentMemory?.let { oldMemory ->
                 val updatedMemory = oldMemory.copy(
+                    title = titleText,
                     content = contentText,
                     isPublic = isPublic,
 

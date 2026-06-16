@@ -29,19 +29,18 @@ fun CreateMemoryScreen(
     viewModel: CreateMemoryViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+
+
+    var titleText by remember { mutableStateOf("") } // <-- TAMBAHAN: State Judul
     var contentText by remember { mutableStateOf("") }
     var isPublic by remember { mutableStateOf(false) }
-
-
     var selectedImageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
-
 
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5)
     ) { uris ->
         if (uris.isNotEmpty()) {
             selectedImageUris = uris
-
             uris.forEach { uri ->
                 val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 context.contentResolver.takePersistableUriPermission(uri, flag)
@@ -59,10 +58,11 @@ fun CreateMemoryScreen(
                 actions = {
                     Button(
                         onClick = {
-                            if (contentText.isNotBlank() || selectedImageUris.isNotEmpty()) {
 
+                            if (titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty()) {
                                 val uriStrings = selectedImageUris.map { it.toString() }
                                 viewModel.saveMemory(
+                                    title = titleText, // <-- Mengirim Judul ke ViewModel
                                     content = contentText,
                                     isPublic = isPublic,
                                     imageUris = uriStrings,
@@ -85,7 +85,6 @@ fun CreateMemoryScreen(
                 .padding(16.dp)
         ) {
 
-
             Button(
                 onClick = {
                     multiplePhotoPickerLauncher.launch(
@@ -99,7 +98,6 @@ fun CreateMemoryScreen(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-
 
             if (selectedImageUris.isNotEmpty()) {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -117,6 +115,19 @@ fun CreateMemoryScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
+
+            OutlinedTextField(
+                value = titleText,
+                onValueChange = { titleText = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Judul Kenangan...") },
+                singleLine = true,
+                textStyle = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+
             OutlinedTextField(
                 value = contentText,
                 onValueChange = { contentText = it },
@@ -125,7 +136,6 @@ fun CreateMemoryScreen(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
