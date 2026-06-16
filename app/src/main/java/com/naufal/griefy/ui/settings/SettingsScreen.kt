@@ -110,8 +110,8 @@ fun SettingsScreen(navController: NavController) {
             SettingsItem(
                 icon = Icons.Default.Notifications,
                 title = "Pengingat Hari Peringatan",
-                subtitle = "Klik untuk tes notifikasi (Muncul 10 detik)",
-                onClick = { setTestReminder() }
+                subtitle = "Atur pengingat hari penting kenangan",
+                onClick = { navController.navigate(Screen.Reminders.route) }
             )
             SettingsItem(
                 icon = Icons.Default.Delete,
