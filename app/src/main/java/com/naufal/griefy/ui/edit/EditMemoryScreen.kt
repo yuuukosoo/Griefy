@@ -141,6 +141,21 @@ fun EditMemoryScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // --- KOLOM INPUT TAG / KATEGORI (BARU) ---
+            OutlinedTextField(
+                value = viewModel.tagsText,
+                onValueChange = { viewModel.onTagsChange(it) },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Kategori / Tag (pisahkan dengan koma)...") },
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             // --- KOLOM INPUT TEKS CURHATAN ---
             OutlinedTextField(
                 value = viewModel.contentText,

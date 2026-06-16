@@ -32,6 +32,7 @@ fun CreateMemoryScreen(
 
 
     var titleText by remember { mutableStateOf("") } // <-- TAMBAHAN: State Judul
+    var tagsText by remember { mutableStateOf("") }
     var contentText by remember { mutableStateOf("") }
     var isPublic by remember { mutableStateOf(false) }
     var selectedImageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
@@ -61,9 +62,13 @@ fun CreateMemoryScreen(
 
                             if (titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty()) {
                                 val uriStrings = selectedImageUris.map { it.toString() }
+                                val tagsList = tagsText.split(",")
+                                    .map { it.trim() }
+                                    .filter { it.isNotEmpty() }
                                 viewModel.saveMemory(
                                     title = titleText, // <-- Mengirim Judul ke ViewModel
                                     content = contentText,
+                                    tags = tagsList,
                                     isPublic = isPublic,
                                     imageUris = uriStrings,
                                     onSaveSuccess = { navController.navigateUp() }
@@ -123,6 +128,17 @@ fun CreateMemoryScreen(
                 placeholder = { Text("Judul Kenangan...") },
                 singleLine = true,
                 textStyle = MaterialTheme.typography.titleLarge
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = tagsText,
+                onValueChange = { tagsText = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Kategori / Tag (pisahkan dengan koma)...") },
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge
             )
 
             Spacer(modifier = Modifier.height(8.dp))

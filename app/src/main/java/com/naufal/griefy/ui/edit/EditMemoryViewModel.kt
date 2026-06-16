@@ -30,6 +30,9 @@ class EditMemoryViewModel @Inject constructor(
     var isPublic by mutableStateOf(false)
         private set
 
+    var tagsText by mutableStateOf("")
+        private set
+
 
     var selectedImageUris by mutableStateOf<List<Uri>>(emptyList())
         private set
@@ -42,6 +45,7 @@ class EditMemoryViewModel @Inject constructor(
                 titleText = it.title
                 contentText = it.content
                 isPublic = it.isPublic
+                tagsText = it.tags.joinToString(", ")
 
                 selectedImageUris = it.imageUris.map { uriString -> Uri.parse(uriString) }
             }
@@ -60,6 +64,10 @@ class EditMemoryViewModel @Inject constructor(
         isPublic = newStatus
     }
 
+    fun onTagsChange(newTags: String) {
+        tagsText = newTags
+    }
+
 
     fun addImages(newUris: List<Uri>) {
         val combinedList = (selectedImageUris + newUris).distinct().take(5)
@@ -74,9 +82,13 @@ class EditMemoryViewModel @Inject constructor(
     fun updateMemory(onUpdateSuccess: () -> Unit) {
         viewModelScope.launch {
             currentMemory?.let { oldMemory ->
+                val tagsList = tagsText.split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
                 val updatedMemory = oldMemory.copy(
                     title = titleText,
                     content = contentText,
+                    tags = tagsList,
                     isPublic = isPublic,
 
                     imageUris = selectedImageUris.map { it.toString() }
