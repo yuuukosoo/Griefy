@@ -20,6 +20,7 @@ import com.naufal.griefy.ui.login.LoginScreen
 import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.ui.profile.ProfileScreen
 import com.naufal.griefy.ui.register.RegisterScreen
+import com.naufal.griefy.ui.settings.SettingsScreen
 import com.naufal.griefy.ui.theme.GriefyTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -57,8 +58,10 @@ class MainActivity : ComponentActivity() {
                             ProfileScreen(navController = navController)
                         }
 
-
-
+                        composable(Screen.Settings.route) {
+                            SettingsScreen(navController = navController)
+                        }
+                        
                         composable(Screen.CreateMemory.route) {
                             CreateMemoryScreen(navController = navController)
                         }
