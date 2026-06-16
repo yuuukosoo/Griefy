@@ -1,5 +1,6 @@
 package com.naufal.griefy.ui.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -47,15 +48,27 @@ fun HomeScreen(
             if (memories.isEmpty()) {
                 item { Text("Belum ada kenangan. Tekan + untuk menambah.", modifier = Modifier.padding(16.dp)) }
             } else {
-                items(memories) { memory -> MemoryCard(memory = memory) }
+                items(memories) { memory ->
+                    MemoryCard(
+                        memory = memory,
+                        onClick = {
+                            navController.navigate(Screen.DetailMemory.createRoute(memory.id))
+                        }
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun MemoryCard(memory: Memory) {
-    Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(2.dp)) {
+fun MemoryCard(memory: Memory, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = memory.content, style = MaterialTheme.typography.bodyLarge)
             if (memory.tags.isNotEmpty()) {

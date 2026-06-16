@@ -7,10 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.naufal.griefy.ui.create.CreateMemoryScreen
+import com.naufal.griefy.ui.detail.DetailScreen
+import com.naufal.griefy.ui.edit.EditMemoryScreen
 import com.naufal.griefy.ui.home.HomeScreen
 import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.ui.theme.GriefyTheme
@@ -39,6 +43,20 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(Screen.CreateMemory.route) {
                             CreateMemoryScreen(navController = navController)
+                        }
+
+                        composable(
+                            route = Screen.DetailMemory.route,
+                            arguments = listOf(navArgument("memoryId") { type = NavType.IntType })
+                        ) {
+                            DetailScreen(navController = navController)
+                        }
+
+                        composable(
+                            route = Screen.EditMemory.route,
+                            arguments = listOf(navArgument("memoryId") { type = NavType.IntType })
+                        ) {
+                            EditMemoryScreen(navController = navController)
                         }
 
 
