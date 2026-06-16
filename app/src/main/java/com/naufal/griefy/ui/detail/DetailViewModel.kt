@@ -6,8 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.repository.MemoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,23 +20,18 @@ class DetailViewModel @Inject constructor(
 
     private val memoryId: Int = checkNotNull(savedStateHandle["memoryId"])
 
-    private val _memory = MutableStateFlow<Memory?>(null)
-    val memory = _memory.asStateFlow()
 
-    init {
-        loadMemory()
-    }
-
-    private fun loadMemory() {
-        viewModelScope.launch {
-            _memory.value = repository.getMemoryById(memoryId)
-        }
-    }
+    val memory: StateFlow<Memory?> = repository.getMemoryByIdAsFlow(memoryId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
 
     fun moveToTrash(onDeleteSuccess: () -> Unit) {
         viewModelScope.launch {
             repository.moveToTrash(memoryId)
-            onDeleteSuccess() // Beritahu UI kalau sudah sukses dihapus
+            onDeleteSuccess()
         }
     }
 }

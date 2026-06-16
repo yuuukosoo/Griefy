@@ -1,5 +1,6 @@
 package com.naufal.griefy.ui.edit
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,10 +22,16 @@ class EditMemoryViewModel @Inject constructor(
     private val memoryId: Int = checkNotNull(savedStateHandle["memoryId"])
     private var currentMemory: Memory? = null
 
+    var titleText by mutableStateOf("")
+        private set
 
     var contentText by mutableStateOf("")
         private set
     var isPublic by mutableStateOf(false)
+        private set
+
+
+    var selectedImageUris by mutableStateOf<List<Uri>>(emptyList())
         private set
 
     init {
@@ -32,8 +39,11 @@ class EditMemoryViewModel @Inject constructor(
         viewModelScope.launch {
             currentMemory = repository.getMemoryById(memoryId)
             currentMemory?.let {
+                titleText = it.title
                 contentText = it.content
                 isPublic = it.isPublic
+
+                selectedImageUris = it.imageUris.map { uriString -> Uri.parse(uriString) }
             }
         }
     }
@@ -42,17 +52,34 @@ class EditMemoryViewModel @Inject constructor(
         contentText = newText
     }
 
+    fun onTitleChange(newTitle: String) {
+        titleText = newTitle
+    }
+
     fun onPrivacyChange(newStatus: Boolean) {
         isPublic = newStatus
+    }
+
+
+    fun addImages(newUris: List<Uri>) {
+        val combinedList = (selectedImageUris + newUris).distinct().take(5)
+        selectedImageUris = combinedList
+    }
+
+
+    fun removeImage(uriToRemove: Uri) {
+        selectedImageUris = selectedImageUris.filter { it != uriToRemove }
     }
 
     fun updateMemory(onUpdateSuccess: () -> Unit) {
         viewModelScope.launch {
             currentMemory?.let { oldMemory ->
-
                 val updatedMemory = oldMemory.copy(
+                    title = titleText,
                     content = contentText,
-                    isPublic = isPublic
+                    isPublic = isPublic,
+
+                    imageUris = selectedImageUris.map { it.toString() }
                 )
                 repository.updateMemory(updatedMemory)
                 onUpdateSuccess()

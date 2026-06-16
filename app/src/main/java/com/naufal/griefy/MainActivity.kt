@@ -20,6 +20,7 @@ import com.naufal.griefy.ui.login.LoginScreen
 import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.ui.profile.ProfileScreen
 import com.naufal.griefy.ui.register.RegisterScreen
+import com.naufal.griefy.ui.search.SearchSongScreen
 import com.naufal.griefy.ui.settings.SettingsScreen
 import com.naufal.griefy.ui.theme.GriefyTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -78,6 +79,10 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(navArgument("memoryId") { type = NavType.IntType })
                         ) {
                             EditMemoryScreen(navController = navController)
+                        }
+
+                        composable(Screen.SearchPublic.route) {
+                            SearchSongScreen(navController = navController)
                         }
 
 
