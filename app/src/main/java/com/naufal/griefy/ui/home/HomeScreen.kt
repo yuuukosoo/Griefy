@@ -1,14 +1,25 @@
 package com.naufal.griefy.ui.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -112,53 +123,155 @@ fun HomeScreen(
 
 @Composable
 fun MemoryCard(memory: Memory, onClick: () -> Unit) {
-    val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
+    val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
     val dateString = formatter.format(Date(memory.createdAt))
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(24.dp), // Rounded corners as shown in the image
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0)) // Soft grey/beige background
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-
-            if (memory.imageUris.isNotEmpty()) {
-                AsyncImage(
-                    model = memory.imageUris.first(),
-                    contentDescription = "Foto Kenangan",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left side: Square Thumbnail Image or Placeholder
+            Box(
+                modifier = Modifier
+                    .size(110.dp) // Large square thumbnail size
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color(0xFFC5C0B7)), // Placeholder background color
+                contentAlignment = Alignment.Center
+            ) {
+                if (memory.imageUris.isNotEmpty()) {
+                    AsyncImage(
+                        model = memory.imageUris.first(),
+                        contentDescription = "Foto Kenangan",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Image,
+                        contentDescription = "No Image",
+                        tint = Color(0xFF8C8075),
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
 
+            Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = memory.title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            Text(
-                text = dateString,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline
-            )
+            // Right side: Info Column
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(110.dp), // Align height with the image
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Top row: Music (left) and Date (right)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Music indicator
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFC5C0B7))
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (memory.songTrackId != null) "Music" else "No Music",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF8C8075)
+                        )
+                    }
 
-            Spacer(modifier = Modifier.height(8.dp))
+                    // Date
+                    Text(
+                        text = dateString,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF8C8075)
+                    )
+                }
 
+                // Middle: Title and Truncated Content
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = memory.title,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF4E4640),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = memory.content,
+                        fontSize = 12.sp,
+                        color = Color(0xFF8C8075),
+                        maxLines = 2, // Truncate at 2 lines as shown in the image
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
-            Text(text = memory.content, style = MaterialTheme.typography.bodyLarge)
+                // Bottom row: Tags (left) and Privacy Lock Icon (right)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Tags chips list
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        val displayTags = memory.tags.take(2) // Take first 2 tags
+                        displayTags.forEach { tag ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color(0xFFC5C0B7))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = tag,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF4E4640)
+                                )
+                            }
+                        }
+                    }
 
-            if (memory.tags.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "🏷️ ${memory.tags.joinToString(", ")}", color = MaterialTheme.colorScheme.primary)
+                    // Privacy Lock Icon
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(Color.White), // White background circle for the lock icon as shown in image
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (!memory.isPublic) Icons.Default.Lock else Icons.Default.LockOpen,
+                            contentDescription = "Privasi",
+                            tint = Color(0xFF5C524A),
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
             }
         }
     }

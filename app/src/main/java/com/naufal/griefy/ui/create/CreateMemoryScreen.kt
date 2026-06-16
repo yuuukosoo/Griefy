@@ -109,7 +109,7 @@ fun CreateMemoryScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Photo Picker Box
+            
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
