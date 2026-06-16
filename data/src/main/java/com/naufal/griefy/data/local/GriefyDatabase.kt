@@ -5,14 +5,15 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [MemoryEntity::class],
-    version = 3,
+    entities = [MemoryEntity::class, RemembranceDayEntity::class],
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class GriefyDatabase : RoomDatabase() {
 
     abstract val memoryDao: MemoryDao
+    abstract val remembranceDayDao: RemembranceDayDao
 
 
     companion object {

@@ -4,10 +4,13 @@ import android.app.Application
 import androidx.room.Room
 import com.naufal.griefy.data.local.GriefyDatabase
 import com.naufal.griefy.data.local.MemoryDao
+import com.naufal.griefy.data.local.RemembranceDayDao
 import com.naufal.griefy.data.remote.SpotifyApi
 import com.naufal.griefy.data.remote.SpotifyAuthApi
 import com.naufal.griefy.data.repository.MemoryRepositoryImpl
+import com.naufal.griefy.data.repository.RemembranceRepositoryImpl
 import com.naufal.griefy.domain.repository.MemoryRepository
+import com.naufal.griefy.domain.repository.RemembranceRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,12 +45,26 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideRemembranceDayDao(database: GriefyDatabase): RemembranceDayDao {
+        return database.remembranceDayDao
+    }
+
+    @Provides
+    @Singleton
     fun provideMemoryRepository(
         dao: MemoryDao,
         spotifyApi: SpotifyApi,
         authApi: SpotifyAuthApi
     ): MemoryRepository {
         return MemoryRepositoryImpl(dao, spotifyApi, authApi)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRemembranceRepository(
+        dao: RemembranceDayDao
+    ): RemembranceRepository {
+        return RemembranceRepositoryImpl(dao)
     }
 
     @Provides

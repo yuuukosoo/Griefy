@@ -1,15 +1,25 @@
 package com.naufal.griefy.ui.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -29,6 +39,8 @@ fun DetailScreen(
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val memory by viewModel.memory.collectAsState()
+    var selectedImageIndexForFullScreen by remember { mutableStateOf<Int?>(null) }
+    val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
 
     Scaffold(
         topBar = {
@@ -81,14 +93,15 @@ fun DetailScreen(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(mem.imageUris) { uri ->
+                        itemsIndexed(mem.imageUris) { index, uri ->
                             AsyncImage(
                                 model = uri,
                                 contentDescription = "Foto Kenangan",
                                 modifier = Modifier
                                     .height(300.dp)
                                     .width(260.dp)
-                                    .clip(RoundedCornerShape(12.dp)),
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { selectedImageIndexForFullScreen = index },
                                 contentScale = ContentScale.Crop
                             )
                         }
@@ -119,7 +132,13 @@ fun DetailScreen(
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Dibuat pada: ${formatter.format(Date(mem.createdAt))}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
 
 
                     Text(
@@ -139,6 +158,78 @@ fun DetailScreen(
         } ?: run {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                 CircularProgressIndicator()
+            }
+        }
+    }
+
+    selectedImageIndexForFullScreen?.let { initialIndex ->
+        val imageUris = memory?.imageUris ?: emptyList()
+        if (imageUris.isNotEmpty()) {
+            val pagerState = rememberPagerState(initialPage = initialIndex) {
+                imageUris.size
+            }
+
+            Dialog(
+                onDismissRequest = { selectedImageIndexForFullScreen = null },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = Color.Black.copy(alpha = 0.95f)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize()
+                        ) { page ->
+                            val uri = imageUris.getOrNull(page)
+                            if (uri != null) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = androidx.compose.ui.Alignment.Center
+                                ) {
+                                    AsyncImage(
+                                        model = uri,
+                                        contentDescription = "Foto Penuh - Halaman ${page + 1}",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clickable { selectedImageIndexForFullScreen = null },
+                                        contentScale = ContentScale.Fit
+                                    )
+                                }
+                            }
+                        }
+
+                        IconButton(
+                            onClick = { selectedImageIndexForFullScreen = null },
+                            modifier = Modifier
+                                .align(androidx.compose.ui.Alignment.TopEnd)
+                                .padding(16.dp)
+                                .statusBarsPadding()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Tutup",
+                                tint = Color.White,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+
+                        if (imageUris.size > 1) {
+                            Text(
+                                text = "${pagerState.currentPage + 1} / ${imageUris.size}",
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier
+                                    .align(androidx.compose.ui.Alignment.BottomCenter)
+                                    .padding(bottom = 24.dp)
+                                    .statusBarsPadding()
+                            )
+                        }
+                    }
+                }
             }
         }
     }

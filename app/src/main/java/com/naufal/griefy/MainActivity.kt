@@ -21,8 +21,10 @@ import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.ui.profile.ProfileScreen
 import com.naufal.griefy.ui.register.RegisterScreen
 import com.naufal.griefy.ui.search.SearchSongScreen
+import com.naufal.griefy.ui.reminders.ReminderScreen
 import com.naufal.griefy.ui.settings.SettingsScreen
 import com.naufal.griefy.ui.theme.GriefyTheme
+import com.naufal.griefy.ui.trash.TrashScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -83,6 +85,14 @@ class MainActivity : ComponentActivity() {
 
                         composable(Screen.SearchPublic.route) {
                             SearchSongScreen(navController = navController)
+                        }
+
+                        composable(Screen.Trash.route) {
+                            TrashScreen(navController = navController)
+                        }
+
+                        composable(Screen.Reminders.route) {
+                            ReminderScreen(navController = navController)
                         }
 
 
