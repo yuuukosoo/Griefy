@@ -13,11 +13,11 @@ class CreateMemoryViewModel @Inject constructor(
     private val repository: MemoryRepository
 ) : ViewModel() {
 
-    fun saveMemory(content: String, isPublic: Boolean, onSaveSuccess: () -> Unit) {
+    fun saveMemory(content: String, isPublic: Boolean, imageUris: List<String>, onSaveSuccess: () -> Unit) {
         viewModelScope.launch {
             val newMemory = Memory(
                 content = content,
-                imageUris = emptyList(),
+                imageUris = imageUris,
                 createdAt = System.currentTimeMillis(), 
                 tags = listOf("Kenangan Baru"),
                 isPublic = isPublic,
@@ -25,7 +25,7 @@ class CreateMemoryViewModel @Inject constructor(
                 isTrashed = false
             )
 
-            repository.addMemory(newMemory) // Simpan ke Room Database
+            repository.addMemory(newMemory) 
             onSaveSuccess()
         }
     }

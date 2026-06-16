@@ -62,18 +62,25 @@ class MemoryRepositoryImpl @Inject constructor(
 
     override suspend fun searchSongs(query: String): List<com.naufal.griefy.domain.model.Song> {
         return try {
-            val clientId = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_ID
-            val clientSecret = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_SECRET
-            
-            android.util.Log.d("SPOTIFY_CEK", "Kunci ID: $clientId")
+
+            val rawClientId = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_ID
+            val rawClientSecret = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_SECRET
+
+            val cleanClientId = rawClientId.replace("\"", "").trim()
+            val cleanClientSecret = rawClientSecret.replace("\"", "").trim()
+
+            android.util.Log.d("SPOTIFY_CEK", "Kunci Bersih: $cleanClientId")
+
 
             val tokenResponse = authApi.getAccessToken(
-                clientId = clientId,
-                clientSecret = clientSecret
+                clientId = cleanClientId,
+                clientSecret = cleanClientSecret
             )
+
 
             val bearerToken = "Bearer ${tokenResponse.access_token}"
             val response = spotifyApi.searchTracks(token = bearerToken, query = query)
+
 
             response.tracks.items.map { trackDto ->
                 com.naufal.griefy.domain.model.Song(
@@ -85,7 +92,6 @@ class MemoryRepositoryImpl @Inject constructor(
                 )
             }
         } catch (e: Exception) {
-
             android.util.Log.e("SPOTIFY_ERROR", "Gagal ambil lagu: ${e.message}", e)
             emptyList()
         }
