@@ -18,6 +18,8 @@ interface MemoryDao {
     @Query("SELECT * FROM memory_table WHERE id = :id")
     suspend fun getMemoryById(id: Int): MemoryEntity?
 
+    @Query("SELECT * FROM memory_table WHERE id = :id")
+    fun getMemoryByIdAsFlow(id: Int): Flow<MemoryEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMemory(memory: MemoryEntity)

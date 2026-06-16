@@ -11,6 +11,8 @@ interface MemoryRepository {
 
     suspend fun getMemoryById(id: Int): Memory?
 
+    fun getMemoryByIdAsFlow(id: Int): Flow<Memory?>
+
     suspend fun addMemory(memory: Memory)
 
     suspend fun updateMemory(memory: Memory)

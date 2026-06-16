@@ -34,6 +34,11 @@ class MemoryRepositoryImpl @Inject constructor(
         return dao.getMemoryById(id)?.toDomain()
     }
 
+
+    override fun getMemoryByIdAsFlow(id: Int): Flow<Memory?> {
+        return dao.getMemoryByIdAsFlow(id).map { it?.toDomain() }
+    }
+
     override suspend fun addMemory(memory: Memory) {
         dao.insertMemory(memory.toEntity())
     }
