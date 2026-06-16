@@ -4,7 +4,6 @@ import com.naufal.griefy.data.local.MemoryDao
 import com.naufal.griefy.data.remote.SpotifyApi
 import com.naufal.griefy.data.remote.SpotifyAuthApi
 import com.naufal.griefy.domain.model.Memory
-import com.naufal.griefy.domain.model.Song
 import com.naufal.griefy.domain.repository.MemoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -61,28 +60,33 @@ class MemoryRepositoryImpl @Inject constructor(
         dao.deletePermanently(id)
     }
 
-    override suspend fun searchSongs(query: String): List<Song> {
+    override suspend fun searchSongs(query: String): List<com.naufal.griefy.domain.model.Song> {
         return try {
-
             val clientId = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_ID
             val clientSecret = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_SECRET
-
+            
+            android.util.Log.d("SPOTIFY_CEK", "Kunci ID: $clientId")
 
             val tokenResponse = authApi.getAccessToken(
                 clientId = clientId,
                 clientSecret = clientSecret
             )
 
-
             val bearerToken = "Bearer ${tokenResponse.access_token}"
-
-
             val response = spotifyApi.searchTracks(token = bearerToken, query = query)
 
-            
-            response.tracks.items.map { it.toSong() }
+            response.tracks.items.map { trackDto ->
+                com.naufal.griefy.domain.model.Song(
+                    trackId = trackDto.id,
+                    title = trackDto.name,
+                    artistName = trackDto.artists.firstOrNull()?.name ?: "Unknown",
+                    imageUrl = trackDto.album.images.firstOrNull()?.url ?: "",
+                    previewUrl = trackDto.preview_url
+                )
+            }
         } catch (e: Exception) {
-            e.printStackTrace()
+
+            android.util.Log.e("SPOTIFY_ERROR", "Gagal ambil lagu: ${e.message}", e)
             emptyList()
         }
     }

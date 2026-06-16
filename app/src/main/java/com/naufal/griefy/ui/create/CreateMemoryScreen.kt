@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.naufal.griefy.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,11 +86,12 @@ fun CreateMemoryScreen(
                 )
             }
 
-            Text(
-                text = "Catatan: Fitur Upload Foto dan Lagu akan segera hadir!",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline
-            )
+            Button(
+                onClick = { navController.navigate(Screen.SearchPublic.route) },
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+            ) {
+                Text("🎵 Cari Lagu di Spotify")
+            }
         }
     }
 }
