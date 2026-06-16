@@ -13,7 +13,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -108,6 +112,9 @@ fun HomeScreen(
 
 @Composable
 fun MemoryCard(memory: Memory, onClick: () -> Unit) {
+    val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
+    val dateString = formatter.format(Date(memory.createdAt))
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -135,7 +142,16 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
+            
             Spacer(modifier = Modifier.height(4.dp))
+            
+            Text(
+                text = dateString,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
 
             Text(text = memory.content, style = MaterialTheme.typography.bodyLarge)

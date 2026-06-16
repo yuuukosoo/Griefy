@@ -17,6 +17,9 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -37,6 +40,7 @@ fun DetailScreen(
 ) {
     val memory by viewModel.memory.collectAsState()
     var selectedImageIndexForFullScreen by remember { mutableStateOf<Int?>(null) }
+    val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
 
     Scaffold(
         topBar = {
@@ -128,7 +132,13 @@ fun DetailScreen(
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Dibuat pada: ${formatter.format(Date(mem.createdAt))}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
 
 
                     Text(
