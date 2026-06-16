@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,7 +21,7 @@ import com.naufal.griefy.ui.navigation.Screen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavController, // <--- TAMBAHAN BARU
+    navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val memories by viewModel.memories.collectAsState()
@@ -28,6 +30,14 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Griefy ✨") },
+
+                actions = {
+
+                    IconButton(onClick = { navController.navigate(Screen.Profile.route) }) {
+                        Icon(imageVector = Icons.Default.Person, contentDescription = "Profil")
+                    }
+                },
+
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                 )
