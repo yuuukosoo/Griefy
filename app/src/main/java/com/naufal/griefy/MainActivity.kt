@@ -16,7 +16,10 @@ import com.naufal.griefy.ui.create.CreateMemoryScreen
 import com.naufal.griefy.ui.detail.DetailScreen
 import com.naufal.griefy.ui.edit.EditMemoryScreen
 import com.naufal.griefy.ui.home.HomeScreen
+import com.naufal.griefy.ui.login.LoginScreen
 import com.naufal.griefy.ui.navigation.Screen
+import com.naufal.griefy.ui.profile.ProfileScreen
+import com.naufal.griefy.ui.register.RegisterScreen
 import com.naufal.griefy.ui.theme.GriefyTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,12 +38,27 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.Home.route
+                        startDestination = Screen.Login.route
                     ) {
+
+                        composable(Screen.Login.route) {
+                            LoginScreen(navController = navController)
+                        }
+
+                        composable(Screen.Register.route) {
+                            RegisterScreen(navController = navController)
+                        }
 
                         composable(Screen.Home.route) {
                             HomeScreen(navController = navController)
                         }
+
+                        composable(Screen.Profile.route) {
+                            ProfileScreen(navController = navController)
+                        }
+
+
+
                         composable(Screen.CreateMemory.route) {
                             CreateMemoryScreen(navController = navController)
                         }
