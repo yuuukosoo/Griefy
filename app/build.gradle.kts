@@ -47,6 +47,9 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data"))
 
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
 

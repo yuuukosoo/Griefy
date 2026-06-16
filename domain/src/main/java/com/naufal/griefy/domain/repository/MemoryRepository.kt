@@ -22,4 +22,6 @@ interface MemoryRepository {
     fun getTrashedMemories(): Flow<List<Memory>>
     suspend fun restoreFromTrash(id: Int)
     suspend fun deletePermanently(id: Int)
+
+    suspend fun searchSongs(query: String): List<com.naufal.griefy.domain.model.Song>
 }

@@ -1,8 +1,18 @@
+import java.util.Properties
+
+val properties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    properties.load(localPropertiesFile.inputStream())
+}
+
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.dagger.hilt.android)
+
 
 }
 
@@ -15,7 +25,15 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"${properties.getProperty("SPOTIFY_CLIENT_ID", "")}\"")
+        buildConfigField("String", "SPOTIFY_CLIENT_SECRET", "\"${properties.getProperty("SPOTIFY_CLIENT_SECRET", "")}\"")
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -29,8 +47,8 @@ kotlin {
 dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     implementation(libs.androidx.room.runtime)
