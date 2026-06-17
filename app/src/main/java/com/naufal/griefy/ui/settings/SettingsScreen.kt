@@ -33,7 +33,7 @@ import com.naufal.griefy.ui.navigation.Screen
 @Composable
 fun SettingsScreen(navController: NavController) {
     val context = LocalContext.current
-    // State sementara untuk demo (Nanti disambungkan ke Local Database/DataStore)
+   
     var isDarkMode by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
