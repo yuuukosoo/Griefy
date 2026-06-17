@@ -1,10 +1,7 @@
 package com.naufal.griefy.data.repository
 
 import com.naufal.griefy.data.local.MemoryEntity
-import com.naufal.griefy.data.remote.TrackDto
 import com.naufal.griefy.domain.model.Memory
-import com.naufal.griefy.domain.model.Song
-
 
 fun MemoryEntity.toDomain(): Memory {
     return Memory(
@@ -16,20 +13,10 @@ fun MemoryEntity.toDomain(): Memory {
         tags = tags,
         isPublic = isPublic,
         songTrackId = songTrackId,
-        isTrashed = isTrashed,
+        songTitle = songTitle,
+        isTrashed = isTrashed
     )
 }
-
-fun TrackDto.toSong(): Song {
-    return Song(
-        trackId = id,
-        title = name,
-        artistName = artists.joinToString(", ") { it.name },
-        imageUrl = album.images.firstOrNull()?.url ?: "",
-        previewUrl = preview_url
-    )
-}
-
 
 fun Memory.toEntity(): MemoryEntity {
     return MemoryEntity(
@@ -41,6 +28,7 @@ fun Memory.toEntity(): MemoryEntity {
         tags = tags,
         isPublic = isPublic,
         songTrackId = songTrackId,
-        isTrashed = isTrashed,
+        songTitle = songTitle,
+        isTrashed = isTrashed
     )
 }

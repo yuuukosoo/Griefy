@@ -14,5 +14,6 @@ data class MemoryEntity(
     val tags: List<String>,
     val isPublic: Boolean,
     val songTrackId: String?,
+    val songTitle: String?,
     val isTrashed: Boolean
 )

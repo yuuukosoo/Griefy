@@ -56,17 +56,17 @@ fun DetailScreen(
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
 
     var isPlaying by remember { mutableStateOf(false) }
-    val mediaPlayer = remember { android.media.MediaPlayer() }
+    val mediaPlayer = remember(songDetails) { android.media.MediaPlayer() }
 
     var currentPosition by remember { mutableStateOf(0f) }
     var duration by remember { mutableStateOf(0f) }
 
-    DisposableEffect(songDetails) {
+    DisposableEffect(mediaPlayer) {
         val previewUrl = songDetails?.previewUrl
         if (!previewUrl.isNullOrEmpty()) {
             try {
-                mediaPlayer.reset()
                 mediaPlayer.setDataSource(previewUrl)
+                mediaPlayer.isLooping = true
                 mediaPlayer.prepareAsync()
                 mediaPlayer.setOnPreparedListener {
                     mediaPlayer.start()
@@ -81,6 +81,9 @@ fun DetailScreen(
         }
         onDispose {
             mediaPlayer.release()
+            isPlaying = false
+            currentPosition = 0f
+            duration = 0f
         }
     }
 
@@ -165,6 +168,18 @@ fun DetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
+                            if (!song.imageUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = song.imageUrl,
+                                    contentDescription = "Cover Album",
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                            }
+
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = song.title,
@@ -185,21 +200,15 @@ fun DetailScreen(
 
                             IconButton(
                                 onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("spotify:track:${song.trackId}"))
-                                    intent.putExtra(Intent.EXTRA_REFERRER, Uri.parse("android-app://${context.packageName}"))
-                                    try {
-                                        context.startActivity(intent)
-                                    } catch (e: Exception) {
-                                        val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com/track/${song.trackId}"))
-                                        context.startActivity(webIntent)
-                                    }
+                                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.deezer.com/track/${song.trackId}"))
+                                    context.startActivity(webIntent)
                                 },
                                 modifier = Modifier.size(36.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.MusicNote,
-                                    contentDescription = "Buka di Spotify",
-                                    tint = Color(0xFF1DB954),
+                                    contentDescription = "Buka di Deezer",
+                                    tint = Color(0xFF75685F),
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -247,7 +256,7 @@ fun DetailScreen(
                                 )
                             } else {
                                 Text(
-                                    text = "Preview audio tidak tersedia. Ketuk tombol musik hijau di atas untuk memutar lagu lengkap di Spotify.",
+                                    text = "Preview audio tidak tersedia.",
                                     fontSize = 12.sp,
                                     color = Color(0xFF8C8075),
                                     modifier = Modifier.padding(vertical = 8.dp)

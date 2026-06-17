@@ -1,8 +1,7 @@
 package com.naufal.griefy.data.repository
 
 import com.naufal.griefy.data.local.MemoryDao
-import com.naufal.griefy.data.remote.SpotifyApi
-import com.naufal.griefy.data.remote.SpotifyAuthApi
+import com.naufal.griefy.data.remote.DeezerApi
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.repository.MemoryRepository
 import kotlinx.coroutines.flow.Flow
@@ -12,8 +11,7 @@ import javax.inject.Inject
 
 class MemoryRepositoryImpl @Inject constructor(
     private val dao: MemoryDao,
-    private val spotifyApi: SpotifyApi,
-    private val authApi: SpotifyAuthApi
+    private val deezerApi: DeezerApi
 ) : MemoryRepository {
 
     override fun getAllMemories(): Flow<List<Memory>> {
@@ -67,76 +65,35 @@ class MemoryRepositoryImpl @Inject constructor(
 
     override suspend fun searchSongs(query: String): List<com.naufal.griefy.domain.model.Song> {
         return try {
-
-            val rawClientId = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_ID
-            val rawClientSecret = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_SECRET
-
-            val cleanClientId = rawClientId.replace("\"", "").trim()
-            val cleanClientSecret = rawClientSecret.replace("\"", "").trim()
-
-            android.util.Log.d("SPOTIFY_CEK", "Kunci Bersih: $cleanClientId")
-
-
-            val tokenResponse = authApi.getAccessToken(
-                grantType = "client_credentials",
-                clientId = cleanClientId,
-                clientSecret = cleanClientSecret
-            )
-
-
-            val bearerToken = "Bearer ${tokenResponse.access_token}"
-            val response = spotifyApi.searchTracks(token = bearerToken, query = query)
-
-
-            response.tracks.items.map { trackDto ->
+            val response = deezerApi.searchTracks(query = query)
+            response.data.map { trackDto ->
                 com.naufal.griefy.domain.model.Song(
-                    trackId = trackDto.id,
-                    title = trackDto.name,
-                    artistName = trackDto.artists.firstOrNull()?.name ?: "Unknown",
-                    imageUrl = trackDto.album.images.firstOrNull()?.url ?: "",
-                    previewUrl = trackDto.preview_url
+                    trackId = trackDto.id.toString(),
+                    title = trackDto.title,
+                    artistName = trackDto.artist.name,
+                    imageUrl = trackDto.album.coverMedium,
+                    previewUrl = trackDto.preview
                 )
             }
-        } catch (e: retrofit2.HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            android.util.Log.e("SPOTIFY_ERROR", "HTTP Error ${e.code()}: $errorBody", e)
-            emptyList()
         } catch (e: Exception) {
-            android.util.Log.e("SPOTIFY_ERROR", "Gagal ambil lagu: ${e.message}", e)
+            android.util.Log.e("DEEZER_ERROR", "Gagal ambil lagu dari Deezer: ${e.message}", e)
             emptyList()
         }
     }
 
     override suspend fun getSongDetails(trackId: String): com.naufal.griefy.domain.model.Song? {
         return try {
-            val rawClientId = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_ID
-            val rawClientSecret = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_SECRET
-
-            val cleanClientId = rawClientId.replace("\"", "").trim()
-            val cleanClientSecret = rawClientSecret.replace("\"", "").trim()
-
-            val tokenResponse = authApi.getAccessToken(
-                grantType = "client_credentials",
-                clientId = cleanClientId,
-                clientSecret = cleanClientSecret
-            )
-
-            val bearerToken = "Bearer ${tokenResponse.access_token}"
-            val trackDto = spotifyApi.getTrack(token = bearerToken, trackId = trackId)
-
+            val id = trackId.toLongOrNull() ?: return null
+            val trackDto = deezerApi.getTrack(id)
             com.naufal.griefy.domain.model.Song(
-                trackId = trackDto.id,
-                title = trackDto.name,
-                artistName = trackDto.artists.firstOrNull()?.name ?: "Unknown",
-                imageUrl = trackDto.album.images.firstOrNull()?.url ?: "",
-                previewUrl = trackDto.preview_url
+                trackId = trackDto.id.toString(),
+                title = trackDto.title,
+                artistName = trackDto.artist.name,
+                imageUrl = trackDto.album.coverMedium,
+                previewUrl = trackDto.preview
             )
-        } catch (e: retrofit2.HttpException) {
-            val errorBody = e.response()?.errorBody()?.string()
-            android.util.Log.e("SPOTIFY_ERROR", "HTTP Error ${e.code()}: $errorBody", e)
-            null
         } catch (e: Exception) {
-            android.util.Log.e("SPOTIFY_ERROR", "Gagal ambil detail lagu: ${e.message}", e)
+            android.util.Log.e("DEEZER_ERROR", "Gagal ambil detail lagu dari Deezer: ${e.message}", e)
             null
         }
     }

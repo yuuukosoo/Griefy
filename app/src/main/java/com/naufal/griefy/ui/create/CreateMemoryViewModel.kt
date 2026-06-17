@@ -93,6 +93,7 @@ class CreateMemoryViewModel @Inject constructor(
                 tags = if (tagsList.isEmpty()) listOf("Kenangan Baru") else tagsList,
                 isPublic = isPublic,
                 songTrackId = selectedSongTrackId,
+                songTitle = selectedSongTitle,
                 isTrashed = false
             )
 
