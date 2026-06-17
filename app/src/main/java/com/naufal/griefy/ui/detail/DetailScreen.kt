@@ -34,6 +34,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.ui.navigation.Screen
@@ -53,17 +56,17 @@ fun DetailScreen(
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
 
     var isPlaying by remember { mutableStateOf(false) }
-    val mediaPlayer = remember { android.media.MediaPlayer() }
+    val mediaPlayer = remember(songDetails) { android.media.MediaPlayer() }
 
     var currentPosition by remember { mutableStateOf(0f) }
     var duration by remember { mutableStateOf(0f) }
 
-    DisposableEffect(songDetails) {
+    DisposableEffect(mediaPlayer) {
         val previewUrl = songDetails?.previewUrl
         if (!previewUrl.isNullOrEmpty()) {
             try {
-                mediaPlayer.reset()
                 mediaPlayer.setDataSource(previewUrl)
+                mediaPlayer.isLooping = true
                 mediaPlayer.prepareAsync()
                 mediaPlayer.setOnPreparedListener {
                     mediaPlayer.start()
@@ -78,6 +81,9 @@ fun DetailScreen(
         }
         onDispose {
             mediaPlayer.release()
+            isPlaying = false
+            currentPosition = 0f
+            duration = 0f
         }
     }
 
@@ -154,25 +160,59 @@ fun DetailScreen(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
+                    val context = LocalContext.current
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        // Title and Artist Info
-                        Text(
-                            text = song.title,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4E4640),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = song.artistName,
-                            fontSize = 12.sp,
-                            color = Color(0xFF8C8075),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (!song.imageUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = song.imageUrl,
+                                    contentDescription = "Cover Album",
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = song.title,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF4E4640),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = song.artistName,
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF8C8075),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.deezer.com/track/${song.trackId}"))
+                                    context.startActivity(webIntent)
+                                },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MusicNote,
+                                    contentDescription = "Buka di Deezer",
+                                    tint = Color(0xFF75685F),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
