@@ -116,6 +116,12 @@
     <string name="reminder_date_btn">Date</string>
     <string name="reminder_time_btn">Time</string>
     <string name="reminder_passed">Passed</string>
+    <string name="reminder_exact_alarm_warning_title">Reminders Not On Time?</string>
+    <string name="reminder_exact_alarm_warning_desc">Griefy needs \'Alarms &amp; Reminders\' permission to deliver your notifications exactly on time.</string>
+    <string name="reminder_exact_alarm_warning_btn">Open Settings</string>
+    <string name="reminder_battery_warning_title">Notifications Not Working When Closed?</string>
+    <string name="reminder_battery_warning_desc">Some devices limit background apps. Please disable battery optimization (set to Unrestricted) for Griefy so notifications arrive even if the app is closed.</string>
+    <string name="reminder_battery_warning_btn">Ignore Restrictions</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
