@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 
 @Composable
@@ -42,7 +44,7 @@ fun LoginScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Sign In",
+                text = stringResource(R.string.login_sign_in),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF4E4640),
@@ -54,7 +56,7 @@ fun LoginScreen(navController: NavController) {
             // Email input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Email",
+                    text = stringResource(R.string.login_email),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4E4640),
                     fontSize = 14.sp
@@ -80,7 +82,7 @@ fun LoginScreen(navController: NavController) {
             // Password input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Password",
+                    text = stringResource(R.string.login_password),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4E4640),
                     fontSize = 14.sp
@@ -123,7 +125,7 @@ fun LoginScreen(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF75685F))
             ) {
                 Text(
-                    text = "Login",
+                    text = stringResource(R.string.login_button),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -136,12 +138,12 @@ fun LoginScreen(navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Don't have an account? ",
+                    text = stringResource(R.string.login_no_account),
                     color = Color(0xFF8C8075),
                     fontSize = 14.sp
                 )
                 Text(
-                    text = "Sign Up",
+                    text = stringResource(R.string.login_sign_up),
                     color = Color(0xFF75685F),
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,

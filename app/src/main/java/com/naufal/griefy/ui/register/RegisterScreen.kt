@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.naufal.griefy.R
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -48,7 +50,7 @@ fun RegisterScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Sign Up",
+                text = stringResource(R.string.register_sign_up),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF4E4640),
@@ -60,7 +62,7 @@ fun RegisterScreen(navController: NavController) {
             // Username input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Username",
+                    text = stringResource(R.string.register_username),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4E4640),
                     fontSize = 14.sp
@@ -86,7 +88,7 @@ fun RegisterScreen(navController: NavController) {
             // Email input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Email",
+                    text = stringResource(R.string.register_email),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4E4640),
                     fontSize = 14.sp
@@ -112,7 +114,7 @@ fun RegisterScreen(navController: NavController) {
             // Password input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Password",
+                    text = stringResource(R.string.register_password),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4E4640),
                     fontSize = 14.sp
@@ -145,7 +147,7 @@ fun RegisterScreen(navController: NavController) {
             // Confirm Password input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Confirm Password",
+                    text = stringResource(R.string.register_confirm_password),
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4E4640),
                     fontSize = 14.sp
@@ -186,7 +188,7 @@ fun RegisterScreen(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF75685F))
             ) {
                 Text(
-                    text = "Register",
+                    text = stringResource(R.string.register_button),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -199,7 +201,7 @@ fun RegisterScreen(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "If you already have an account register",
+                    text = stringResource(R.string.register_already_have_account),
                     color = Color(0xFF8C8075),
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center
@@ -209,12 +211,12 @@ fun RegisterScreen(navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "You can ",
+                        text = stringResource(R.string.register_you_can),
                         color = Color(0xFF8C8075),
                         fontSize = 12.sp
                     )
                     Text(
-                        text = "Login here !",
+                        text = stringResource(R.string.register_login_here),
                         color = Color(0xFF75685F),
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,

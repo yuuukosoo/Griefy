@@ -1,84 +1,177 @@
 package com.naufal.griefy.ui.settings
 
-import android.Manifest
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.os.Build
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController) {
-    val context = LocalContext.current
-    // State sementara untuk demo (Nanti disambungkan ke Local Database/DataStore)
-    var isDarkMode by remember { mutableStateOf(false) }
+fun SettingsScreen(
+    navController: NavController,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
+    val currentLangCode by viewModel.currentLanguageCode.collectAsState()
 
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            Toast.makeText(context, "Izin diberikan! Coba klik lagi.", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, "Izin notifikasi ditolak :(", Toast.LENGTH_SHORT).show()
-        }
+    val currentLanguageName = if (currentLangCode == "in" || currentLangCode == "id") {
+        stringResource(R.string.settings_language_indonesian)
+    } else {
+        stringResource(R.string.settings_language_english)
     }
 
+    val showLanguageDialog = remember { mutableStateOf(false) }
 
-    fun setTestReminder() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                return
+    if (showLanguageDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog.value = false },
+            containerColor = Color.White,
+            title = {
+                Text(
+                    text = stringResource(R.string.settings_select_language_title),
+                    color = Color(0xFF4E4640),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                viewModel.changeLanguage("en")
+                                showLanguageDialog.value = false
+                            }
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (currentLangCode != "in" && currentLangCode != "id"),
+                            onClick = {
+                                viewModel.changeLanguage("en")
+                                showLanguageDialog.value = false
+                            },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = Color(0xFF75685F),
+                                unselectedColor = Color(0xFFB0A59A)
+                            )
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.settings_language_english),
+                            color = Color(0xFF4E4640)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                viewModel.changeLanguage("in")
+                                showLanguageDialog.value = false
+                            }
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (currentLangCode == "in" || currentLangCode == "id"),
+                            onClick = {
+                                viewModel.changeLanguage("in")
+                                showLanguageDialog.value = false
+                            },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = Color(0xFF75685F),
+                                unselectedColor = Color(0xFFB0A59A)
+                            )
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.settings_language_indonesian),
+                            color = Color(0xFF4E4640)
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showLanguageDialog.value = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF75685F))
+                ) {
+                    Text(text = stringResource(R.string.cancel))
+                }
             }
-        }
-
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, ReminderReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-
-
-        val triggerTime = System.currentTimeMillis() + (10 * 1000)
-
-        try {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
-            Toast.makeText(context, "Alarm diatur! Tutup aplikasi sekarang & tunggu 10 dtk.", Toast.LENGTH_LONG).show()
-        } catch (_: SecurityException) {
-            Toast.makeText(context, "Error Alarm: Izinkan Alarms & Reminders di Settings HP", Toast.LENGTH_LONG).show()
-        }
     }
 
     Scaffold(
+        containerColor = Color(0xFFFAF7F2),
         topBar = {
             TopAppBar(
-                title = { Text("Pengaturan") },
+                title = {
+                    Text(
+                        stringResource(R.string.settings_title),
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF4E4640)
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFAF7F2)
+                ),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(R.string.settings_back_description),
+                            tint = Color(0xFF5C524A)
+                        )
                     }
                 }
             )
@@ -88,51 +181,85 @@ fun SettingsScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .padding(horizontal = 48.dp)
         ) {
 
-            SettingsCategoryTitle("PREFERENSI TAMPILAN")
-            SettingsItem(
-                icon = Icons.Default.Language,
-                title = "Ubah Bahasa",
-                subtitle = "Indonesia",
-                onClick = { /* TODO */ }
-            )
-            SettingsSwitchItem(
-                icon = Icons.Default.DarkMode,
-                title = "Mode Gelap",
-                isChecked = isDarkMode,
-                onCheckedChange = { isDarkMode = it }
-            )
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            SettingsCategoryTitle("MANAJEMEN MEMORI")
-            SettingsItem(
-                icon = Icons.Default.Notifications,
-                title = "Pengingat Hari Peringatan",
-                subtitle = "Atur pengingat hari penting kenangan",
-                onClick = { navController.navigate(Screen.Reminders.route) }
-            )
-            SettingsItem(
-                icon = Icons.Default.Delete,
-                title = "Baru Saja Dihapus (Trash)",
-                subtitle = "Pulihkan kenangan dalam 30 hari",
-                onClick = { navController.navigate(Screen.Trash.route) }
-            )
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            SettingsCategoryTitle("AKUN")
-            SettingsItem(
-                icon = Icons.AutoMirrored.Filled.ExitToApp,
-                title = "Keluar (Logout)",
-                titleColor = MaterialTheme.colorScheme.error,
-                onClick = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0)
-                    }
+            SettingsCategoryTitle(stringResource(R.string.settings_pref_display))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column {
+                    SettingsItem(
+                        icon = Icons.Default.Language,
+                        title = stringResource(R.string.settings_change_language),
+                        subtitle = currentLanguageName,
+                        onClick = { showLanguageDialog.value = true }
+                    )
+                    HorizontalDivider(color = Color(0xFFEDE6DC), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    SettingsSwitchItem(
+                        icon = Icons.Default.DarkMode,
+                        title = stringResource(R.string.settings_dark_mode),
+                        isChecked = isDarkMode,
+                        onCheckedChange = { viewModel.setDarkMode(it) }
+                    )
                 }
-            )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SettingsCategoryTitle(stringResource(R.string.settings_pref_memory))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column {
+                    SettingsItem(
+                        icon = Icons.Default.Notifications,
+                        title = stringResource(R.string.settings_reminders_title),
+                        subtitle = stringResource(R.string.settings_reminders_subtitle),
+                        onClick = { navController.navigate(Screen.Reminders.route) }
+                    )
+                    HorizontalDivider(color = Color(0xFFEDE6DC), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    SettingsItem(
+                        icon = Icons.Default.Delete,
+                        title = stringResource(R.string.settings_trash_title),
+                        subtitle = stringResource(R.string.settings_trash_subtitle),
+                        onClick = { navController.navigate(Screen.Trash.route) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SettingsCategoryTitle(stringResource(R.string.settings_pref_account))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                SettingsItem(
+                    icon = Icons.AutoMirrored.Filled.ExitToApp,
+                    title = stringResource(R.string.settings_logout),
+                    titleColor = MaterialTheme.colorScheme.error,
+                    onClick = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0)
+                        }
+                    }
+                )
+            }
         }
     }
 }
@@ -142,9 +269,9 @@ fun SettingsCategoryTitle(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary,
+        color = Color(0xFF8C8075),
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
+        modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp)
     )
 }
 
@@ -153,25 +280,43 @@ fun SettingsItem(
     icon: ImageVector,
     title: String,
     subtitle: String? = null,
-    titleColor: Color = MaterialTheme.colorScheme.onSurface,
+    titleColor: Color = Color(0xFF4E4640),
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = title, tint = titleColor)
+        Icon(
+            imageVector = icon, 
+            contentDescription = title, 
+            tint = if (titleColor == MaterialTheme.colorScheme.error) titleColor else Color(0xFF5C524A)
+        )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, color = titleColor)
+            Text(
+                text = title, 
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = titleColor
+            )
             if (subtitle != null) {
-                Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle, 
+                    fontSize = 13.sp,
+                    color = Color(0xFF8C8075)
+                )
             }
         }
-        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = "Detail", tint = MaterialTheme.colorScheme.outline)
+        Icon(
+            imageVector = Icons.Default.ChevronRight, 
+            contentDescription = stringResource(R.string.settings_detail_description), 
+            tint = Color(0xFFB0A59A)
+        )
     }
 }
 
@@ -185,12 +330,27 @@ fun SettingsSwitchItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = title)
+        Icon(imageVector = icon, contentDescription = title, tint = Color(0xFF5C524A))
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Switch(checked = isChecked, onCheckedChange = onCheckedChange)
+        Text(
+            text = title, 
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF4E4640),
+            modifier = Modifier.weight(1f)
+        )
+        Switch(
+            checked = isChecked, 
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Color(0xFF75685F),
+                uncheckedThumbColor = Color(0xFF8C8075),
+                uncheckedTrackColor = Color(0xFFEDE8E0)
+            )
+        )
     }
 }

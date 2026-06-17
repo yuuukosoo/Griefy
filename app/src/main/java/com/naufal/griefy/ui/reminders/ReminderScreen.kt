@@ -18,10 +18,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.RemembranceDay
 import java.text.SimpleDateFormat
 import java.util.*
@@ -73,10 +75,13 @@ fun ReminderScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Pengingat Hari Peringatan", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.reminder_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -87,7 +92,10 @@ fun ReminderScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Tambah Pengingat")
+                Icon(
+                    imageVector = Icons.Default.Add, 
+                    contentDescription = stringResource(R.string.reminder_dialog_add)
+                )
             }
         }
     ) { paddingValues ->
@@ -112,13 +120,13 @@ fun ReminderScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Belum ada pengingat hari penting.",
+                        text = stringResource(R.string.reminder_empty_title),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.outline
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Tekan tombol + untuk menambahkan peringatan hari khusus.",
+                        text = stringResource(R.string.reminder_empty_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -147,7 +155,10 @@ fun ReminderScreen(
                 onDismissRequest = { showDialog = false },
                 title = {
                     Text(
-                        text = if (editingReminder != null) "Edit Pengingat" else "Tambah Pengingat",
+                        text = if (editingReminder != null) 
+                            stringResource(R.string.reminder_dialog_edit) 
+                        else 
+                            stringResource(R.string.reminder_dialog_add),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -161,7 +172,7 @@ fun ReminderScreen(
                         OutlinedTextField(
                             value = titleText,
                             onValueChange = { titleText = it },
-                            label = { Text("Nama Peringatan / Hari Penting") },
+                            label = { Text(stringResource(R.string.reminder_name_label)) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
@@ -169,7 +180,7 @@ fun ReminderScreen(
                         OutlinedTextField(
                             value = descText,
                             onValueChange = { descText = it },
-                            label = { Text("Catatan / Deskripsi (Opsional)") },
+                            label = { Text(stringResource(R.string.reminder_note_label)) },
                             modifier = Modifier.fillMaxWidth(),
                             maxLines = 3
                         )
@@ -182,7 +193,7 @@ fun ReminderScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "Waktu Peringatan:",
+                                text = stringResource(R.string.reminder_time_label),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -211,7 +222,7 @@ fun ReminderScreen(
                                 ) {
                                     Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Tanggal")
+                                    Text(stringResource(R.string.reminder_date_btn))
                                 }
 
                                 Button(
@@ -234,7 +245,7 @@ fun ReminderScreen(
                                 ) {
                                     Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Waktu")
+                                    Text(stringResource(R.string.reminder_time_btn))
                                 }
                             }
 
@@ -292,12 +303,12 @@ fun ReminderScreen(
                         },
                         enabled = titleText.isNotBlank()
                     ) {
-                        Text("Simpan")
+                        Text(stringResource(R.string.save))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDialog = false }) {
-                        Text("Batal")
+                        Text(stringResource(R.string.cancel))
                     }
                 }
             )
@@ -359,14 +370,14 @@ fun ReminderCard(
                     IconButton(onClick = onEdit) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Pengingat",
+                            contentDescription = stringResource(R.string.reminder_dialog_edit),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
                     IconButton(onClick = onDelete) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Hapus Pengingat",
+                            contentDescription = stringResource(R.string.delete),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -400,7 +411,7 @@ fun ReminderCard(
                         modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
                         Text(
-                            text = "Sudah lewat",
+                            text = stringResource(R.string.reminder_passed),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)

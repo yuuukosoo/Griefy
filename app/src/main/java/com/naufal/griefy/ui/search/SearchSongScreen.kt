@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Song
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,10 +83,13 @@ fun SearchSongScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Pilih Lagu Kenangan") },
+                title = { Text(stringResource(R.string.search_song_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 }
             )
@@ -101,10 +106,10 @@ fun SearchSongScreen(
                 value = viewModel.searchQuery,
                 onValueChange = { viewModel.onQueryChange(it) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Cari judul lagu atau artis...") },
+                placeholder = { Text(stringResource(R.string.search_song_placeholder)) },
                 trailingIcon = {
                     IconButton(onClick = { viewModel.searchSongs() }) {
-                        Icon(Icons.Default.Search, contentDescription = "Cari")
+                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.clear))
                     }
                 },
                 singleLine = true
@@ -123,7 +128,7 @@ fun SearchSongScreen(
                 ) {
                     if (viewModel.searchResults.isEmpty() && viewModel.searchQuery.isNotEmpty()) {
                         item {
-                            Text("Ketik judul lagu dan tekan tombol cari.", color = MaterialTheme.colorScheme.outline)
+                            Text(stringResource(R.string.search_song_empty_hint), color = MaterialTheme.colorScheme.outline)
                         }
                     }
 
@@ -178,7 +183,7 @@ fun SongCard(
             Box(contentAlignment = Alignment.Center) {
                 AsyncImage(
                     model = song.imageUrl,
-                    contentDescription = "Cover Album",
+                    contentDescription = stringResource(R.string.search_song_album_cover_desc),
                     modifier = Modifier
                         .size(56.dp)
                         .clip(RoundedCornerShape(8.dp)),
@@ -193,7 +198,10 @@ fun SongCard(
                 ) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause Preview" else "Play Preview",
+                        contentDescription = if (isPlaying) 
+                            stringResource(R.string.search_song_pause_preview_desc) 
+                        else 
+                            stringResource(R.string.search_song_play_preview_desc),
                         tint = Color.White,
                         modifier = Modifier.size(24.dp)
                     )
@@ -230,11 +238,11 @@ fun SongCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Tambah Lagu",
+                        contentDescription = stringResource(R.string.create_add_song),
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Tambah", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.search_song_add_button), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
