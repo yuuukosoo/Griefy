@@ -5,8 +5,7 @@ import androidx.room.Room
 import com.naufal.griefy.data.local.GriefyDatabase
 import com.naufal.griefy.data.local.MemoryDao
 import com.naufal.griefy.data.local.RemembranceDayDao
-import com.naufal.griefy.data.remote.SpotifyApi
-import com.naufal.griefy.data.remote.SpotifyAuthApi
+import com.naufal.griefy.data.remote.DeezerApi
 import com.naufal.griefy.data.repository.MemoryRepositoryImpl
 import com.naufal.griefy.data.repository.RemembranceRepositoryImpl
 import com.naufal.griefy.domain.repository.MemoryRepository
@@ -53,10 +52,9 @@ object AppModule {
     @Singleton
     fun provideMemoryRepository(
         dao: MemoryDao,
-        spotifyApi: SpotifyApi,
-        authApi: SpotifyAuthApi
+        deezerApi: DeezerApi
     ): MemoryRepository {
-        return MemoryRepositoryImpl(dao, spotifyApi, authApi)
+        return MemoryRepositoryImpl(dao, deezerApi)
     }
 
     @Provides
@@ -69,21 +67,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideSpotifyApi(): SpotifyApi {
+    fun provideDeezerApi(): DeezerApi {
         return Retrofit.Builder()
-            .baseUrl("https://api.spotify.com/")
+            .baseUrl("https://api.deezer.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(SpotifyApi::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideSpotifyAuthApi(): SpotifyAuthApi {
-        return Retrofit.Builder()
-            .baseUrl("https://accounts.spotify.com/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(SpotifyAuthApi::class.java)
+            .create(DeezerApi::class.java)
     }
 }

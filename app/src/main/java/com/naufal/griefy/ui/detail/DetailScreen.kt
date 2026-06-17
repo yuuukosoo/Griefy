@@ -187,21 +187,15 @@ fun DetailScreen(
 
                             IconButton(
                                 onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("spotify:track:${song.trackId}"))
-                                    intent.putExtra(Intent.EXTRA_REFERRER, Uri.parse("android-app://${context.packageName}"))
-                                    try {
-                                        context.startActivity(intent)
-                                    } catch (e: Exception) {
-                                        val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com/track/${song.trackId}"))
-                                        context.startActivity(webIntent)
-                                    }
+                                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.deezer.com/track/${song.trackId}"))
+                                    context.startActivity(webIntent)
                                 },
                                 modifier = Modifier.size(36.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.MusicNote,
-                                    contentDescription = "Buka di Spotify",
-                                    tint = Color(0xFF1DB954),
+                                    contentDescription = "Buka di Deezer",
+                                    tint = Color(0xFF75685F),
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -248,54 +242,12 @@ fun DetailScreen(
                                     trackColor = Color(0xFFFAF7F2)
                                 )
                             } else {
-                                IconButton(
-                                    onClick = {
-                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("spotify:track:${song.trackId}"))
-                                        intent.putExtra(Intent.EXTRA_REFERRER, Uri.parse("android-app://${context.packageName}"))
-                                        try {
-                                            context.startActivity(intent)
-                                        } catch (e: Exception) {
-                                            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com/track/${song.trackId}"))
-                                            context.startActivity(webIntent)
-                                        }
-                                    },
-                                    modifier = Modifier.size(36.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = "Putar di Spotify",
-                                        tint = Color(0xFF1DB954),
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.width(8.dp))
-
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(36.dp),
-                                    contentAlignment = Alignment.CenterStart
-                                ) {
-                                    Column {
-                                        LinearProgressIndicator(
-                                            progress = { 0f },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(6.dp)
-                                                .clip(RoundedCornerShape(3.dp)),
-                                            color = Color(0xFF1DB954),
-                                            trackColor = Color(0xFFFAF7F2)
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = "Putar lagu lengkap di Spotify",
-                                            fontSize = 10.sp,
-                                            color = Color(0xFF1DB954),
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text = "Preview audio tidak tersedia.",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF8C8075),
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
                             }
                         }
                     }
