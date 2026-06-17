@@ -1,6 +1,7 @@
 package com.naufal.griefy.ui.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -8,35 +9,37 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.ui.navigation.Screen
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,10 +50,13 @@ fun DetailScreen(
     val memory by viewModel.memory.collectAsState()
     val songDetails by viewModel.songDetails.collectAsState()
     var selectedImageIndexForFullScreen by remember { mutableStateOf<Int?>(null) }
-    val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
+    val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
 
     var isPlaying by remember { mutableStateOf(false) }
     val mediaPlayer = remember { android.media.MediaPlayer() }
+
+    var currentPosition by remember { mutableStateOf(0f) }
+    var duration by remember { mutableStateOf(0f) }
 
     DisposableEffect(songDetails) {
         val previewUrl = songDetails?.previewUrl
@@ -75,13 +81,37 @@ fun DetailScreen(
         }
     }
 
+    LaunchedEffect(isPlaying) {
+        if (isPlaying) {
+            while (isPlaying) {
+                try {
+                    currentPosition = mediaPlayer.currentPosition.toFloat()
+                    duration = mediaPlayer.duration.toFloat()
+                } catch (e: Exception) {
+                    // ignore if media player is released/reset
+                }
+                delay(300)
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detail Kenangan") },
+                title = { Text("Detail Kenangan", color = Color(0xFF4E4640), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Kembali")
+                    IconButton(
+                        onClick = { navController.navigateUp() },
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .size(36.dp)
+
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Color(0xFF5C524A)
+                        )
                     }
                 },
                 actions = {
@@ -92,7 +122,7 @@ fun DetailScreen(
                             }
                         }
                     ) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color(0xFF5C524A))
                     }
 
                     IconButton(
@@ -100,7 +130,8 @@ fun DetailScreen(
                             viewModel.moveToTrash(
                                 onDeleteSuccess = { navController.navigateUp() }
                             )
-                        }
+                        },
+                        modifier = Modifier.padding(end = 8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -108,91 +139,89 @@ fun DetailScreen(
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
         bottomBar = {
             songDetails?.let { song ->
-                Surface(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
                         .navigationBarsPadding(),
-                    tonalElevation = 8.dp,
-                    color = MaterialTheme.colorScheme.surfaceVariant
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(12.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
-                        if (song.imageUrl.isNotEmpty()) {
-                            AsyncImage(
-                                model = song.imageUrl,
-                                contentDescription = "Cover Album",
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.MusicNote,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
-                        }
+                        // Title and Artist Info
+                        Text(
+                            text = song.title,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4E4640),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = song.artistName,
+                            fontSize = 12.sp,
+                            color = Color(0xFF8C8075),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = song.title,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Text(
-                                text = song.artistName,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-
-                        if (!song.previewUrl.isNullOrEmpty()) {
-                            IconButton(
-                                onClick = {
-                                    if (isPlaying) {
-                                        mediaPlayer.pause()
-                                        isPlaying = false
-                                    } else {
-                                        mediaPlayer.start()
-                                        isPlaying = true
-                                    }
+                        // Controls & Progress bar row
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (!song.previewUrl.isNullOrEmpty()) {
+                                IconButton(
+                                    onClick = {
+                                        if (isPlaying) {
+                                            mediaPlayer.pause()
+                                            isPlaying = false
+                                        } else {
+                                            mediaPlayer.start()
+                                            isPlaying = true
+                                        }
+                                    },
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                        contentDescription = if (isPlaying) "Pause" else "Play",
+                                        tint = Color(0xFF5C524A),
+                                        modifier = Modifier.size(28.dp)
+                                    )
                                 }
-                            ) {
-                                Icon(
-                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    contentDescription = if (isPlaying) "Pause" else "Play",
-                                    modifier = Modifier.size(32.dp)
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                val progress = if (duration > 0) currentPosition / duration else 0f
+                                LinearProgressIndicator(
+                                    progress = { progress },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(6.dp)
+                                        .clip(RoundedCornerShape(3.dp)),
+                                    color = Color(0xFF75685F),
+                                    trackColor = Color(0xFFFAF7F2)
+                                )
+                            } else {
+                                Text(
+                                    text = "Preview audio tidak tersedia.",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF8C8075),
+                                    modifier = Modifier.padding(vertical = 8.dp)
                                 )
                             }
-                        } else {
-                            Text(
-                                text = "No Preview",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.outline
-                            )
                         }
                     }
                 }
@@ -203,69 +232,155 @@ fun DetailScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
+                    .background(Color(0xFFFAF7F2))
+                    .padding(
+                        top = paddingValues.calculateTopPadding(),
+                        bottom = paddingValues.calculateBottomPadding() + 8.dp
+                    )
             ) {
-
+                // Horizontal Image Pager with reduced height for better screen space
                 if (mem.imageUris.isNotEmpty()) {
-                    LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    val pagerState = rememberPagerState(initialPage = 0) { mem.imageUris.size }
+                    
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
                     ) {
-                        itemsIndexed(mem.imageUris) { index, uri ->
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp)
+                                .padding(horizontal = 24.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                        ) { page ->
                             AsyncImage(
-                                model = uri,
+                                model = mem.imageUris[page],
                                 contentDescription = "Foto Kenangan",
                                 modifier = Modifier
-                                    .height(300.dp)
-                                    .width(260.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .clickable { selectedImageIndexForFullScreen = index },
+                                    .fillMaxSize()
+                                    .clickable { selectedImageIndexForFullScreen = page },
                                 contentScale = ContentScale.Crop
                             )
+                        }
+
+                        // Page indicators (dots)
+                        if (mem.imageUris.size > 1) {
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 10.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                repeat(mem.imageUris.size) { iteration ->
+                                    val color = if (pagerState.currentPage == iteration) Color(0xFF75685F) else Color(0xFFEDE6DC)
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(3.dp)
+                                            .clip(CircleShape)
+                                            .background(color)
+                                            .size(8.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
 
-                Column(modifier = Modifier.padding(16.dp)) {
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Metadata Row (Date, Privacy circle indicator, Tags)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Date
                     Text(
-                        text = if (mem.isPublic) "Status: Publik 🌐" else "Status: Privat 🔒",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        text = formatter.format(Date(mem.createdAt)),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF8C8075)
                     )
 
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    // Privacy status circle
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(if (mem.isPublic) Color(0xFF81C784) else Color(0xFFB0A59A))
+                    )
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    // Tags
                     if (mem.tags.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            itemsIndexed(mem.tags) { _, tag ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color(0xFFEDE8E0))
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = tag,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF5C524A)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Title
+                Text(
+                    text = mem.title,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4E4640),
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Scrollable content area with fixed size and proper breathing padding
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 24.dp, vertical = 4.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White)
+                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(16.dp))
+                        .padding(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                    ) {
                         Text(
-                            text = "🏷️ ${mem.tags.joinToString(", ")}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.secondary
+                            text = mem.content,
+                            fontSize = 15.sp,
+                            color = Color(0xFF5C524A),
+                            lineHeight = 22.sp
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = mem.title,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Dibuat pada: ${formatter.format(Date(mem.createdAt))}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = mem.content,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-
-                    Spacer(modifier = Modifier.height(32.dp))
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
         } ?: run {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
