@@ -48,7 +48,7 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF7F2))
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
     ) {
         Column(
@@ -58,7 +58,7 @@ fun HomeScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 48.dp, vertical = 32.dp),
+                    .padding(start = 48.dp, end = 48.dp, top = 64.dp, bottom = 32.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -67,12 +67,12 @@ fun HomeScreen(
                         text = stringResource(R.string.home_greeting),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4E4640)
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         text = stringResource(R.string.home_subtitle),
                         fontSize = 14.sp,
-                        color = Color(0xFF8C8075)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -80,12 +80,12 @@ fun HomeScreen(
                     onClick = { navController.navigate(Screen.Settings.route) },
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color(0xFFEDE8E0), CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = stringResource(R.string.settings_title),
-                        tint = Color(0xFF5C524A)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -97,20 +97,20 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 8.dp),
-                placeholder = { Text(stringResource(R.string.home_search_placeholder), color = Color(0xFFB0A59A)) },
-                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = Color(0xFF8C8075)) },
+                placeholder = { Text(stringResource(R.string.home_search_placeholder), color = MaterialTheme.colorScheme.outline) },
+                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { viewModel.setSearchQuery("") }) {
-                            Icon(imageVector = Icons.Default.Clear, contentDescription = stringResource(R.string.clear), tint = Color(0xFF8C8075))
+                            Icon(imageVector = Icons.Default.Clear, contentDescription = stringResource(R.string.clear), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF75685F),
-                    unfocusedBorderColor = Color(0xFFEDE6DC),
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White
                 )
@@ -135,7 +135,7 @@ fun HomeScreen(
                             } else {
                                 stringResource(R.string.home_no_search_results, searchQuery)
                             }
-                            Text(message, color = Color(0xFF8C8075), fontWeight = FontWeight.Medium)
+                            Text(message, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
                         }
                     }
                 } else {
@@ -194,7 +194,7 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
                 text = memory.title,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF4E4640)
+                color = MaterialTheme.colorScheme.onBackground
             )
             
             Spacer(modifier = Modifier.height(4.dp))
@@ -206,7 +206,7 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
                 Text(
                     text = dateString,
                     fontSize = 12.sp,
-                    color = Color(0xFF8C8075),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -215,20 +215,20 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFEDE8E0))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.MusicNote,
                             contentDescription = stringResource(R.string.home_pinned_song),
-                            tint = Color(0xFF75685F),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = memory.songTitle ?: stringResource(R.string.home_pinned_song),
                             fontSize = 10.sp,
-                            color = Color(0xFF5C524A),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -243,7 +243,7 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
             Text(
                 text = memory.content,
                 fontSize = 14.sp,
-                color = Color(0xFF5C524A),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -253,7 +253,7 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
                 Text(
                     text = "🏷️ ${memory.tags.joinToString(", ")}",
                     fontSize = 12.sp,
-                    color = Color(0xFF75685F),
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
             }

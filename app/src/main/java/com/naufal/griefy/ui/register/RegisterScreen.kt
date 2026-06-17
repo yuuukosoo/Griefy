@@ -37,7 +37,7 @@ fun RegisterScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF7F2))
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .navigationBarsPadding(),
         contentAlignment = Alignment.Center
@@ -45,7 +45,7 @@ fun RegisterScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(48.dp)
+                .padding(start = 48.dp, end = 48.dp, bottom = 24.dp, top = 56.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -53,7 +53,7 @@ fun RegisterScreen(navController: NavController) {
                 text = stringResource(R.string.register_sign_up),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF4E4640),
+                color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
             )
 
@@ -64,7 +64,7 @@ fun RegisterScreen(navController: NavController) {
                 Text(
                     text = stringResource(R.string.register_username),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -75,9 +75,9 @@ fun RegisterScreen(navController: NavController) {
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFEDE8E0),
-                        unfocusedContainerColor = Color(0xFFEDE8E0),
-                        focusedBorderColor = Color(0xFF75685F),
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = Color.Transparent
                     )
                 )
@@ -90,7 +90,7 @@ fun RegisterScreen(navController: NavController) {
                 Text(
                     text = stringResource(R.string.register_email),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -101,9 +101,9 @@ fun RegisterScreen(navController: NavController) {
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFEDE8E0),
-                        unfocusedContainerColor = Color(0xFFEDE8E0),
-                        focusedBorderColor = Color(0xFF75685F),
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = Color.Transparent
                     )
                 )
@@ -116,7 +116,7 @@ fun RegisterScreen(navController: NavController) {
                 Text(
                     text = stringResource(R.string.register_password),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -130,13 +130,13 @@ fun RegisterScreen(navController: NavController) {
                     trailingIcon = {
                         val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(imageVector = image, contentDescription = null, tint = Color(0xFF8C8075))
+                            Icon(imageVector = image, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFEDE8E0),
-                        unfocusedContainerColor = Color(0xFFEDE8E0),
-                        focusedBorderColor = Color(0xFF75685F),
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = Color.Transparent
                     )
                 )
@@ -149,7 +149,7 @@ fun RegisterScreen(navController: NavController) {
                 Text(
                     text = stringResource(R.string.register_confirm_password),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -163,13 +163,13 @@ fun RegisterScreen(navController: NavController) {
                     trailingIcon = {
                         val image = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
                         IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                            Icon(imageVector = image, contentDescription = null, tint = Color(0xFF8C8075))
+                            Icon(imageVector = image, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFEDE8E0),
-                        unfocusedContainerColor = Color(0xFFEDE8E0),
-                        focusedBorderColor = Color(0xFF75685F),
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = Color.Transparent
                     )
                 )
@@ -185,7 +185,7 @@ fun RegisterScreen(navController: NavController) {
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF75685F))
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(
                     text = stringResource(R.string.register_button),
@@ -202,7 +202,7 @@ fun RegisterScreen(navController: NavController) {
             ) {
                 Text(
                     text = stringResource(R.string.register_already_have_account),
-                    color = Color(0xFF8C8075),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center
                 )
@@ -212,12 +212,12 @@ fun RegisterScreen(navController: NavController) {
                 ) {
                     Text(
                         text = stringResource(R.string.register_you_can),
-                        color = Color(0xFF8C8075),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp
                     )
                     Text(
                         text = stringResource(R.string.register_login_here),
-                        color = Color(0xFF75685F),
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         modifier = Modifier.clickable {

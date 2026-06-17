@@ -83,6 +83,7 @@ fun SearchSongScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.padding(top = 32.dp),
                 title = { Text(stringResource(R.string.search_song_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {

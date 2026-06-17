@@ -26,7 +26,7 @@ fun ProfileScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF7F2))
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
     ) {
         Column(
@@ -37,7 +37,7 @@ fun ProfileScreen(navController: NavController) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(start = 24.dp, end = 24.dp, top = 48.dp, bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -45,19 +45,19 @@ fun ProfileScreen(navController: NavController) {
                     text = stringResource(R.string.profile_title),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 IconButton(
                     onClick = { navController.navigate(Screen.Settings.route) },
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color(0xFFEDE8E0), CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = stringResource(R.string.settings_title),
-                        tint = Color(0xFF5C524A)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -72,7 +72,7 @@ fun ProfileScreen(navController: NavController) {
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFEDE8E0)),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("👤", fontSize = 48.sp)
@@ -84,11 +84,11 @@ fun ProfileScreen(navController: NavController) {
                     text = "Khalish",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
                     text = "khalish@example.com",
-                    color = Color(0xFF8C8075),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
 
@@ -107,7 +107,7 @@ fun ProfileScreen(navController: NavController) {
                         Text(
                             text = stringResource(R.string.profile_statistics),
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4E4640)
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(
@@ -115,12 +115,12 @@ fun ProfileScreen(navController: NavController) {
                             horizontalArrangement = Arrangement.SpaceAround
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("24", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF75685F))
-                                Text(stringResource(R.string.profile_total_memories), fontSize = 12.sp, color = Color(0xFF8C8075))
+                                Text("24", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                Text(stringResource(R.string.profile_total_memories), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("5", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF75685F))
-                                Text(stringResource(R.string.profile_public_albums), fontSize = 12.sp, color = Color(0xFF8C8075))
+                                Text("5", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                Text(stringResource(R.string.profile_public_albums), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }

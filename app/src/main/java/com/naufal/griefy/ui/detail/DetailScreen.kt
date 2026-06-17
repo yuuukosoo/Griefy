@@ -106,7 +106,8 @@ fun DetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.detail_title), color = Color(0xFF4E4640), fontWeight = FontWeight.Bold) },
+                modifier = Modifier.padding(top = 32.dp),
+                title = { Text(stringResource(R.string.detail_title), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigateUp() },
@@ -117,7 +118,7 @@ fun DetailScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back),
-                            tint = Color(0xFF5C524A)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -129,7 +130,7 @@ fun DetailScreen(
                             }
                         }
                     ) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit), tint = Color(0xFF5C524A))
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
 
                     IconButton(
@@ -158,7 +159,7 @@ fun DetailScreen(
                         .padding(horizontal = 24.dp, vertical = 16.dp)
                         .navigationBarsPadding(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     val context = LocalContext.current
@@ -186,14 +187,14 @@ fun DetailScreen(
                                     text = song.title,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF4E4640),
+                                    color = MaterialTheme.colorScheme.onBackground,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = song.artistName,
                                     fontSize = 12.sp,
-                                    color = Color(0xFF8C8075),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -209,7 +210,7 @@ fun DetailScreen(
                                 Icon(
                                     imageVector = Icons.Default.MusicNote,
                                     contentDescription = stringResource(R.string.detail_open_deezer_desc),
-                                    tint = Color(0xFF75685F),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -240,7 +241,7 @@ fun DetailScreen(
                                             stringResource(R.string.detail_pause_desc) 
                                         else 
                                             stringResource(R.string.detail_play_desc),
-                                        tint = Color(0xFF5C524A),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(28.dp)
                                     )
                                 }
@@ -254,14 +255,14 @@ fun DetailScreen(
                                         .weight(1f)
                                         .height(6.dp)
                                         .clip(RoundedCornerShape(3.dp)),
-                                    color = Color(0xFF75685F),
-                                    trackColor = Color(0xFFFAF7F2)
+                                    color = MaterialTheme.colorScheme.primary,
+                                    trackColor = MaterialTheme.colorScheme.background
                                 )
                             } else {
                                 Text(
                                     text = stringResource(R.string.detail_preview_unavailable),
                                     fontSize = 12.sp,
-                                    color = Color(0xFF8C8075),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(vertical = 8.dp)
                                 )
                             }
@@ -275,7 +276,7 @@ fun DetailScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFFFAF7F2))
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(
                         top = paddingValues.calculateTopPadding(),
                         bottom = paddingValues.calculateBottomPadding() + 8.dp
@@ -315,7 +316,7 @@ fun DetailScreen(
                                 horizontalArrangement = Arrangement.Center
                             ) {
                                 repeat(mem.imageUris.size) { iteration ->
-                                    val color = if (pagerState.currentPage == iteration) Color(0xFF75685F) else Color(0xFFEDE6DC)
+                                    val color = if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                                     Box(
                                         modifier = Modifier
                                             .padding(3.dp)
@@ -341,7 +342,7 @@ fun DetailScreen(
                         text = formatter.format(Date(mem.createdAt)),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF8C8075)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
@@ -350,7 +351,7 @@ fun DetailScreen(
                         modifier = Modifier
                             .size(12.dp)
                             .clip(CircleShape)
-                            .background(if (mem.isPublic) Color(0xFF81C784) else Color(0xFFB0A59A))
+                            .background(if (mem.isPublic) Color(0xFF81C784) else MaterialTheme.colorScheme.outline)
                     )
 
                     Spacer(modifier = Modifier.width(16.dp))
@@ -364,14 +365,14 @@ fun DetailScreen(
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(Color(0xFFEDE8E0))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
                                         .padding(horizontal = 10.dp, vertical = 4.dp)
                                 ) {
                                     Text(
                                         text = tag,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF5C524A)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -385,7 +386,7 @@ fun DetailScreen(
                     text = mem.title,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640),
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(horizontal = 24.dp)
                 )
 
@@ -401,7 +402,7 @@ fun DetailScreen(
                     Text(
                         text = mem.content,
                         fontSize = 16.sp,
-                        color = Color(0xFF5C524A),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 24.sp
                     )
                 }

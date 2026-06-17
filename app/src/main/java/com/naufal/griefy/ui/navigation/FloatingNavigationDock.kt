@@ -44,7 +44,7 @@ fun FloatingNavigationDock(
                     .padding(end = 16.dp)
                     .height(56.dp),
                 shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
             ) {
                 Row(
@@ -63,7 +63,7 @@ fun FloatingNavigationDock(
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = stringResource(R.string.nav_home),
-                            tint = if (currentRoute == Screen.Home.route) Color(0xFF75685F) else Color(0xFFB0A59A)
+                            tint = if (currentRoute == Screen.Home.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                         )
                     }
 
@@ -80,7 +80,7 @@ fun FloatingNavigationDock(
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = stringResource(R.string.nav_search_memory),
-                            tint = if (currentRoute == Screen.SearchMemory.route) Color(0xFF75685F) else Color(0xFFB0A59A)
+                            tint = if (currentRoute == Screen.SearchMemory.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                         )
                     }
 
@@ -97,7 +97,7 @@ fun FloatingNavigationDock(
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = stringResource(R.string.nav_profile),
-                            tint = if (currentRoute == Screen.Profile.route) Color(0xFF75685F) else Color(0xFFB0A59A)
+                            tint = if (currentRoute == Screen.Profile.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                         )
                     }
                 }
@@ -107,7 +107,7 @@ fun FloatingNavigationDock(
             FloatingActionButton(
                 onClick = { navController.navigate(Screen.CreateMemory.route) },
                 shape = CircleShape,
-                containerColor = Color(0xFF75685F),
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White,
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
                 modifier = Modifier.size(56.dp)

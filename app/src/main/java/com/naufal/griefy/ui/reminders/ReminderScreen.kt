@@ -122,7 +122,7 @@ fun ReminderScreen(
         } else {
             titleText = ""
             descText = ""
-            selectedDateTime = System.currentTimeMillis() + 60000 // default to 1 min from now
+            selectedDateTime = System.currentTimeMillis() + 60000
         }
         showDialog = true
     }
@@ -131,6 +131,7 @@ fun ReminderScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.reminder_title), fontWeight = FontWeight.Bold) },
+                modifier = Modifier.padding(top = 32.dp),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
@@ -145,7 +146,8 @@ fun ReminderScreen(
             FloatingActionButton(
                 onClick = { openDialog() },
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.padding(end = 32.dp, bottom = 16.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add, 
@@ -199,7 +201,7 @@ fun ReminderScreen(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
+                        contentPadding = PaddingValues(horizontal = 48.dp, vertical = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(remembranceDays, key = { it.id }) { reminder ->
@@ -395,12 +397,12 @@ fun ReminderCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isPast) {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                MaterialTheme.colorScheme.primaryContainer
             } else {
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.primary
             }
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isPast) 0.dp else 2.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -417,14 +419,14 @@ fun ReminderCard(
                         text = reminder.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (isPast) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface
+                        color = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onPrimary
                     )
                     if (reminder.description.isNotBlank()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = reminder.description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                         )
                     }
                 }
@@ -436,14 +438,14 @@ fun ReminderCard(
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = stringResource(R.string.reminder_dialog_edit),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     IconButton(onClick = onDelete) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = stringResource(R.string.delete),
-                            tint = MaterialTheme.colorScheme.error
+                            tint = if (isPast) MaterialTheme.colorScheme.error.copy(alpha = 0.8f) else MaterialTheme.colorScheme.errorContainer
                         )
                     }
                 }
@@ -457,28 +459,28 @@ fun ReminderCard(
                 Icon(
                     imageVector = if (isPast) Icons.Default.NotificationsNone else Icons.Default.NotificationsActive,
                     contentDescription = null,
-                    tint = if (isPast) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.secondary,
+                    tint = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = dateTimeString,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isPast) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.secondary,
+                    color = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 if (isPast) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.reminder_passed),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.outline,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
@@ -493,7 +495,7 @@ fun ExactAlarmWarningCard(context: Context) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 48.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFFDF3E7) // warm light orange/peach
         ),
@@ -561,7 +563,7 @@ fun BatteryOptimizationWarningCard(context: Context) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 48.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF0FDF4) // light green/teal tint
         ),
