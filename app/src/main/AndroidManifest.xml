@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".GriefyApp"
@@ -52,7 +53,7 @@
                 android:value="true" />
         </service>
 
-        <receiver android:name=".ui.settings.ReminderReceiver" android:exported="false" />
+        <receiver android:name=".ui.settings.ReminderReceiver" android:exported="true" />
         
         <receiver
             android:name=".ui.settings.BootReceiver"

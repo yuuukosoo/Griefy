@@ -15,6 +15,8 @@ class ReminderScheduler(private val context: Context) {
             putExtra("REMINDER_ID", day.id)
             putExtra("REMINDER_TITLE", day.title)
             putExtra("REMINDER_DESC", day.description)
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -24,7 +26,10 @@ class ReminderScheduler(private val context: Context) {
         )
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                val alarmClockInfo = AlarmManager.AlarmClockInfo(day.dateTime, pendingIntent)
+                alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     day.dateTime,
@@ -38,7 +43,6 @@ class ReminderScheduler(private val context: Context) {
                 )
             }
         } catch (e: SecurityException) {
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,

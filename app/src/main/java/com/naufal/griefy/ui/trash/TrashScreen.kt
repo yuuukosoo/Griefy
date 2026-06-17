@@ -60,6 +60,7 @@ fun TrashScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.padding(top = 32.dp),
                 title = { Text(stringResource(R.string.trash_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
@@ -88,7 +89,7 @@ fun TrashScreen(
                 text = stringResource(R.string.trash_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 48.dp, vertical = 8.dp)
             )
 
             if (trashedMemories.isEmpty()) {
@@ -100,7 +101,7 @@ fun TrashScreen(
                 }
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(horizontal = 48.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(trashedMemories) { memory ->
@@ -143,7 +144,13 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                OutlinedButton(onClick = onRestore) {
+                Button(
+                    onClick = onRestore,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
                     Icon(
                         imageVector = Icons.Default.Restore, 
                         contentDescription = stringResource(R.string.trash_restore), 

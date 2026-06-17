@@ -116,6 +116,12 @@
     <string name="reminder_date_btn">Tanggal</string>
     <string name="reminder_time_btn">Waktu</string>
     <string name="reminder_passed">Sudah lewat</string>
+    <string name="reminder_exact_alarm_warning_title">Pengingat Tidak Tepat Waktu?</string>
+    <string name="reminder_exact_alarm_warning_desc">Griefy memerlukan izin \'Alarm &amp; Pengingat\' agar dapat mengirimkan notifikasi tepat pada waktunya.</string>
+    <string name="reminder_exact_alarm_warning_btn">Buka Pengaturan</string>
+    <string name="reminder_battery_warning_title">Notifikasi Tidak Masuk Saat Ditutup?</string>
+    <string name="reminder_battery_warning_desc">Beberapa perangkat membatasi aplikasi di latar belakang. Silakan matikan pengoptimalan baterai (atur ke Tanpa Batasan) untuk Griefy agar notifikasi tetap masuk meskipun aplikasi ditutup.</string>
+    <string name="reminder_battery_warning_btn">Abaikan Batasan</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Pengaturan</string>

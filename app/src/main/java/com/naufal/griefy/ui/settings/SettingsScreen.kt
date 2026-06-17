@@ -78,8 +78,9 @@ fun SettingsScreen(
             title = {
                 Text(
                     text = stringResource(R.string.settings_select_language_title),
-                    color = Color(0xFF4E4640),
-                    fontWeight = FontWeight.Bold
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 16.dp, top = 16.dp)
                 )
             },
             text = {
@@ -101,14 +102,15 @@ fun SettingsScreen(
                                 showLanguageDialog.value = false
                             },
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = Color(0xFF75685F),
-                                unselectedColor = Color(0xFFB0A59A)
+                                selectedColor = MaterialTheme.colorScheme.primary,
+                                unselectedColor = MaterialTheme.colorScheme.outline
                             )
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.settings_language_english),
-                            color = Color(0xFF4E4640)
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontSize = 18.sp
                         )
                     }
                     Row(
@@ -128,14 +130,15 @@ fun SettingsScreen(
                                 showLanguageDialog.value = false
                             },
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = Color(0xFF75685F),
-                                unselectedColor = Color(0xFFB0A59A)
+                                selectedColor = MaterialTheme.colorScheme.primary,
+                                unselectedColor = MaterialTheme.colorScheme.outline
                             )
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.settings_language_indonesian),
-                            color = Color(0xFF4E4640)
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontSize = 18.sp
                         )
                     }
                 }
@@ -143,34 +146,36 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = { showLanguageDialog.value = false },
-                    colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF75685F))
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(text = stringResource(R.string.cancel))
+                    Text(text = stringResource(R.string.cancel),
+                        fontSize = 18.sp)
                 }
             }
         )
     }
 
     Scaffold(
-        containerColor = Color(0xFFFAF7F2),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                modifier = Modifier.padding(top = 32.dp),
                 title = {
                     Text(
                         stringResource(R.string.settings_title),
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4E4640)
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFFAF7F2)
+                    containerColor = MaterialTheme.colorScheme.background
                 ),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = stringResource(R.string.settings_back_description),
-                            tint = Color(0xFF5C524A)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -200,7 +205,7 @@ fun SettingsScreen(
                         subtitle = currentLanguageName,
                         onClick = { showLanguageDialog.value = true }
                     )
-                    HorizontalDivider(color = Color(0xFFEDE6DC), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
                     SettingsSwitchItem(
                         icon = Icons.Default.DarkMode,
                         title = stringResource(R.string.settings_dark_mode),
@@ -228,7 +233,7 @@ fun SettingsScreen(
                         subtitle = stringResource(R.string.settings_reminders_subtitle),
                         onClick = { navController.navigate(Screen.Reminders.route) }
                     )
-                    HorizontalDivider(color = Color(0xFFEDE6DC), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
                     SettingsItem(
                         icon = Icons.Default.Delete,
                         title = stringResource(R.string.settings_trash_title),
@@ -269,7 +274,7 @@ fun SettingsCategoryTitle(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelMedium,
-        color = Color(0xFF8C8075),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp)
     )
@@ -280,7 +285,7 @@ fun SettingsItem(
     icon: ImageVector,
     title: String,
     subtitle: String? = null,
-    titleColor: Color = Color(0xFF4E4640),
+    titleColor: Color = MaterialTheme.colorScheme.onBackground,
     onClick: () -> Unit
 ) {
     Row(
@@ -293,7 +298,7 @@ fun SettingsItem(
         Icon(
             imageVector = icon, 
             contentDescription = title, 
-            tint = if (titleColor == MaterialTheme.colorScheme.error) titleColor else Color(0xFF5C524A)
+            tint = if (titleColor == MaterialTheme.colorScheme.error) titleColor else MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -308,14 +313,14 @@ fun SettingsItem(
                 Text(
                     text = subtitle, 
                     fontSize = 13.sp,
-                    color = Color(0xFF8C8075)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
         Icon(
             imageVector = Icons.Default.ChevronRight, 
             contentDescription = stringResource(R.string.settings_detail_description), 
-            tint = Color(0xFFB0A59A)
+            tint = MaterialTheme.colorScheme.outline
         )
     }
 }
@@ -333,13 +338,13 @@ fun SettingsSwitchItem(
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = title, tint = Color(0xFF5C524A))
+        Icon(imageVector = icon, contentDescription = title, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = title, 
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            color = Color(0xFF4E4640),
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f)
         )
         Switch(
@@ -347,9 +352,9 @@ fun SettingsSwitchItem(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFF75685F),
-                uncheckedThumbColor = Color(0xFF8C8075),
-                uncheckedTrackColor = Color(0xFFEDE8E0)
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         )
     }

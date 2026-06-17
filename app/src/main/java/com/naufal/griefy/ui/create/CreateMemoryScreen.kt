@@ -93,14 +93,14 @@ fun CreateMemoryScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF7F2)) // Cozy warm paper background (Mymory style)
+            .background(MaterialTheme.colorScheme.background) // Cozy warm paper background (Mymory style)
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 48.dp)
                 .verticalScroll(rememberScrollState())
         ) {
 
@@ -112,12 +112,12 @@ fun CreateMemoryScreen(
                     onClick = { navController.navigateUp() },
                     modifier = Modifier
                         .size(36.dp)
-                        .background(Color(0xFFEDE8E0), CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.back),
-                        tint = Color(0xFF5C524A),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -128,7 +128,7 @@ fun CreateMemoryScreen(
                     text = stringResource(R.string.create_title),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -138,8 +138,8 @@ fun CreateMemoryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f) // 1:1 Square ratio
-                    .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(16.dp))
-                    .background(Color(0xFFEDE8E0), RoundedCornerShape(16.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
                     .clickable {
                         multiplePhotoPickerLauncher.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -152,7 +152,7 @@ fun CreateMemoryScreen(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = stringResource(R.string.create_select_photo_desc),
-                            tint = Color(0xFF8C8075),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(36.dp) // Larger plus icon for square box
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -160,7 +160,7 @@ fun CreateMemoryScreen(
                             text = stringResource(R.string.create_select_photo_text),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color(0xFF8C8075)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 } else {
@@ -218,7 +218,7 @@ fun CreateMemoryScreen(
                 placeholder = {
                     Text(
                         text = stringResource(R.string.create_title_placeholder),
-                        color = Color(0xFFB0A59A),
+                        color = MaterialTheme.colorScheme.outline,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -227,7 +227,7 @@ fun CreateMemoryScreen(
                 textStyle = TextStyle(
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640)
+                    color = MaterialTheme.colorScheme.onBackground
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -239,7 +239,7 @@ fun CreateMemoryScreen(
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 4.dp),
-                color = Color(0xFFEDE6DC)
+                color = MaterialTheme.colorScheme.outline
             )
 
             // Content Input Field - limited height and internally scrollable
@@ -252,13 +252,13 @@ fun CreateMemoryScreen(
                 placeholder = {
                     Text(
                         text = stringResource(R.string.create_content_placeholder),
-                        color = Color(0xFFB0A59A),
+                        color = MaterialTheme.colorScheme.outline,
                         fontSize = 16.sp
                     )
                 },
                 textStyle = TextStyle(
                     fontSize = 16.sp,
-                    color = Color(0xFF5C524A)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -281,17 +281,17 @@ fun CreateMemoryScreen(
                     items(tagsList) { tag ->
                         Box(
                             modifier = Modifier
-                                .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(10.dp))
-                                .background(Color(0xFFEDE8E0), RoundedCornerShape(10.dp))
+                                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
                                 .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = tag, fontSize = 11.sp, color = Color(0xFF5C524A))
+                                Text(text = tag, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = stringResource(R.string.delete),
-                                    tint = Color(0xFF8C8075),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier
                                         .size(12.dp)
                                         .clickable { viewModel.removeTag(tag) }
@@ -308,8 +308,8 @@ fun CreateMemoryScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 12.dp)
-                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Row(
                         modifier = Modifier
@@ -330,7 +330,7 @@ fun CreateMemoryScreen(
                             Box(
                                 modifier = Modifier
                                     .size(48.dp)
-                                    .background(Color(0xFF8C8075), RoundedCornerShape(8.dp)),
+                                    .background(MaterialTheme.colorScheme.onSurfaceVariant, RoundedCornerShape(8.dp)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -347,13 +347,13 @@ fun CreateMemoryScreen(
                             Text(
                                 text = viewModel.selectedSongTitle ?: stringResource(R.string.create_memory_song),
                                 style = MaterialTheme.typography.titleSmall,
-                                color = Color(0xFF4E4640),
+                                color = MaterialTheme.colorScheme.onBackground,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = viewModel.selectedSongArtist ?: stringResource(R.string.create_artist),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF8C8075)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
 
@@ -361,7 +361,7 @@ fun CreateMemoryScreen(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = stringResource(R.string.create_delete_song_desc),
-                                tint = Color(0xFF8C8075)
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -379,11 +379,11 @@ fun CreateMemoryScreen(
                     modifier = Modifier
                         .weight(1f)
                         .height(38.dp)
-                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(10.dp)),
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp)),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEDE8E0))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    Text(text = stringResource(R.string.create_add_song), fontSize = 12.sp, color = Color(0xFF5C524A), fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(R.string.create_add_song), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                 }
 
                 // Add Label Button
@@ -392,11 +392,11 @@ fun CreateMemoryScreen(
                     modifier = Modifier
                         .weight(1f)
                         .height(38.dp)
-                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(10.dp)),
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp)),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEDE8E0))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    Text(text = stringResource(R.string.create_add_label), fontSize = 12.sp, color = Color(0xFF5C524A), fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(R.string.create_add_label), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -407,7 +407,7 @@ fun CreateMemoryScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFEDE8E0))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .padding(4.dp)
             ) {
 
@@ -424,7 +424,7 @@ fun CreateMemoryScreen(
                         text = stringResource(R.string.private_text),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (!isPublic) Color.White else Color(0xFF5C524A)
+                        color = if (!isPublic) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -442,7 +442,7 @@ fun CreateMemoryScreen(
                         text = stringResource(R.string.public_text),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isPublic) Color.White else Color(0xFF5C524A)
+                        color = if (isPublic) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -462,7 +462,7 @@ fun CreateMemoryScreen(
                     .fillMaxWidth()
                     .height(46.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF75685F)), // Cozy warm clay
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), // Cozy warm clay
                 enabled = titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty()
             ) {
                 Text(
@@ -479,7 +479,7 @@ fun CreateMemoryScreen(
     if (showAddLabelDialog) {
         AlertDialog(
             onDismissRequest = { showAddLabelDialog = false },
-            title = { Text(stringResource(R.string.create_dialog_title), color = Color(0xFF4E4640)) },
+            title = { Text(stringResource(R.string.create_dialog_title), color = MaterialTheme.colorScheme.onBackground) },
             text = {
                 OutlinedTextField(
                     value = newLabelText,
@@ -499,7 +499,7 @@ fun CreateMemoryScreen(
                             showAddLabelDialog = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF75685F))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(stringResource(R.string.add))
                 }

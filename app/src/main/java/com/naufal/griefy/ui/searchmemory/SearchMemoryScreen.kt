@@ -5,13 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,7 +43,7 @@ fun SearchMemoryScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF7F2))
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
     ) {
         Column(
@@ -57,27 +55,27 @@ fun SearchMemoryScreen(
                 onValueChange = { viewModel.setSearchQuery(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
-                placeholder = { Text(stringResource(R.string.search_memory_placeholder), color = Color(0xFFB0A59A)) },
-                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = Color(0xFF8C8075)) },
+                    .padding(start = 48.dp, end = 48.dp, top = 40.dp, bottom = 8.dp),
+                placeholder = { Text(stringResource(R.string.search_memory_placeholder), color = MaterialTheme.colorScheme.outline) },
+                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { viewModel.setSearchQuery("") }) {
-                            Icon(imageVector = Icons.Default.Clear, contentDescription = stringResource(R.string.clear), tint = Color(0xFF8C8075))
+                            Icon(imageVector = Icons.Default.Clear, contentDescription = stringResource(R.string.clear), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF75685F),
-                    unfocusedBorderColor = Color(0xFFEDE6DC),
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White
                 )
             )
 
-            // Content Feed
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 100.dp),
@@ -96,7 +94,7 @@ fun SearchMemoryScreen(
                                     stringResource(R.string.search_memory_empty) 
                                 else 
                                     stringResource(R.string.search_memory_empty_search),
-                                color = Color(0xFF8C8075),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontWeight = FontWeight.Medium
                             )
                         }
@@ -114,7 +112,7 @@ fun SearchMemoryScreen(
             }
         }
 
-        // Shared Custom Navigation Dock overlay
+
         Box(
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
@@ -157,7 +155,7 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
                 text = memory.title,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF4E4640)
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -169,7 +167,7 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
                 Text(
                     text = stringResource(R.string.search_memory_by_other_user, dateString),
                     fontSize = 12.sp,
-                    color = Color(0xFF8C8075),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -178,20 +176,20 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFEDE8E0))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.MusicNote,
                             contentDescription = stringResource(R.string.home_pinned_song),
-                            tint = Color(0xFF75685F),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = memory.songTitle ?: stringResource(R.string.home_pinned_song),
                             fontSize = 10.sp,
-                            color = Color(0xFF5C524A),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -206,7 +204,7 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
             Text(
                 text = memory.content,
                 fontSize = 14.sp,
-                color = Color(0xFF5C524A),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -216,7 +214,7 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
                 Text(
                     text = "🏷️ ${memory.tags.joinToString(", ")}",
                     fontSize = 12.sp,
-                    color = Color(0xFF75685F),
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
             }

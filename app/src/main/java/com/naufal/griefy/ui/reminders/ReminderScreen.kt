@@ -1,9 +1,15 @@
 package com.naufal.griefy.ui.reminders
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
@@ -17,11 +23,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.RemembranceDay
@@ -37,9 +47,54 @@ fun ReminderScreen(
     val context = LocalContext.current
     val remembranceDays by viewModel.remembranceDays.collectAsState()
 
+    val alarmManager = remember { context.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
+    val powerManager = remember { context.getSystemService(Context.POWER_SERVICE) as PowerManager }
+
+    var hasExactAlarmPermission by remember {
+        mutableStateOf(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                alarmManager.canScheduleExactAlarms()
+            } else {
+                true
+            }
+        )
+    }
+
+    var isBatteryOptimized by remember {
+        mutableStateOf(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                !powerManager.isIgnoringBatteryOptimizations(context.packageName)
+            } else {
+                false
+            }
+        )
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { _ -> }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                hasExactAlarmPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    alarmManager.canScheduleExactAlarms()
+                } else {
+                    true
+                }
+                isBatteryOptimized = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    !powerManager.isIgnoringBatteryOptimizations(context.packageName)
+                } else {
+                    false
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -67,7 +122,7 @@ fun ReminderScreen(
         } else {
             titleText = ""
             descText = ""
-            selectedDateTime = System.currentTimeMillis() + 60000 // default to 1 min from now
+            selectedDateTime = System.currentTimeMillis() + 60000
         }
         showDialog = true
     }
@@ -76,6 +131,7 @@ fun ReminderScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.reminder_title), fontWeight = FontWeight.Bold) },
+                modifier = Modifier.padding(top = 32.dp),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
@@ -90,7 +146,8 @@ fun ReminderScreen(
             FloatingActionButton(
                 onClick = { openDialog() },
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.padding(end = 32.dp, bottom = 16.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add, 
@@ -99,52 +156,62 @@ fun ReminderScreen(
             }
         }
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (remembranceDays.isEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.NotificationsActive,
-                        contentDescription = null,
-                        modifier = Modifier.size(72.dp),
-                        tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(R.string.reminder_empty_title),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = stringResource(R.string.reminder_empty_subtitle),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(remembranceDays, key = { it.id }) { reminder ->
-                        ReminderCard(
-                            reminder = reminder,
-                            dateTimeString = formatter.format(Date(reminder.dateTime)),
-                            onEdit = { openDialog(reminder) },
-                            onDelete = { viewModel.deleteReminder(reminder) }
+            if (!hasExactAlarmPermission) {
+                ExactAlarmWarningCard(context)
+            } else if (isBatteryOptimized) {
+                BatteryOptimizationWarningCard(context)
+            }
+
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                if (remembranceDays.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.NotificationsActive,
+                            contentDescription = null,
+                            modifier = Modifier.size(72.dp),
+                            tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
                         )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.reminder_empty_title),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = stringResource(R.string.reminder_empty_subtitle),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 48.dp, vertical = 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(remembranceDays, key = { it.id }) { reminder ->
+                            ReminderCard(
+                                reminder = reminder,
+                                dateTimeString = formatter.format(Date(reminder.dateTime)),
+                                onEdit = { openDialog(reminder) },
+                                onDelete = { viewModel.deleteReminder(reminder) }
+                            )
+                        }
                     }
                 }
             }
@@ -330,12 +397,12 @@ fun ReminderCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isPast) {
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                MaterialTheme.colorScheme.primaryContainer
             } else {
-                MaterialTheme.colorScheme.surface
+                MaterialTheme.colorScheme.primary
             }
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isPast) 0.dp else 2.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -352,14 +419,14 @@ fun ReminderCard(
                         text = reminder.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (isPast) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface
+                        color = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onPrimary
                     )
                     if (reminder.description.isNotBlank()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = reminder.description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                         )
                     }
                 }
@@ -371,14 +438,14 @@ fun ReminderCard(
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = stringResource(R.string.reminder_dialog_edit),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     IconButton(onClick = onDelete) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = stringResource(R.string.delete),
-                            tint = MaterialTheme.colorScheme.error
+                            tint = if (isPast) MaterialTheme.colorScheme.error.copy(alpha = 0.8f) else MaterialTheme.colorScheme.errorContainer
                         )
                     }
                 }
@@ -392,32 +459,164 @@ fun ReminderCard(
                 Icon(
                     imageVector = if (isPast) Icons.Default.NotificationsNone else Icons.Default.NotificationsActive,
                     contentDescription = null,
-                    tint = if (isPast) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.secondary,
+                    tint = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = dateTimeString,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isPast) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.secondary,
+                    color = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 if (isPast) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.reminder_passed),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.outline,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExactAlarmWarningCard(context: Context) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 48.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFFDF3E7) // warm light orange/peach
+        ),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = Color(0xFFD97706),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.reminder_exact_alarm_warning_title),
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF78350F),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.reminder_exact_alarm_warning_desc),
+                        color = Color(0xFF92400E),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                                data = Uri.parse("package:${context.packageName}")
+                            }
+                            context.startActivity(intent)
+                        }
+                    } catch (e: Exception) {
+                        val intent = Intent(Settings.ACTION_SETTINGS)
+                        context.startActivity(intent)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFD97706),
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(stringResource(R.string.reminder_exact_alarm_warning_btn), fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+fun BatteryOptimizationWarningCard(context: Context) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 48.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF0FDF4) // light green/teal tint
+        ),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.Top
+            ) {
+                Icon(
+                    imageVector = Icons.Default.BatteryAlert,
+                    contentDescription = null,
+                    tint = Color(0xFF16A34A),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.reminder_battery_warning_title),
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF14532D),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.reminder_battery_warning_desc),
+                        color = Color(0xFF166534),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = {
+                    try {
+                        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        val intent = Intent(Settings.ACTION_SETTINGS)
+                        context.startActivity(intent)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF16A34A),
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(stringResource(R.string.reminder_battery_warning_btn), fontWeight = FontWeight.Bold)
             }
         }
     }
