@@ -66,6 +66,7 @@ fun DetailScreen(
         if (!previewUrl.isNullOrEmpty()) {
             try {
                 mediaPlayer.setDataSource(previewUrl)
+                mediaPlayer.isLooping = true
                 mediaPlayer.prepareAsync()
                 mediaPlayer.setOnPreparedListener {
                     mediaPlayer.start()
