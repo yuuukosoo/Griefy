@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
@@ -62,13 +64,13 @@ fun HomeScreen(
             ) {
                 Column {
                     Text(
-                        text = "Halo, Khalish",
+                        text = stringResource(R.string.home_greeting),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF4E4640)
                     )
                     Text(
-                        text = "Mari refleksikan kenanganmu.",
+                        text = stringResource(R.string.home_subtitle),
                         fontSize = 14.sp,
                         color = Color(0xFF8C8075)
                     )
@@ -82,7 +84,7 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Pengaturan",
+                        contentDescription = stringResource(R.string.settings_title),
                         tint = Color(0xFF5C524A)
                     )
                 }
@@ -95,12 +97,12 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 8.dp),
-                placeholder = { Text("Cari kenangan...", color = Color(0xFFB0A59A)) },
+                placeholder = { Text(stringResource(R.string.home_search_placeholder), color = Color(0xFFB0A59A)) },
                 leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = Color(0xFF8C8075)) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { viewModel.setSearchQuery("") }) {
-                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Hapus", tint = Color(0xFF8C8075))
+                            Icon(imageVector = Icons.Default.Clear, contentDescription = stringResource(R.string.clear), tint = Color(0xFF8C8075))
                         }
                     }
                 },
@@ -129,9 +131,9 @@ fun HomeScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             val message = if (searchQuery.isEmpty()) {
-                                "Belum ada kenangan. Tekan + untuk menambah."
+                                stringResource(R.string.home_empty_memories)
                             } else {
-                                "Tidak ditemukan kenangan dengan kata kunci \"$searchQuery\"."
+                                stringResource(R.string.home_no_search_results, searchQuery)
                             }
                             Text(message, color = Color(0xFF8C8075), fontWeight = FontWeight.Medium)
                         }
@@ -178,7 +180,7 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first(),
-                    contentDescription = "Foto Kenangan",
+                    contentDescription = stringResource(R.string.home_memory_photo_desc),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
@@ -218,13 +220,13 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.MusicNote,
-                            contentDescription = "Lagu Tersemat",
+                            contentDescription = stringResource(R.string.home_pinned_song),
                             tint = Color(0xFF75685F),
                             modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = memory.songTitle ?: "Lagu Tersemat",
+                            text = memory.songTitle ?: stringResource(R.string.home_pinned_song),
                             fontSize = 10.sp,
                             color = Color(0xFF5C524A),
                             fontWeight = FontWeight.Bold,

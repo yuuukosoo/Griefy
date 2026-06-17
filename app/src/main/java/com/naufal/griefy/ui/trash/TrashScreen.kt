@@ -14,11 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Memory
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,14 +31,13 @@ fun TrashScreen(
 ) {
     val trashedMemories by viewModel.trashedMemories.collectAsState()
 
-
     var showEmptyTrashDialog by remember { mutableStateOf(false) }
 
     if (showEmptyTrashDialog) {
         AlertDialog(
             onDismissRequest = { showEmptyTrashDialog = false },
-            title = { Text("Kosongkan Tempat Sampah?") },
-            text = { Text("Semua kenangan di sini akan dihapus secara permanen dan tidak dapat dikembalikan lagi.") },
+            title = { Text(stringResource(R.string.trash_dialog_title)) },
+            text = { Text(stringResource(R.string.trash_dialog_text)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -45,11 +46,13 @@ fun TrashScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Ya, Hapus Semua")
+                    Text(stringResource(R.string.trash_dialog_confirm))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEmptyTrashDialog = false }) { Text("Batal") }
+                TextButton(onClick = { showEmptyTrashDialog = false }) { 
+                    Text(stringResource(R.string.cancel)) 
+                }
             }
         )
     }
@@ -57,20 +60,22 @@ fun TrashScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Baru Saja Dihapus") },
+                title = { Text(stringResource(R.string.trash_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 },
                 actions = {
-
                     if (trashedMemories.isNotEmpty()) {
                         TextButton(
                             onClick = { showEmptyTrashDialog = true },
                             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                         ) {
-                            Text("Kosongkan")
+                            Text(stringResource(R.string.clear))
                         }
                     }
                 }
@@ -80,17 +85,16 @@ fun TrashScreen(
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
 
             Text(
-                text = "Kenangan di bawah ini akan dihapus permanen oleh sistem setelah 30 hari.",
+                text = stringResource(R.string.trash_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
             if (trashedMemories.isEmpty()) {
-
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "Tempat sampah kosong.",
+                        text = stringResource(R.string.trash_empty),
                         color = MaterialTheme.colorScheme.outline
                     )
                 }
@@ -123,7 +127,7 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first(),
-                    contentDescription = "Thumbnail",
+                    contentDescription = stringResource(R.string.trash_thumbnail_desc),
                     modifier = Modifier.fillMaxWidth().height(120.dp).clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop
                 )
@@ -135,22 +139,29 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
                 OutlinedButton(onClick = onRestore) {
-                    Icon(imageVector = Icons.Default.Restore, contentDescription = "Pulihkan", modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = Icons.Default.Restore, 
+                        contentDescription = stringResource(R.string.trash_restore), 
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Pulihkan")
+                    Text(stringResource(R.string.trash_restore))
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = onDelete,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Icon(imageVector = Icons.Default.DeleteForever, contentDescription = "Hapus", modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = Icons.Default.DeleteForever, 
+                        contentDescription = stringResource(R.string.delete), 
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
             }
         }

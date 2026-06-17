@@ -12,10 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
 
@@ -40,7 +42,7 @@ fun ProfileScreen(navController: NavController) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Profil Anda",
+                    text = stringResource(R.string.profile_title),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4E4640)
@@ -54,7 +56,7 @@ fun ProfileScreen(navController: NavController) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Pengaturan",
+                        contentDescription = stringResource(R.string.settings_title),
                         tint = Color(0xFF5C524A)
                     )
                 }
@@ -103,7 +105,7 @@ fun ProfileScreen(navController: NavController) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "✨ Statistik Kenangan",
+                            text = stringResource(R.string.profile_statistics),
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF4E4640)
                         )
@@ -114,11 +116,11 @@ fun ProfileScreen(navController: NavController) {
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text("24", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF75685F))
-                                Text("Total Memori", fontSize = 12.sp, color = Color(0xFF8C8075))
+                                Text(stringResource(R.string.profile_total_memories), fontSize = 12.sp, color = Color(0xFF8C8075))
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text("5", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF75685F))
-                                Text("Album Publik", fontSize = 12.sp, color = Color(0xFF8C8075))
+                                Text(stringResource(R.string.profile_public_albums), fontSize = 12.sp, color = Color(0xFF8C8075))
                             }
                         }
                     }

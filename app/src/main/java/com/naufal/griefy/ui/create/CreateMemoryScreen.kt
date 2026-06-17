@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +55,6 @@ fun CreateMemoryScreen(
 
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var newLabelText by remember { mutableStateOf("") }
-
 
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val returnedTrackId by savedStateHandle?.getStateFlow<String?>("selected_song_track_id", null)?.collectAsState() ?: remember { mutableStateOf(null) }
@@ -115,7 +116,7 @@ fun CreateMemoryScreen(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
+                        contentDescription = stringResource(R.string.back),
                         tint = Color(0xFF5C524A),
                         modifier = Modifier.size(20.dp)
                     )
@@ -124,7 +125,7 @@ fun CreateMemoryScreen(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
-                    text = "Tulis Kenangan",
+                    text = stringResource(R.string.create_title),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF4E4640)
@@ -150,13 +151,13 @@ fun CreateMemoryScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Pilih Foto",
+                            contentDescription = stringResource(R.string.create_select_photo_desc),
                             tint = Color(0xFF8C8075),
                             modifier = Modifier.size(36.dp) // Larger plus icon for square box
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Pilih Foto Kenangan",
+                            text = stringResource(R.string.create_select_photo_text),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color(0xFF8C8075)
@@ -178,7 +179,7 @@ fun CreateMemoryScreen(
                             ) {
                                 AsyncImage(
                                     model = uri,
-                                    contentDescription = "Foto Pilihan",
+                                    contentDescription = stringResource(R.string.create_selected_photo_desc),
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .clip(RoundedCornerShape(12.dp)),
@@ -196,7 +197,7 @@ fun CreateMemoryScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
-                                        contentDescription = "Hapus",
+                                        contentDescription = stringResource(R.string.delete),
                                         tint = Color.White,
                                         modifier = Modifier.size(14.dp)
                                     )
@@ -216,7 +217,7 @@ fun CreateMemoryScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = "Judul kenangan...",
+                        text = stringResource(R.string.create_title_placeholder),
                         color = Color(0xFFB0A59A),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
@@ -250,7 +251,7 @@ fun CreateMemoryScreen(
                     .height(140.dp),
                 placeholder = {
                     Text(
-                        text = "Tuliskan ceritamu di sini...",
+                        text = stringResource(R.string.create_content_placeholder),
                         color = Color(0xFFB0A59A),
                         fontSize = 16.sp
                     )
@@ -289,7 +290,7 @@ fun CreateMemoryScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Hapus",
+                                    contentDescription = stringResource(R.string.delete),
                                     tint = Color(0xFF8C8075),
                                     modifier = Modifier
                                         .size(12.dp)
@@ -319,7 +320,7 @@ fun CreateMemoryScreen(
                         if (!viewModel.selectedSongImageUrl.isNullOrEmpty()) {
                             AsyncImage(
                                 model = viewModel.selectedSongImageUrl,
-                                contentDescription = "Cover Album",
+                                contentDescription = stringResource(R.string.search_song_album_cover_desc),
                                 modifier = Modifier
                                     .size(48.dp)
                                     .clip(RoundedCornerShape(8.dp)),
@@ -344,13 +345,13 @@ fun CreateMemoryScreen(
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = viewModel.selectedSongTitle ?: "Lagu Kenangan",
+                                text = viewModel.selectedSongTitle ?: stringResource(R.string.create_memory_song),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = Color(0xFF4E4640),
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = viewModel.selectedSongArtist ?: "Artis",
+                                text = viewModel.selectedSongArtist ?: stringResource(R.string.create_artist),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFF8C8075)
                             )
@@ -359,7 +360,7 @@ fun CreateMemoryScreen(
                         IconButton(onClick = { viewModel.setSelectedSong(null, null, null, null) }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Hapus Lagu",
+                                contentDescription = stringResource(R.string.create_delete_song_desc),
                                 tint = Color(0xFF8C8075)
                             )
                         }
@@ -382,7 +383,7 @@ fun CreateMemoryScreen(
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEDE8E0))
                 ) {
-                    Text(text = "Add Song", fontSize = 12.sp, color = Color(0xFF5C524A), fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(R.string.create_add_song), fontSize = 12.sp, color = Color(0xFF5C524A), fontWeight = FontWeight.Bold)
                 }
 
                 // Add Label Button
@@ -395,7 +396,7 @@ fun CreateMemoryScreen(
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEDE8E0))
                 ) {
-                    Text(text = "Add Label", fontSize = 12.sp, color = Color(0xFF5C524A), fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(R.string.create_add_label), fontSize = 12.sp, color = Color(0xFF5C524A), fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -420,7 +421,7 @@ fun CreateMemoryScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Privat",
+                        text = stringResource(R.string.private_text),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (!isPublic) Color.White else Color(0xFF5C524A)
@@ -438,7 +439,7 @@ fun CreateMemoryScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Publik",
+                        text = stringResource(R.string.public_text),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isPublic) Color.White else Color(0xFF5C524A)
@@ -465,7 +466,7 @@ fun CreateMemoryScreen(
                 enabled = titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty()
             ) {
                 Text(
-                    text = "Simpan Kenangan Indah",
+                    text = stringResource(R.string.create_save_button),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -478,12 +479,12 @@ fun CreateMemoryScreen(
     if (showAddLabelDialog) {
         AlertDialog(
             onDismissRequest = { showAddLabelDialog = false },
-            title = { Text("Tambah Label / Kategori", color = Color(0xFF4E4640)) },
+            title = { Text(stringResource(R.string.create_dialog_title), color = Color(0xFF4E4640)) },
             text = {
                 OutlinedTextField(
                     value = newLabelText,
                     onValueChange = { newLabelText = it },
-                    placeholder = { Text("Nama label...") },
+                    placeholder = { Text(stringResource(R.string.create_dialog_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
@@ -500,12 +501,12 @@ fun CreateMemoryScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF75685F))
                 ) {
-                    Text("Tambah")
+                    Text(stringResource(R.string.add))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddLabelDialog = false }) {
-                    Text("Batal", color = Color(0xFF8C7D73))
+                    Text(stringResource(R.string.cancel), color = Color(0xFF8C7D73))
                 }
             }
         )

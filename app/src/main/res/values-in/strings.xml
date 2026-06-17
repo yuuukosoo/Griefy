@@ -1,5 +1,123 @@
 <resources>
+    <!-- Common / General -->
     <string name="app_name">Griefy</string>
+    <string name="back">Kembali</string>
+    <string name="cancel">Batal</string>
+    <string name="save">Simpan</string>
+    <string name="delete">Hapus</string>
+    <string name="edit">Edit</string>
+    <string name="add">Tambah</string>
+    <string name="clear">Hapus</string>
+    <string name="private_text">Privat</string>
+    <string name="public_text">Publik</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_welcome">Selamat datang di ruang amanmu.</string>
+
+    <!-- Login Screen -->
+    <string name="login_sign_in">Sign In</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Login</string>
+    <string name="login_no_account">Don\'t have an account? </string>
+    <string name="login_sign_up">Sign Up</string>
+
+    <!-- Register Screen -->
+    <string name="register_sign_up">Sign Up</string>
+    <string name="register_username">Username</string>
+    <string name="register_email">Email</string>
+    <string name="register_password">Password</string>
+    <string name="register_confirm_password">Confirm Password</string>
+    <string name="register_button">Register</string>
+    <string name="register_already_have_account">If you already have an account register</string>
+    <string name="register_you_can">You can </string>
+    <string name="register_login_here">Login here !</string>
+
+    <!-- Home Screen -->
+    <string name="home_greeting">Halo, Khalish</string>
+    <string name="home_subtitle">Mari refleksikan kenanganmu.</string>
+    <string name="home_search_placeholder">Cari kenangan...</string>
+    <string name="home_empty_memories">Belum ada kenangan. Tekan + untuk menambah.</string>
+    <string name="home_no_search_results">Tidak ditemukan kenangan dengan kata kunci \"%1$s\".</string>
+    <string name="home_memory_photo_desc">Foto Kenangan</string>
+    <string name="home_pinned_song">Lagu Tersemat</string>
+
+    <!-- Navigation Dock -->
+    <string name="nav_home">Home</string>
+    <string name="nav_search_memory">Search Memory</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_write_memory_desc">Tulis Kenangan</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_title">Profil Anda</string>
+    <string name="profile_statistics">✨ Statistik Kenangan</string>
+    <string name="profile_total_memories">Total Memori</string>
+    <string name="profile_public_albums">Album Publik</string>
+
+    <!-- Create & Edit Memory Screen -->
+    <string name="create_title">Tulis Kenangan</string>
+    <string name="edit_title">Edit Kenangan</string>
+    <string name="create_select_photo_desc">Pilih Foto</string>
+    <string name="create_select_photo_text">Pilih Foto Kenangan</string>
+    <string name="create_selected_photo_desc">Foto Pilihan</string>
+    <string name="create_title_placeholder">Judul kenangan...</string>
+    <string name="create_content_placeholder">Tuliskan ceritamu di sini...</string>
+    <string name="create_memory_song">Lagu Kenangan</string>
+    <string name="create_artist">Artis</string>
+    <string name="create_delete_song_desc">Hapus Lagu</string>
+    <string name="create_add_song">Add Song</string>
+    <string name="create_add_label">Add Label</string>
+    <string name="create_save_button">Simpan Kenangan Indah</string>
+    <string name="edit_save_button">Perbarui Kenangan Indah</string>
+    <string name="create_dialog_title">Tambah Label / Kategori</string>
+    <string name="create_dialog_placeholder">Nama label...</string>
+
+    <!-- Detail Screen -->
+    <string name="detail_title">Detail Kenangan</string>
+    <string name="detail_open_deezer_desc">Buka di Deezer</string>
+    <string name="detail_play_desc">Play</string>
+    <string name="detail_pause_desc">Pause</string>
+    <string name="detail_preview_unavailable">Preview audio tidak tersedia.</string>
+
+    <!-- Search Song Screen -->
+    <string name="search_song_title">Pilih Lagu Kenangan</string>
+    <string name="search_song_placeholder">Cari judul lagu atau artis...</string>
+    <string name="search_song_empty_hint">Ketik judul lagu dan tekan tombol cari.</string>
+    <string name="search_song_play_preview_desc">Play Preview</string>
+    <string name="search_song_pause_preview_desc">Pause Preview</string>
+    <string name="search_song_add_button">Tambah</string>
+    <string name="search_song_album_cover_desc">Cover Album</string>
+
+    <!-- Search Memory Screen -->
+    <string name="search_memory_placeholder">Cari album publik...</string>
+    <string name="search_memory_empty">Belum ada album publik.</string>
+    <string name="search_memory_empty_search">Tidak ada album publik yang cocok.</string>
+    <string name="search_memory_by_other_user">Oleh Pengguna Lain • %1$s</string>
+
+    <!-- Trash Screen -->
+    <string name="trash_dialog_title">Kosongkan Tempat Sampah?</string>
+    <string name="trash_dialog_text">Semua kenangan di sini akan dihapus secara permanen dan tidak dapat dikembalikan lagi.</string>
+    <string name="trash_dialog_confirm">Ya, Hapus Semua</string>
+    <string name="trash_title">Baru Saja Dihapus</string>
+    <string name="trash_subtitle">Kenangan di bawah ini akan dihapus permanen oleh sistem setelah 30 hari.</string>
+    <string name="trash_empty">Tempat sampah kosong.</string>
+    <string name="trash_restore">Pulihkan</string>
+    <string name="trash_thumbnail_desc">Thumbnail</string>
+
+    <!-- Reminder / Remembrance Screen -->
+    <string name="reminder_title">Pengingat Hari Peringatan</string>
+    <string name="reminder_empty_title">Belum ada pengingat hari penting.</string>
+    <string name="reminder_empty_subtitle">Tekan tombol + untuk menambahkan peringatan hari khusus.</string>
+    <string name="reminder_dialog_add">Tambah Pengingat</string>
+    <string name="reminder_dialog_edit">Edit Pengingat</string>
+    <string name="reminder_name_label">Nama Peringatan / Hari Penting</string>
+    <string name="reminder_note_label">Catatan / Deskripsi (Opsional)</string>
+    <string name="reminder_time_label">Waktu Peringatan:</string>
+    <string name="reminder_date_btn">Tanggal</string>
+    <string name="reminder_time_btn">Waktu</string>
+    <string name="reminder_passed">Sudah lewat</string>
+
+    <!-- Settings Screen -->
     <string name="settings_title">Pengaturan</string>
     <string name="settings_back_description">Kembali</string>
     <string name="settings_pref_display">PREFERENSI TAMPILAN</string>

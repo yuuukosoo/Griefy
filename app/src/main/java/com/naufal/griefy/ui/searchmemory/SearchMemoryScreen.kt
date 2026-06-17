@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
@@ -49,20 +52,18 @@ fun SearchMemoryScreen(
             modifier = Modifier.fillMaxSize()
         ) {
 
-
-
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 8.dp),
-                placeholder = { Text("Cari album publik...", color = Color(0xFFB0A59A)) },
+                placeholder = { Text(stringResource(R.string.search_memory_placeholder), color = Color(0xFFB0A59A)) },
                 leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = Color(0xFF8C8075)) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { viewModel.setSearchQuery("") }) {
-                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Hapus", tint = Color(0xFF8C8075))
+                            Icon(imageVector = Icons.Default.Clear, contentDescription = stringResource(R.string.clear), tint = Color(0xFF8C8075))
                         }
                     }
                 },
@@ -91,7 +92,10 @@ fun SearchMemoryScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = if (searchQuery.isEmpty()) "Belum ada album publik." else "Tidak ada album publik yang cocok.",
+                                text = if (searchQuery.isEmpty()) 
+                                    stringResource(R.string.search_memory_empty) 
+                                else 
+                                    stringResource(R.string.search_memory_empty_search),
                                 color = Color(0xFF8C8075),
                                 fontWeight = FontWeight.Medium
                             )
@@ -139,7 +143,7 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first(),
-                    contentDescription = "Foto Sampul",
+                    contentDescription = stringResource(R.string.home_memory_photo_desc),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
@@ -158,11 +162,44 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = "Oleh Pengguna Lain • $dateString",
-                fontSize = 12.sp,
-                color = Color(0xFF8C8075)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.search_memory_by_other_user, dateString),
+                    fontSize = 12.sp,
+                    color = Color(0xFF8C8075),
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (!memory.songTrackId.isNullOrEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFEDE8E0))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MusicNote,
+                            contentDescription = stringResource(R.string.home_pinned_song),
+                            tint = Color(0xFF75685F),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = memory.songTitle ?: stringResource(R.string.home_pinned_song),
+                            fontSize = 10.sp,
+                            color = Color(0xFF5C524A),
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.widthIn(max = 120.dp)
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 

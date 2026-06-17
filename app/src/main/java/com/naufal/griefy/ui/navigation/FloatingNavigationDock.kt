@@ -14,8 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.naufal.griefy.R
 
 @Composable
 fun FloatingNavigationDock(
@@ -60,7 +62,7 @@ fun FloatingNavigationDock(
                     }) {
                         Icon(
                             imageVector = Icons.Default.Home,
-                            contentDescription = "Home",
+                            contentDescription = stringResource(R.string.nav_home),
                             tint = if (currentRoute == Screen.Home.route) Color(0xFF75685F) else Color(0xFFB0A59A)
                         )
                     }
@@ -77,7 +79,7 @@ fun FloatingNavigationDock(
                     }) {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search Memory",
+                            contentDescription = stringResource(R.string.nav_search_memory),
                             tint = if (currentRoute == Screen.SearchMemory.route) Color(0xFF75685F) else Color(0xFFB0A59A)
                         )
                     }
@@ -94,7 +96,7 @@ fun FloatingNavigationDock(
                     }) {
                         Icon(
                             imageVector = Icons.Default.Person,
-                            contentDescription = "Profile",
+                            contentDescription = stringResource(R.string.nav_profile),
                             tint = if (currentRoute == Screen.Profile.route) Color(0xFF75685F) else Color(0xFFB0A59A)
                         )
                     }
@@ -112,7 +114,7 @@ fun FloatingNavigationDock(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Tulis Kenangan",
+                    contentDescription = stringResource(R.string.nav_write_memory_desc),
                     modifier = Modifier.size(24.dp)
                 )
             }

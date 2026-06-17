@@ -1,5 +1,123 @@
 <resources>
+    <!-- Common / General -->
     <string name="app_name">Griefy</string>
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="add">Add</string>
+    <string name="clear">Clear</string>
+    <string name="private_text">Private</string>
+    <string name="public_text">Public</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_welcome">Welcome to your safe space.</string>
+
+    <!-- Login Screen -->
+    <string name="login_sign_in">Sign In</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Login</string>
+    <string name="login_no_account">Don\'t have an account? </string>
+    <string name="login_sign_up">Sign Up</string>
+
+    <!-- Register Screen -->
+    <string name="register_sign_up">Sign Up</string>
+    <string name="register_username">Username</string>
+    <string name="register_email">Email</string>
+    <string name="register_password">Password</string>
+    <string name="register_confirm_password">Confirm Password</string>
+    <string name="register_button">Register</string>
+    <string name="register_already_have_account">If you already have an account register</string>
+    <string name="register_you_can">You can </string>
+    <string name="register_login_here">Login here !</string>
+
+    <!-- Home Screen -->
+    <string name="home_greeting">Hello, Khalish</string>
+    <string name="home_subtitle">Let\'s reflect on your memories.</string>
+    <string name="home_search_placeholder">Search memories...</string>
+    <string name="home_empty_memories">No memories yet. Press + to add.</string>
+    <string name="home_no_search_results">No memories found with keyword \"%1$s\".</string>
+    <string name="home_memory_photo_desc">Memory Photo</string>
+    <string name="home_pinned_song">Pinned Song</string>
+
+    <!-- Navigation Dock -->
+    <string name="nav_home">Home</string>
+    <string name="nav_search_memory">Search Memory</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_write_memory_desc">Write Memory</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_title">Your Profile</string>
+    <string name="profile_statistics">✨ Memory Statistics</string>
+    <string name="profile_total_memories">Total Memories</string>
+    <string name="profile_public_albums">Public Albums</string>
+
+    <!-- Create & Edit Memory Screen -->
+    <string name="create_title">Write Memory</string>
+    <string name="edit_title">Edit Memory</string>
+    <string name="create_select_photo_desc">Select Photo</string>
+    <string name="create_select_photo_text">Select Memory Photo</string>
+    <string name="create_selected_photo_desc">Selected Photo</string>
+    <string name="create_title_placeholder">Memory title...</string>
+    <string name="create_content_placeholder">Write your story here...</string>
+    <string name="create_memory_song">Memory Song</string>
+    <string name="create_artist">Artist</string>
+    <string name="create_delete_song_desc">Delete Song</string>
+    <string name="create_add_song">Add Song</string>
+    <string name="create_add_label">Add Label</string>
+    <string name="create_save_button">Save Beautiful Memory</string>
+    <string name="edit_save_button">Update Beautiful Memory</string>
+    <string name="create_dialog_title">Add Label / Category</string>
+    <string name="create_dialog_placeholder">Label name...</string>
+
+    <!-- Detail Screen -->
+    <string name="detail_title">Memory Detail</string>
+    <string name="detail_open_deezer_desc">Open in Deezer</string>
+    <string name="detail_play_desc">Play</string>
+    <string name="detail_pause_desc">Pause</string>
+    <string name="detail_preview_unavailable">Audio preview not available.</string>
+
+    <!-- Search Song Screen -->
+    <string name="search_song_title">Choose Memory Song</string>
+    <string name="search_song_placeholder">Search song title or artist...</string>
+    <string name="search_song_empty_hint">Type song title and press search button.</string>
+    <string name="search_song_play_preview_desc">Play Preview</string>
+    <string name="search_song_pause_preview_desc">Pause Preview</string>
+    <string name="search_song_add_button">Add</string>
+    <string name="search_song_album_cover_desc">Album Cover</string>
+
+    <!-- Search Memory Screen -->
+    <string name="search_memory_placeholder">Search public albums...</string>
+    <string name="search_memory_empty">No public albums yet.</string>
+    <string name="search_memory_empty_search">No matching public albums.</string>
+    <string name="search_memory_by_other_user">By Other User • %1$s</string>
+
+    <!-- Trash Screen -->
+    <string name="trash_dialog_title">Empty Trash?</string>
+    <string name="trash_dialog_text">All memories here will be permanently deleted and cannot be recovered.</string>
+    <string name="trash_dialog_confirm">Yes, Delete All</string>
+    <string name="trash_title">Recently Deleted</string>
+    <string name="trash_subtitle">Memories below will be permanently deleted by the system after 30 days.</string>
+    <string name="trash_empty">Trash is empty.</string>
+    <string name="trash_restore">Restore</string>
+    <string name="trash_thumbnail_desc">Thumbnail</string>
+
+    <!-- Reminder / Remembrance Screen -->
+    <string name="reminder_title">Remembrance Day Reminders</string>
+    <string name="reminder_empty_title">No important day reminders yet.</string>
+    <string name="reminder_empty_subtitle">Press + button to add a special day reminder.</string>
+    <string name="reminder_dialog_add">Add Reminder</string>
+    <string name="reminder_dialog_edit">Edit Reminder</string>
+    <string name="reminder_name_label">Reminder Name / Important Day</string>
+    <string name="reminder_note_label">Note / Description (Optional)</string>
+    <string name="reminder_time_label">Reminder Time:</string>
+    <string name="reminder_date_btn">Date</string>
+    <string name="reminder_time_btn">Time</string>
+    <string name="reminder_passed">Passed</string>
+
+    <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
     <string name="settings_back_description">Back</string>
     <string name="settings_pref_display">DISPLAY PREFERENCES</string>

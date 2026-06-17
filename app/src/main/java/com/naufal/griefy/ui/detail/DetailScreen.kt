@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -39,6 +40,7 @@ import android.net.Uri
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -104,18 +106,17 @@ fun DetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Detail Kenangan", color = Color(0xFF4E4640), fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.detail_title), color = Color(0xFF4E4640), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigateUp() },
                         modifier = Modifier
                             .padding(start = 16.dp)
                             .size(36.dp)
-
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color(0xFF5C524A)
                         )
                     }
@@ -128,7 +129,7 @@ fun DetailScreen(
                             }
                         }
                     ) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = Color(0xFF5C524A))
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit), tint = Color(0xFF5C524A))
                     }
 
                     IconButton(
@@ -141,7 +142,7 @@ fun DetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Hapus",
+                            contentDescription = stringResource(R.string.delete),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -171,7 +172,7 @@ fun DetailScreen(
                             if (!song.imageUrl.isNullOrEmpty()) {
                                 AsyncImage(
                                     model = song.imageUrl,
-                                    contentDescription = "Cover Album",
+                                    contentDescription = stringResource(R.string.search_song_album_cover_desc),
                                     modifier = Modifier
                                         .size(48.dp)
                                         .clip(RoundedCornerShape(8.dp)),
@@ -207,7 +208,7 @@ fun DetailScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.MusicNote,
-                                    contentDescription = "Buka di Deezer",
+                                    contentDescription = stringResource(R.string.detail_open_deezer_desc),
                                     tint = Color(0xFF75685F),
                                     modifier = Modifier.size(24.dp)
                                 )
@@ -216,7 +217,6 @@ fun DetailScreen(
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Controls & Progress bar row
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
@@ -236,7 +236,10 @@ fun DetailScreen(
                                 ) {
                                     Icon(
                                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                        contentDescription = if (isPlaying) "Pause" else "Play",
+                                        contentDescription = if (isPlaying) 
+                                            stringResource(R.string.detail_pause_desc) 
+                                        else 
+                                            stringResource(R.string.detail_play_desc),
                                         tint = Color(0xFF5C524A),
                                         modifier = Modifier.size(28.dp)
                                     )
@@ -256,7 +259,7 @@ fun DetailScreen(
                                 )
                             } else {
                                 Text(
-                                    text = "Preview audio tidak tersedia.",
+                                    text = stringResource(R.string.detail_preview_unavailable),
                                     fontSize = 12.sp,
                                     color = Color(0xFF8C8075),
                                     modifier = Modifier.padding(vertical = 8.dp)
@@ -278,7 +281,6 @@ fun DetailScreen(
                         bottom = paddingValues.calculateBottomPadding() + 8.dp
                     )
             ) {
-                // Horizontal Image Pager with reduced height for better screen space
                 if (mem.imageUris.isNotEmpty()) {
                     val pagerState = rememberPagerState(initialPage = 0) { mem.imageUris.size }
                     
@@ -297,7 +299,7 @@ fun DetailScreen(
                         ) { page ->
                             AsyncImage(
                                 model = mem.imageUris[page],
-                                contentDescription = "Foto Kenangan",
+                                contentDescription = stringResource(R.string.home_memory_photo_desc),
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clickable { selectedImageIndexForFullScreen = page },
@@ -305,7 +307,6 @@ fun DetailScreen(
                             )
                         }
 
-                        // Page indicators (dots)
                         if (mem.imageUris.size > 1) {
                             Row(
                                 Modifier
@@ -330,14 +331,12 @@ fun DetailScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Metadata Row (Date, Privacy circle indicator, Tags)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Date
                     Text(
                         text = formatter.format(Date(mem.createdAt)),
                         fontSize = 14.sp,
@@ -347,7 +346,6 @@ fun DetailScreen(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
-                    // Privacy status circle
                     Box(
                         modifier = Modifier
                             .size(12.dp)
@@ -357,7 +355,6 @@ fun DetailScreen(
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    // Tags
                     if (mem.tags.isNotEmpty()) {
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -384,7 +381,6 @@ fun DetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Title
                 Text(
                     text = mem.title,
                     fontSize = 22.sp,
@@ -395,107 +391,59 @@ fun DetailScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Scrollable content area with fixed size and proper breathing padding
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(horizontal = 24.dp, vertical = 4.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(16.dp))
-                        .padding(16.dp)
+                        .padding(horizontal = 24.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Text(
-                            text = mem.content,
-                            fontSize = 15.sp,
-                            color = Color(0xFF5C524A),
-                            lineHeight = 22.sp
-                        )
-                    }
+                    Text(
+                        text = mem.content,
+                        fontSize = 16.sp,
+                        color = Color(0xFF5C524A),
+                        lineHeight = 24.sp
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        } ?: run {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
             }
         }
     }
 
-    selectedImageIndexForFullScreen?.let { initialIndex ->
-        val imageUris = memory?.imageUris ?: emptyList()
-        if (imageUris.isNotEmpty()) {
-            val pagerState = rememberPagerState(initialPage = initialIndex) {
-                imageUris.size
-            }
-
-            Dialog(
-                onDismissRequest = { selectedImageIndexForFullScreen = null },
-                properties = DialogProperties(usePlatformDefaultWidth = false)
+    if (selectedImageIndexForFullScreen != null && memory != null) {
+        val pagerState = rememberPagerState(initialPage = selectedImageIndexForFullScreen!!) { memory!!.imageUris.size }
+        Dialog(
+            onDismissRequest = { selectedImageIndexForFullScreen = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.Black.copy(alpha = 0.95f)
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    AsyncImage(
+                        model = memory!!.imageUris[page],
+                        contentDescription = stringResource(R.string.home_memory_photo_desc),
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                IconButton(
+                    onClick = { selectedImageIndexForFullScreen = null },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(24.dp)
+                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier.fillMaxSize()
-                        ) { page ->
-                            val uri = imageUris.getOrNull(page)
-                            if (uri != null) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    AsyncImage(
-                                        model = uri,
-                                        contentDescription = "Foto Penuh - Halaman ${page + 1}",
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .clickable { selectedImageIndexForFullScreen = null },
-                                        contentScale = ContentScale.Fit
-                                    )
-                                }
-                            }
-                        }
-
-                        IconButton(
-                            onClick = { selectedImageIndexForFullScreen = null },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(16.dp)
-                                .statusBarsPadding()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Tutup",
-                                tint = Color.White,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
-
-                        if (imageUris.size > 1) {
-                            Text(
-                                text = "${pagerState.currentPage + 1} / ${imageUris.size}",
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(bottom = 24.dp)
-                                    .statusBarsPadding()
-                            )
-                        }
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.clear),
+                        tint = Color.White
+                    )
                 }
             }
         }
