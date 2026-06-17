@@ -56,16 +56,15 @@ fun DetailScreen(
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
 
     var isPlaying by remember { mutableStateOf(false) }
-    val mediaPlayer = remember { android.media.MediaPlayer() }
+    val mediaPlayer = remember(songDetails) { android.media.MediaPlayer() }
 
     var currentPosition by remember { mutableStateOf(0f) }
     var duration by remember { mutableStateOf(0f) }
 
-    DisposableEffect(songDetails) {
+    DisposableEffect(mediaPlayer) {
         val previewUrl = songDetails?.previewUrl
         if (!previewUrl.isNullOrEmpty()) {
             try {
-                mediaPlayer.reset()
                 mediaPlayer.setDataSource(previewUrl)
                 mediaPlayer.prepareAsync()
                 mediaPlayer.setOnPreparedListener {
@@ -81,6 +80,9 @@ fun DetailScreen(
         }
         onDispose {
             mediaPlayer.release()
+            isPlaying = false
+            currentPosition = 0f
+            duration = 0f
         }
     }
 
