@@ -36,15 +36,37 @@ class EditMemoryViewModel @Inject constructor(
     var selectedImageUris by mutableStateOf<List<Uri>>(emptyList())
         private set
 
+    var selectedSongTrackId by mutableStateOf<String?>(null)
+        private set
+
+    var selectedSongTitle by mutableStateOf<String?>(null)
+        private set
+
+    var selectedSongArtist by mutableStateOf<String?>(null)
+        private set
+
+    var selectedSongImageUrl by mutableStateOf<String?>(null)
+        private set
+
     init {
         viewModelScope.launch {
             currentMemory = repository.getMemoryById(memoryId)
-            currentMemory?.let {
-                titleText = it.title
-                contentText = it.content
-                isPublic = it.isPublic
-                tagsList = it.tags
-                selectedImageUris = it.imageUris.map { uriString -> Uri.parse(uriString) }
+            currentMemory?.let { memory ->
+                titleText = memory.title
+                contentText = memory.content
+                isPublic = memory.isPublic
+                tagsList = memory.tags
+                selectedImageUris = memory.imageUris.map { uriString -> Uri.parse(uriString) }
+                selectedSongTrackId = memory.songTrackId
+
+                memory.songTrackId?.let { trackId ->
+                    val song = repository.getSongDetails(trackId)
+                    song?.let { s ->
+                        selectedSongTitle = s.title
+                        selectedSongArtist = s.artistName
+                        selectedSongImageUrl = s.imageUrl
+                    }
+                }
             }
         }
     }
@@ -72,6 +94,13 @@ class EditMemoryViewModel @Inject constructor(
         tagsList = tagsList - tag
     }
 
+    fun setSelectedSong(trackId: String?, title: String?, artist: String?, imageUrl: String?) {
+        selectedSongTrackId = trackId
+        selectedSongTitle = title
+        selectedSongArtist = artist
+        selectedSongImageUrl = imageUrl
+    }
+
     fun addImages(newUris: List<Uri>) {
         val combinedList = (selectedImageUris + newUris).distinct().take(5)
         selectedImageUris = combinedList
@@ -89,7 +118,8 @@ class EditMemoryViewModel @Inject constructor(
                     content = contentText,
                     tags = tagsList,
                     isPublic = isPublic,
-                    imageUris = selectedImageUris.map { it.toString() }
+                    imageUris = selectedImageUris.map { it.toString() },
+                    songTrackId = selectedSongTrackId
                 )
                 repository.updateMemory(updatedMemory)
                 onUpdateSuccess()

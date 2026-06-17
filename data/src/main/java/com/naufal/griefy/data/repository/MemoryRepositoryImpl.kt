@@ -101,4 +101,33 @@ class MemoryRepositoryImpl @Inject constructor(
             emptyList()
         }
     }
+
+    override suspend fun getSongDetails(trackId: String): com.naufal.griefy.domain.model.Song? {
+        return try {
+            val rawClientId = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_ID
+            val rawClientSecret = com.naufal.griefy.data.BuildConfig.SPOTIFY_CLIENT_SECRET
+
+            val cleanClientId = rawClientId.replace("\"", "").trim()
+            val cleanClientSecret = rawClientSecret.replace("\"", "").trim()
+
+            val tokenResponse = authApi.getAccessToken(
+                clientId = cleanClientId,
+                clientSecret = cleanClientSecret
+            )
+
+            val bearerToken = "Bearer ${tokenResponse.access_token}"
+            val trackDto = spotifyApi.getTrack(token = bearerToken, trackId = trackId)
+
+            com.naufal.griefy.domain.model.Song(
+                trackId = trackDto.id,
+                title = trackDto.name,
+                artistName = trackDto.artists.firstOrNull()?.name ?: "Unknown",
+                imageUrl = trackDto.album.images.firstOrNull()?.url ?: "",
+                previewUrl = trackDto.preview_url
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("SPOTIFY_ERROR", "Gagal ambil detail lagu: ${e.message}", e)
+            null
+        }
+    }
 }

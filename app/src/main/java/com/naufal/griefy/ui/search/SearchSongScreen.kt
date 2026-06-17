@@ -79,7 +79,11 @@ fun SearchSongScreen(
 
                     items(viewModel.searchResults) { song ->
                         SongCard(song = song) {
-                            // TODO: Nanti kalau diklik, lagu ini akan dibawa ke layar Create/Edit
+                            navController.previousBackStackEntry?.savedStateHandle?.set("selected_song_track_id", song.trackId)
+                            navController.previousBackStackEntry?.savedStateHandle?.set("selected_song_title", song.title)
+                            navController.previousBackStackEntry?.savedStateHandle?.set("selected_song_artist", song.artistName)
+                            navController.previousBackStackEntry?.savedStateHandle?.set("selected_song_image_url", song.imageUrl)
+                            navController.popBackStack()
                         }
                     }
                 }

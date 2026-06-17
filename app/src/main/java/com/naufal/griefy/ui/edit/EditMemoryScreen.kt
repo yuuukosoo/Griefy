@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,6 +47,29 @@ fun EditMemoryScreen(
 
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var newLabelText by remember { mutableStateOf("") }
+
+    // Listen for song from SearchSongScreen
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val returnedTrackId by savedStateHandle?.getStateFlow<String?>("selected_song_track_id", null)?.collectAsState() ?: remember { mutableStateOf(null) }
+    val returnedTitle by savedStateHandle?.getStateFlow<String?>("selected_song_title", null)?.collectAsState() ?: remember { mutableStateOf(null) }
+    val returnedArtist by savedStateHandle?.getStateFlow<String?>("selected_song_artist", null)?.collectAsState() ?: remember { mutableStateOf(null) }
+    val returnedImageUrl by savedStateHandle?.getStateFlow<String?>("selected_song_image_url", null)?.collectAsState() ?: remember { mutableStateOf(null) }
+
+    LaunchedEffect(returnedTrackId) {
+        returnedTrackId?.let { trackId ->
+            viewModel.setSelectedSong(
+                trackId = trackId,
+                title = returnedTitle,
+                artist = returnedArtist,
+                imageUrl = returnedImageUrl
+            )
+            // Reset state values
+            savedStateHandle?.set("selected_song_track_id", null)
+            savedStateHandle?.set("selected_song_title", null)
+            savedStateHandle?.set("selected_song_artist", null)
+            savedStateHandle?.set("selected_song_image_url", null)
+        }
+    }
 
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5)
@@ -267,6 +291,72 @@ fun EditMemoryScreen(
                                         .clickable { viewModel.removeTag(tag) }
                                 )
                             }
+                        }
+                    }
+                }
+            }
+
+            // Display Selected Song if any
+            viewModel.selectedSongTrackId?.let { trackId ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(12.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (!viewModel.selectedSongImageUrl.isNullOrEmpty()) {
+                            AsyncImage(
+                                model = viewModel.selectedSongImageUrl,
+                                contentDescription = "Cover Album",
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(Color(0xFF8C8075), RoundedCornerShape(8.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MusicNote,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = viewModel.selectedSongTitle ?: "Lagu Kenangan",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = Color(0xFF4E4640),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = viewModel.selectedSongArtist ?: "Artis",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF8C8075)
+                            )
+                        }
+
+                        IconButton(onClick = { viewModel.setSelectedSong(null, null, null, null) }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Hapus Lagu",
+                                tint = Color(0xFF8C8075)
+                            )
                         }
                     }
                 }

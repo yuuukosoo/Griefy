@@ -1,5 +1,6 @@
 package com.naufal.griefy.ui.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,6 +15,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -22,10 +26,12 @@ import java.util.Date
 import java.util.Locale
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -39,8 +45,35 @@ fun DetailScreen(
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val memory by viewModel.memory.collectAsState()
+    val songDetails by viewModel.songDetails.collectAsState()
     var selectedImageIndexForFullScreen by remember { mutableStateOf<Int?>(null) }
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
+
+    var isPlaying by remember { mutableStateOf(false) }
+    val mediaPlayer = remember { android.media.MediaPlayer() }
+
+    DisposableEffect(songDetails) {
+        val previewUrl = songDetails?.previewUrl
+        if (!previewUrl.isNullOrEmpty()) {
+            try {
+                mediaPlayer.reset()
+                mediaPlayer.setDataSource(previewUrl)
+                mediaPlayer.prepareAsync()
+                mediaPlayer.setOnPreparedListener {
+                    mediaPlayer.start()
+                    isPlaying = true
+                }
+                mediaPlayer.setOnCompletionListener {
+                    isPlaying = false
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MEDIA_PLAYER", "Gagal inisialisasi MediaPlayer", e)
+            }
+        }
+        onDispose {
+            mediaPlayer.release()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -77,6 +110,93 @@ fun DetailScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            songDetails?.let { song ->
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding(),
+                    tonalElevation = 8.dp,
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (song.imageUrl.isNotEmpty()) {
+                            AsyncImage(
+                                model = song.imageUrl,
+                                contentDescription = "Cover Album",
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MusicNote,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = song.title,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text(
+                                text = song.artistName,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+
+                        if (!song.previewUrl.isNullOrEmpty()) {
+                            IconButton(
+                                onClick = {
+                                    if (isPlaying) {
+                                        mediaPlayer.pause()
+                                        isPlaying = false
+                                    } else {
+                                        mediaPlayer.start()
+                                        isPlaying = true
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = if (isPlaying) "Pause" else "Play",
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = "No Preview",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         memory?.let { mem ->
@@ -126,7 +246,6 @@ fun DetailScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-
                     Text(
                         text = mem.title,
                         style = MaterialTheme.typography.headlineMedium,
@@ -140,23 +259,16 @@ fun DetailScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
-
                     Text(
                         text = mem.content,
                         style = MaterialTheme.typography.bodyLarge
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
-
-                    Text(
-                        text = "Fitur Pemutar Lagu Spotify akan muncul di bawah sini nanti.",
-                        color = MaterialTheme.colorScheme.outline,
-                        style = MaterialTheme.typography.bodySmall
-                    )
                 }
             }
         } ?: run {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
         }
@@ -188,7 +300,7 @@ fun DetailScreen(
                             if (uri != null) {
                                 Box(
                                     modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = androidx.compose.ui.Alignment.Center
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     AsyncImage(
                                         model = uri,
@@ -205,7 +317,7 @@ fun DetailScreen(
                         IconButton(
                             onClick = { selectedImageIndexForFullScreen = null },
                             modifier = Modifier
-                                .align(androidx.compose.ui.Alignment.TopEnd)
+                                .align(Alignment.TopEnd)
                                 .padding(16.dp)
                                 .statusBarsPadding()
                         ) {
@@ -223,7 +335,7 @@ fun DetailScreen(
                                 color = Color.White,
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier
-                                    .align(androidx.compose.ui.Alignment.BottomCenter)
+                                    .align(Alignment.BottomCenter)
                                     .padding(bottom = 24.dp)
                                     .statusBarsPadding()
                             )

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,24 +45,47 @@ fun CreateMemoryScreen(
 ) {
     val context = LocalContext.current
 
-    var titleText by remember { mutableStateOf("") }
-    var contentText by remember { mutableStateOf("") }
-    var isPublic by remember { mutableStateOf(false) }
-    var selectedImageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
-    var tagsList by remember { mutableStateOf<List<String>>(emptyList()) }
+    val titleText = viewModel.titleText
+    val contentText = viewModel.contentText
+    val isPublic = viewModel.isPublic
+    val selectedImageUris = viewModel.selectedImageUris
+    val tagsList = viewModel.tagsList
 
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var newLabelText by remember { mutableStateOf("") }
+
+    // Listen for song from SearchSongScreen
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val returnedTrackId by savedStateHandle?.getStateFlow<String?>("selected_song_track_id", null)?.collectAsState() ?: remember { mutableStateOf(null) }
+    val returnedTitle by savedStateHandle?.getStateFlow<String?>("selected_song_title", null)?.collectAsState() ?: remember { mutableStateOf(null) }
+    val returnedArtist by savedStateHandle?.getStateFlow<String?>("selected_song_artist", null)?.collectAsState() ?: remember { mutableStateOf(null) }
+    val returnedImageUrl by savedStateHandle?.getStateFlow<String?>("selected_song_image_url", null)?.collectAsState() ?: remember { mutableStateOf(null) }
+
+    LaunchedEffect(returnedTrackId) {
+        returnedTrackId?.let { trackId ->
+            viewModel.setSelectedSong(
+                trackId = trackId,
+                title = returnedTitle,
+                artist = returnedArtist,
+                imageUrl = returnedImageUrl
+            )
+            // Reset state values
+            savedStateHandle?.set("selected_song_track_id", null)
+            savedStateHandle?.set("selected_song_title", null)
+            savedStateHandle?.set("selected_song_artist", null)
+            savedStateHandle?.set("selected_song_image_url", null)
+        }
+    }
 
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5)
     ) { uris ->
         if (uris.isNotEmpty()) {
-            selectedImageUris = uris
             uris.forEach { uri ->
                 val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 context.contentResolver.takePersistableUriPermission(uri, flag)
             }
+            viewModel.addImages(uris)
         }
     }
 
@@ -108,7 +132,6 @@ fun CreateMemoryScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
 
             Box(
                 modifier = Modifier
@@ -168,7 +191,7 @@ fun CreateMemoryScreen(
                                         .size(24.dp)
                                         .clip(CircleShape)
                                         .background(Color.Black.copy(alpha = 0.6f))
-                                        .clickable { selectedImageUris = selectedImageUris - uri },
+                                        .clickable { viewModel.removeImage(uri) },
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
@@ -189,7 +212,7 @@ fun CreateMemoryScreen(
             // Title Input Field
             TextField(
                 value = titleText,
-                onValueChange = { titleText = it },
+                onValueChange = { viewModel.onTitleChange(it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
@@ -221,7 +244,7 @@ fun CreateMemoryScreen(
             // Content Input Field - limited height and internally scrollable
             TextField(
                 value = contentText,
-                onValueChange = { contentText = it },
+                onValueChange = { viewModel.onContentChange(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp),
@@ -270,9 +293,75 @@ fun CreateMemoryScreen(
                                     tint = Color(0xFF8C8075),
                                     modifier = Modifier
                                         .size(12.dp)
-                                        .clickable { tagsList = tagsList - tag }
+                                        .clickable { viewModel.removeTag(tag) }
                                 )
                             }
+                        }
+                    }
+                }
+            }
+
+            // Display Selected Song if any
+            viewModel.selectedSongTrackId?.let { trackId ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(12.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (!viewModel.selectedSongImageUrl.isNullOrEmpty()) {
+                            AsyncImage(
+                                model = viewModel.selectedSongImageUrl,
+                                contentDescription = "Cover Album",
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .background(Color(0xFF8C8075), RoundedCornerShape(8.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MusicNote,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = viewModel.selectedSongTitle ?: "Lagu Kenangan",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = Color(0xFF4E4640),
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = viewModel.selectedSongArtist ?: "Artis",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF8C8075)
+                            )
+                        }
+
+                        IconButton(onClick = { viewModel.setSelectedSong(null, null, null, null) }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Hapus Lagu",
+                                tint = Color(0xFF8C8075)
+                            )
                         }
                     }
                 }
@@ -327,7 +416,7 @@ fun CreateMemoryScreen(
                         .height(32.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(if (!isPublic) Color(0xFF8C7D73) else Color.Transparent)
-                        .clickable { isPublic = false },
+                        .clickable { viewModel.onPrivacyChange(false) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -345,7 +434,7 @@ fun CreateMemoryScreen(
                         .height(32.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(if (isPublic) Color(0xFF8C7D73) else Color.Transparent)
-                        .clickable { isPublic = true },
+                        .clickable { viewModel.onPrivacyChange(true) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -363,13 +452,7 @@ fun CreateMemoryScreen(
             Button(
                 onClick = {
                     if (titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty()) {
-                        val uriStrings = selectedImageUris.map { it.toString() }
                         viewModel.saveMemory(
-                            title = titleText,
-                            content = contentText,
-                            tags = tagsList,
-                            isPublic = isPublic,
-                            imageUris = uriStrings,
                             onSaveSuccess = { navController.navigateUp() }
                         )
                     }
@@ -410,10 +493,7 @@ fun CreateMemoryScreen(
                 Button(
                     onClick = {
                         if (newLabelText.isNotBlank()) {
-                            val cleanTag = newLabelText.trim()
-                            if (!tagsList.contains(cleanTag)) {
-                                tagsList = tagsList + cleanTag
-                            }
+                            viewModel.addTag(newLabelText)
                             newLabelText = ""
                             showAddLabelDialog = false
                         }
