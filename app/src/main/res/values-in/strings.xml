@@ -122,7 +122,9 @@
     <string name="settings_back_description">Kembali</string>
     <string name="settings_pref_display">PREFERENSI TAMPILAN</string>
     <string name="settings_change_language">Ubah Bahasa</string>
-    <string name="settings_language_indonesian">Indonesia</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_indonesian">Bahasa Indonesia</string>
+    <string name="settings_select_language_title">Pilih Bahasa</string>
     <string name="settings_dark_mode">Mode Gelap</string>
     <string name="settings_pref_memory">MANAJEMEN MEMORI</string>
     <string name="settings_reminders_title">Pengingat Hari Peringatan</string>

@@ -9,6 +9,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
@@ -33,8 +35,18 @@ import com.naufal.griefy.ui.navigation.Screen
 @Composable
 fun SettingsScreen(navController: NavController) {
     val context = LocalContext.current
-   
+
     var isDarkMode by remember { mutableStateOf(false) }
+
+    val currentLocale = AppCompatDelegate.getApplicationLocales().get(0)
+    val currentLangCode = currentLocale?.language ?: "en"
+    val currentLanguageName = if (currentLangCode == "in" || currentLangCode == "id") {
+        stringResource(R.string.settings_language_indonesian)
+    } else {
+        stringResource(R.string.settings_language_english)
+    }
+
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -70,6 +82,70 @@ fun SettingsScreen(navController: NavController) {
         }
     }
 
+    if (showLanguageDialog) {
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text(text = stringResource(R.string.settings_select_language_title)) },
+            text = {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                AppCompatDelegate.setApplicationLocales(
+                                    LocaleListCompat.forLanguageTags("en")
+                                )
+                                showLanguageDialog = false
+                            }
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (currentLangCode != "in" && currentLangCode != "id"),
+                            onClick = {
+                                AppCompatDelegate.setApplicationLocales(
+                                    LocaleListCompat.forLanguageTags("en")
+                                )
+                                showLanguageDialog = false
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.settings_language_english))
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                AppCompatDelegate.setApplicationLocales(
+                                    LocaleListCompat.forLanguageTags("in")
+                                )
+                                showLanguageDialog = false
+                            }
+                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (currentLangCode == "in" || currentLangCode == "id"),
+                            onClick = {
+                                AppCompatDelegate.setApplicationLocales(
+                                    LocaleListCompat.forLanguageTags("in")
+                                )
+                                showLanguageDialog = false
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(R.string.settings_language_indonesian))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -95,8 +171,8 @@ fun SettingsScreen(navController: NavController) {
             SettingsItem(
                 icon = Icons.Default.Language,
                 title = stringResource(R.string.settings_change_language),
-                subtitle = stringResource(R.string.settings_language_indonesian),
-                onClick = { /* TODO */ }
+                subtitle = currentLanguageName,
+                onClick = { showLanguageDialog = true }
             )
             SettingsSwitchItem(
                 icon = Icons.Default.DarkMode,

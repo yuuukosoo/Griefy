@@ -122,7 +122,9 @@
     <string name="settings_back_description">Back</string>
     <string name="settings_pref_display">DISPLAY PREFERENCES</string>
     <string name="settings_change_language">Change Language</string>
-    <string name="settings_language_indonesian">Indonesian</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_indonesian">Bahasa Indonesia</string>
+    <string name="settings_select_language_title">Select Language</string>
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_pref_memory">MEMORY MANAGEMENT</string>
     <string name="settings_reminders_title">Remembrance Day Reminders</string>
