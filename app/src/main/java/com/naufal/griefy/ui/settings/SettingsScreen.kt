@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -18,17 +20,23 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +49,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
 import com.naufal.griefy.R
@@ -64,7 +73,14 @@ fun SettingsScreen(navController: NavController) {
     if (showLanguageDialog.value) {
         AlertDialog(
             onDismissRequest = { showLanguageDialog.value = false },
-            title = { Text(text = stringResource(R.string.settings_select_language_title)) },
+            containerColor = Color.White,
+            title = {
+                Text(
+                    text = stringResource(R.string.settings_select_language_title),
+                    color = Color(0xFF4E4640),
+                    fontWeight = FontWeight.Bold
+                )
+            },
             text = {
                 Column {
                     Row(
@@ -86,10 +102,17 @@ fun SettingsScreen(navController: NavController) {
                                     LocaleListCompat.forLanguageTags("en")
                                 )
                                 showLanguageDialog.value = false
-                            }
+                            },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = Color(0xFF75685F),
+                                unselectedColor = Color(0xFFB0A59A)
+                            )
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = stringResource(R.string.settings_language_english))
+                        Text(
+                            text = stringResource(R.string.settings_language_english),
+                            color = Color(0xFF4E4640)
+                        )
                     }
                     Row(
                         modifier = Modifier
@@ -110,15 +133,25 @@ fun SettingsScreen(navController: NavController) {
                                     LocaleListCompat.forLanguageTags("in")
                                 )
                                 showLanguageDialog.value = false
-                            }
+                            },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = Color(0xFF75685F),
+                                unselectedColor = Color(0xFFB0A59A)
+                            )
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = stringResource(R.string.settings_language_indonesian))
+                        Text(
+                            text = stringResource(R.string.settings_language_indonesian),
+                            color = Color(0xFF4E4640)
+                        )
                     }
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLanguageDialog.value = false }) {
+                TextButton(
+                    onClick = { showLanguageDialog.value = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF75685F))
+                ) {
                     Text(text = stringResource(R.string.cancel))
                 }
             }
@@ -126,14 +159,25 @@ fun SettingsScreen(navController: NavController) {
     }
 
     Scaffold(
+        containerColor = Color(0xFFFAF7F2),
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_title)) },
+                title = {
+                    Text(
+                        stringResource(R.string.settings_title),
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF4E4640)
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFFAF7F2)
+                ),
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.settings_back_description)
+                            contentDescription = stringResource(R.string.settings_back_description),
+                            tint = Color(0xFF5C524A)
                         )
                     }
                 }
@@ -147,48 +191,81 @@ fun SettingsScreen(navController: NavController) {
         ) {
 
             SettingsCategoryTitle(stringResource(R.string.settings_pref_display))
-            SettingsItem(
-                icon = Icons.Default.Language,
-                title = stringResource(R.string.settings_change_language),
-                subtitle = currentLanguageName,
-                onClick = { showLanguageDialog.value = true }
-            )
-            SettingsSwitchItem(
-                icon = Icons.Default.DarkMode,
-                title = stringResource(R.string.settings_dark_mode),
-                isChecked = isDarkMode,
-                onCheckedChange = { isDarkMode = it }
-            )
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column {
+                    SettingsItem(
+                        icon = Icons.Default.Language,
+                        title = stringResource(R.string.settings_change_language),
+                        subtitle = currentLanguageName,
+                        onClick = { showLanguageDialog.value = true }
+                    )
+                    HorizontalDivider(color = Color(0xFFEDE6DC), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    SettingsSwitchItem(
+                        icon = Icons.Default.DarkMode,
+                        title = stringResource(R.string.settings_dark_mode),
+                        isChecked = isDarkMode,
+                        onCheckedChange = { isDarkMode = it }
+                    )
+                }
+            }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             SettingsCategoryTitle(stringResource(R.string.settings_pref_memory))
-            SettingsItem(
-                icon = Icons.Default.Notifications,
-                title = stringResource(R.string.settings_reminders_title),
-                subtitle = stringResource(R.string.settings_reminders_subtitle),
-                onClick = { navController.navigate(Screen.Reminders.route) }
-            )
-            SettingsItem(
-                icon = Icons.Default.Delete,
-                title = stringResource(R.string.settings_trash_title),
-                subtitle = stringResource(R.string.settings_trash_subtitle),
-                onClick = { navController.navigate(Screen.Trash.route) }
-            )
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column {
+                    SettingsItem(
+                        icon = Icons.Default.Notifications,
+                        title = stringResource(R.string.settings_reminders_title),
+                        subtitle = stringResource(R.string.settings_reminders_subtitle),
+                        onClick = { navController.navigate(Screen.Reminders.route) }
+                    )
+                    HorizontalDivider(color = Color(0xFFEDE6DC), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    SettingsItem(
+                        icon = Icons.Default.Delete,
+                        title = stringResource(R.string.settings_trash_title),
+                        subtitle = stringResource(R.string.settings_trash_subtitle),
+                        onClick = { navController.navigate(Screen.Trash.route) }
+                    )
+                }
+            }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             SettingsCategoryTitle(stringResource(R.string.settings_pref_account))
-            SettingsItem(
-                icon = Icons.AutoMirrored.Filled.ExitToApp,
-                title = stringResource(R.string.settings_logout),
-                titleColor = MaterialTheme.colorScheme.error,
-                onClick = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                SettingsItem(
+                    icon = Icons.AutoMirrored.Filled.ExitToApp,
+                    title = stringResource(R.string.settings_logout),
+                    titleColor = MaterialTheme.colorScheme.error,
+                    onClick = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0)
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
@@ -198,9 +275,9 @@ fun SettingsCategoryTitle(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary,
+        color = Color(0xFF8C8075),
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp)
+        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 4.dp)
     )
 }
 
@@ -209,28 +286,42 @@ fun SettingsItem(
     icon: ImageVector,
     title: String,
     subtitle: String? = null,
-    titleColor: Color = MaterialTheme.colorScheme.onSurface,
+    titleColor: Color = Color(0xFF4E4640),
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = title, tint = titleColor)
+        Icon(
+            imageVector = icon, 
+            contentDescription = title, 
+            tint = if (titleColor == MaterialTheme.colorScheme.error) titleColor else Color(0xFF5C524A)
+        )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, color = titleColor)
+            Text(
+                text = title, 
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = titleColor
+            )
             if (subtitle != null) {
-                Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle, 
+                    fontSize = 13.sp,
+                    color = Color(0xFF8C8075)
+                )
             }
         }
         Icon(
             imageVector = Icons.Default.ChevronRight, 
             contentDescription = stringResource(R.string.settings_detail_description), 
-            tint = MaterialTheme.colorScheme.outline
+            tint = Color(0xFFB0A59A)
         )
     }
 }
@@ -245,12 +336,27 @@ fun SettingsSwitchItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = title)
+        Icon(imageVector = icon, contentDescription = title, tint = Color(0xFF5C524A))
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Switch(checked = isChecked, onCheckedChange = onCheckedChange)
+        Text(
+            text = title, 
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF4E4640),
+            modifier = Modifier.weight(1f)
+        )
+        Switch(
+            checked = isChecked, 
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Color(0xFF75685F),
+                uncheckedThumbColor = Color(0xFF8C8075),
+                uncheckedTrackColor = Color(0xFFEDE8E0)
+            )
+        )
     }
 }
