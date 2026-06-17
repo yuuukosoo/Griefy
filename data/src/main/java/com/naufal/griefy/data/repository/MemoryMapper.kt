@@ -13,6 +13,7 @@ fun MemoryEntity.toDomain(): Memory {
         tags = tags,
         isPublic = isPublic,
         songTrackId = songTrackId,
+        songTitle = songTitle,
         isTrashed = isTrashed
     )
 }
@@ -27,6 +28,7 @@ fun Memory.toEntity(): MemoryEntity {
         tags = tags,
         isPublic = isPublic,
         songTrackId = songTrackId,
+        songTitle = songTitle,
         isTrashed = isTrashed
     )
 }

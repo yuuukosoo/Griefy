@@ -32,6 +32,7 @@ class DomainModelTest {
         assertEquals("Keluarga", memory.tags[0])
         assertFalse(memory.isPublic)
         assertNull(memory.songTrackId)
+        assertNull(memory.songTitle)
         assertFalse(memory.isTrashed)
     }
 
@@ -46,6 +47,7 @@ class DomainModelTest {
             tags = listOf("Teman"),
             isPublic = true,
             songTrackId = "track_spotify_id_123",
+            songTitle = "Fix You",
             isTrashed = true
         )
 
@@ -56,6 +58,7 @@ class DomainModelTest {
         assertEquals(1687000000000L, memory.createdAt)
         assertTrue(memory.isPublic)
         assertEquals("track_spotify_id_123", memory.songTrackId)
+        assertEquals("Fix You", memory.songTitle)
         assertTrue(memory.isTrashed)
     }
 
@@ -70,6 +73,7 @@ class DomainModelTest {
             tags = emptyList(),
             isPublic = false,
             songTrackId = null,
+            songTitle = null,
             isTrashed = false
         )
 

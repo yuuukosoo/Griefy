@@ -224,10 +224,13 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Lagu Tersemat",
+                            text = memory.songTitle ?: "Lagu Tersemat",
                             fontSize = 10.sp,
                             color = Color(0xFF5C524A),
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.widthIn(max = 120.dp)
                         )
                     }
                 }

@@ -9,5 +9,6 @@ data class Memory(
     val tags : List<String>,
     val isPublic : Boolean = false,
     val songTrackId: String? = null,
+    val songTitle: String? = null,
     val isTrashed: Boolean = false
 )

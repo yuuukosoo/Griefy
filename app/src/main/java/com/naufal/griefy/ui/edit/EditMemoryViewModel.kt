@@ -58,6 +58,7 @@ class EditMemoryViewModel @Inject constructor(
                 tagsList = memory.tags
                 selectedImageUris = memory.imageUris.map { uriString -> Uri.parse(uriString) }
                 selectedSongTrackId = memory.songTrackId
+                selectedSongTitle = memory.songTitle
 
                 memory.songTrackId?.let { trackId ->
                     val song = repository.getSongDetails(trackId)
@@ -119,7 +120,8 @@ class EditMemoryViewModel @Inject constructor(
                     tags = tagsList,
                     isPublic = isPublic,
                     imageUris = selectedImageUris.map { it.toString() },
-                    songTrackId = selectedSongTrackId
+                    songTrackId = selectedSongTrackId,
+                    songTitle = selectedSongTitle
                 )
                 repository.updateMemory(updatedMemory)
                 onUpdateSuccess()
