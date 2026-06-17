@@ -6,12 +6,17 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import com.naufal.griefy.MainActivity
 import com.naufal.griefy.R
 
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Griefy::ReminderWakeLock")
+        wakeLock.acquire(3000)
+
         val reminderId = intent?.getIntExtra("REMINDER_ID", 101) ?: 101
         val title = intent?.getStringExtra("REMINDER_TITLE") ?: "Hari Peringatan Penting ✨"
         val desc = intent?.getStringExtra("REMINDER_DESC") ?: "Mari luangkan waktu sejenak untuk mengingat kenangan indah."
