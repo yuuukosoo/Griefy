@@ -39,6 +39,19 @@ class ReminderScheduler(private val context: Context) {
             }
         } catch (e: SecurityException) {
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    day.dateTime,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.set(
+                    AlarmManager.RTC_WAKEUP,
+                    day.dateTime,
+                    pendingIntent
+                )
+            }
         }
     }
 
