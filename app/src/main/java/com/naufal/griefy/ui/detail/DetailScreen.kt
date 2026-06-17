@@ -34,6 +34,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.ui.navigation.Screen
@@ -154,25 +157,53 @@ fun DetailScreen(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
+                    val context = LocalContext.current
                     Column(
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        // Title and Artist Info
-                        Text(
-                            text = song.title,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4E4640),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = song.artistName,
-                            fontSize = 12.sp,
-                            color = Color(0xFF8C8075),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = song.title,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF4E4640),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = song.artistName,
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF8C8075),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("spotify:track:${song.trackId}"))
+                                    intent.putExtra(Intent.EXTRA_REFERRER, Uri.parse("android-app://${context.packageName}"))
+                                    try {
+                                        context.startActivity(intent)
+                                    } catch (e: Exception) {
+                                        val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com/track/${song.trackId}"))
+                                        context.startActivity(webIntent)
+                                    }
+                                },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MusicNote,
+                                    contentDescription = "Buka di Spotify",
+                                    tint = Color(0xFF1DB954),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
@@ -216,7 +247,7 @@ fun DetailScreen(
                                 )
                             } else {
                                 Text(
-                                    text = "Preview audio tidak tersedia.",
+                                    text = "Preview audio tidak tersedia. Ketuk tombol musik hijau di atas untuk memutar lagu lengkap di Spotify.",
                                     fontSize = 12.sp,
                                     color = Color(0xFF8C8075),
                                     modifier = Modifier.padding(vertical = 8.dp)
