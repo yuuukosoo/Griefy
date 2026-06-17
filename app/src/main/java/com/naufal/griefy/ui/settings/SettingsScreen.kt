@@ -1,6 +1,5 @@
 package com.naufal.griefy.ui.settings
 
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,10 +37,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,18 +49,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.LocaleListCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController) {
-    var isDarkMode by remember { mutableStateOf(false) }
+fun SettingsScreen(
+    navController: NavController,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
+    val currentLangCode by viewModel.currentLanguageCode.collectAsState()
 
-    val currentLocale = AppCompatDelegate.getApplicationLocales().get(0)
-    val currentLangCode = currentLocale?.language ?: "en"
     val currentLanguageName = if (currentLangCode == "in" || currentLangCode == "id") {
         stringResource(R.string.settings_language_indonesian)
     } else {
@@ -87,9 +88,7 @@ fun SettingsScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                AppCompatDelegate.setApplicationLocales(
-                                    LocaleListCompat.forLanguageTags("en")
-                                )
+                                viewModel.changeLanguage("en")
                                 showLanguageDialog.value = false
                             }
                             .padding(vertical = 12.dp, horizontal = 8.dp),
@@ -98,9 +97,7 @@ fun SettingsScreen(navController: NavController) {
                         RadioButton(
                             selected = (currentLangCode != "in" && currentLangCode != "id"),
                             onClick = {
-                                AppCompatDelegate.setApplicationLocales(
-                                    LocaleListCompat.forLanguageTags("en")
-                                )
+                                viewModel.changeLanguage("en")
                                 showLanguageDialog.value = false
                             },
                             colors = RadioButtonDefaults.colors(
@@ -118,9 +115,7 @@ fun SettingsScreen(navController: NavController) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                AppCompatDelegate.setApplicationLocales(
-                                    LocaleListCompat.forLanguageTags("in")
-                                )
+                                viewModel.changeLanguage("in")
                                 showLanguageDialog.value = false
                             }
                             .padding(vertical = 12.dp, horizontal = 8.dp),
@@ -129,9 +124,7 @@ fun SettingsScreen(navController: NavController) {
                         RadioButton(
                             selected = (currentLangCode == "in" || currentLangCode == "id"),
                             onClick = {
-                                AppCompatDelegate.setApplicationLocales(
-                                    LocaleListCompat.forLanguageTags("in")
-                                )
+                                viewModel.changeLanguage("in")
                                 showLanguageDialog.value = false
                             },
                             colors = RadioButtonDefaults.colors(
@@ -211,7 +204,7 @@ fun SettingsScreen(navController: NavController) {
                         icon = Icons.Default.DarkMode,
                         title = stringResource(R.string.settings_dark_mode),
                         isChecked = isDarkMode,
-                        onCheckedChange = { isDarkMode = it }
+                        onCheckedChange = { viewModel.setDarkMode(it) }
                     )
                 }
             }
