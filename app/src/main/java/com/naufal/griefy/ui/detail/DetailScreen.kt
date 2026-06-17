@@ -168,6 +168,18 @@ fun DetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
+                            if (!song.imageUrl.isNullOrEmpty()) {
+                                AsyncImage(
+                                    model = song.imageUrl,
+                                    contentDescription = "Cover Album",
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(8.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                            }
+
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = song.title,
