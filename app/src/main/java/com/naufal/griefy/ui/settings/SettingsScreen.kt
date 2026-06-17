@@ -59,11 +59,11 @@ fun SettingsScreen(navController: NavController) {
         stringResource(R.string.settings_language_english)
     }
 
-    var showLanguageDialog by remember { mutableStateOf(false) }
+    val showLanguageDialog = remember { mutableStateOf(false) }
 
-    if (showLanguageDialog) {
+    if (showLanguageDialog.value) {
         AlertDialog(
-            onDismissRequest = { showLanguageDialog = false },
+            onDismissRequest = { showLanguageDialog.value = false },
             title = { Text(text = stringResource(R.string.settings_select_language_title)) },
             text = {
                 Column {
@@ -74,7 +74,7 @@ fun SettingsScreen(navController: NavController) {
                                 AppCompatDelegate.setApplicationLocales(
                                     LocaleListCompat.forLanguageTags("en")
                                 )
-                                showLanguageDialog = false
+                                showLanguageDialog.value = false
                             }
                             .padding(vertical = 12.dp, horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -85,7 +85,7 @@ fun SettingsScreen(navController: NavController) {
                                 AppCompatDelegate.setApplicationLocales(
                                     LocaleListCompat.forLanguageTags("en")
                                 )
-                                showLanguageDialog = false
+                                showLanguageDialog.value = false
                             }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -98,7 +98,7 @@ fun SettingsScreen(navController: NavController) {
                                 AppCompatDelegate.setApplicationLocales(
                                     LocaleListCompat.forLanguageTags("in")
                                 )
-                                showLanguageDialog = false
+                                showLanguageDialog.value = false
                             }
                             .padding(vertical = 12.dp, horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -109,7 +109,7 @@ fun SettingsScreen(navController: NavController) {
                                 AppCompatDelegate.setApplicationLocales(
                                     LocaleListCompat.forLanguageTags("in")
                                 )
-                                showLanguageDialog = false
+                                showLanguageDialog.value = false
                             }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -118,7 +118,7 @@ fun SettingsScreen(navController: NavController) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLanguageDialog = false }) {
+                TextButton(onClick = { showLanguageDialog.value = false }) {
                     Text(text = stringResource(R.string.cancel))
                 }
             }
@@ -151,7 +151,7 @@ fun SettingsScreen(navController: NavController) {
                 icon = Icons.Default.Language,
                 title = stringResource(R.string.settings_change_language),
                 subtitle = currentLanguageName,
-                onClick = { showLanguageDialog = true }
+                onClick = { showLanguageDialog.value = true }
             )
             SettingsSwitchItem(
                 icon = Icons.Default.DarkMode,
