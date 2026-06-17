@@ -23,6 +23,7 @@ import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.ui.profile.ProfileScreen
 import com.naufal.griefy.ui.register.RegisterScreen
 import com.naufal.griefy.ui.search.SearchSongScreen
+import com.naufal.griefy.ui.searchmemory.SearchMemoryScreen
 import com.naufal.griefy.ui.reminders.ReminderScreen
 import com.naufal.griefy.ui.settings.SettingsScreen
 import com.naufal.griefy.ui.theme.GriefyTheme
@@ -99,6 +100,10 @@ class MainActivity : ComponentActivity() {
 
                         composable(Screen.SearchPublic.route) {
                             SearchSongScreen(navController = navController)
+                        }
+
+                        composable(Screen.SearchMemory.route) {
+                            SearchMemoryScreen(navController = navController)
                         }
 
                         composable(Screen.Trash.route) {

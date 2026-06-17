@@ -54,7 +54,7 @@ fun CreateMemoryScreen(
     var showAddLabelDialog by remember { mutableStateOf(false) }
     var newLabelText by remember { mutableStateOf("") }
 
-    // Listen for song from SearchSongScreen
+
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val returnedTrackId by savedStateHandle?.getStateFlow<String?>("selected_song_track_id", null)?.collectAsState() ?: remember { mutableStateOf(null) }
     val returnedTitle by savedStateHandle?.getStateFlow<String?>("selected_song_title", null)?.collectAsState() ?: remember { mutableStateOf(null) }
@@ -69,7 +69,7 @@ fun CreateMemoryScreen(
                 artist = returnedArtist,
                 imageUrl = returnedImageUrl
             )
-            // Reset state values
+
             savedStateHandle?.set("selected_song_track_id", null)
             savedStateHandle?.set("selected_song_title", null)
             savedStateHandle?.set("selected_song_artist", null)
@@ -102,7 +102,7 @@ fun CreateMemoryScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header Row (Cozy minimal back button & title)
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -301,7 +301,7 @@ fun CreateMemoryScreen(
                 }
             }
 
-            // Display Selected Song if any
+
             viewModel.selectedSongTrackId?.let { trackId ->
                 Card(
                     modifier = Modifier
@@ -401,7 +401,7 @@ fun CreateMemoryScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Minimal Privacy Toggle Tabs
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -409,7 +409,7 @@ fun CreateMemoryScreen(
                     .background(Color(0xFFEDE8E0))
                     .padding(4.dp)
             ) {
-                // Privat Tab
+
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -427,7 +427,7 @@ fun CreateMemoryScreen(
                     )
                 }
 
-                // Public Tab
+
                 Box(
                     modifier = Modifier
                         .weight(1f)
@@ -474,7 +474,7 @@ fun CreateMemoryScreen(
         }
     }
 
-    // Add Label Dialog
+
     if (showAddLabelDialog) {
         AlertDialog(
             onDismissRequest = { showAddLabelDialog = false },

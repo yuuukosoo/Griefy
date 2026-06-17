@@ -1,0 +1,121 @@
+package com.naufal.griefy.ui.navigation
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+
+@Composable
+fun FloatingNavigationDock(
+    navController: NavController,
+    currentRoute: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 24.dp),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Floating navigation dock (Home -> Search -> Profile)
+            Card(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 16.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(28.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Home Tab
+                    IconButton(onClick = {
+                        if (currentRoute != Screen.Home.route) {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Home.route) { inclusive = true }
+                            }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home",
+                            tint = if (currentRoute == Screen.Home.route) Color(0xFF75685F) else Color(0xFFB0A59A)
+                        )
+                    }
+
+                    // Search Memory Tab
+                    IconButton(onClick = {
+                        if (currentRoute != Screen.SearchMemory.route) {
+                            navController.navigate(Screen.SearchMemory.route) {
+                                popUpTo(Screen.Home.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Memory",
+                            tint = if (currentRoute == Screen.SearchMemory.route) Color(0xFF75685F) else Color(0xFFB0A59A)
+                        )
+                    }
+
+                    // Profile Tab
+                    IconButton(onClick = {
+                        if (currentRoute != Screen.Profile.route) {
+                            navController.navigate(Screen.Profile.route) {
+                                popUpTo(Screen.Home.route) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Profile",
+                            tint = if (currentRoute == Screen.Profile.route) Color(0xFF75685F) else Color(0xFFB0A59A)
+                        )
+                    }
+                }
+            }
+
+            // Create Memory FAB (Right side)
+            FloatingActionButton(
+                onClick = { navController.navigate(Screen.CreateMemory.route) },
+                shape = CircleShape,
+                containerColor = Color(0xFF75685F),
+                contentColor = Color.White,
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
+                modifier = Modifier.size(56.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Tulis Kenangan",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}

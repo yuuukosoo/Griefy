@@ -15,6 +15,7 @@ sealed class Screen(val route: String) {
     }
 
     object SearchPublic : Screen("search_public")
+    object SearchMemory : Screen("search_memory")
     object Profile : Screen("profile")
     object Settings : Screen("settings")
     object Trash : Screen("trash")

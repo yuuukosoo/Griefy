@@ -1,4 +1,4 @@
-package com.naufal.griefy.ui.home
+package com.naufal.griefy.ui.searchmemory
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,10 +12,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,17 +32,17 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun HomeScreen(
+fun SearchMemoryScreen(
     navController: NavController,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: SearchMemoryViewModel = hiltViewModel()
 ) {
-    val memories by viewModel.memories.collectAsState()
+    val memories by viewModel.publicMemories.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF7F2)) // Cozy warm paper background (Mymory style)
+            .background(Color(0xFFFAF7F2))
             .statusBarsPadding()
     ) {
         Column(
@@ -67,7 +64,7 @@ fun HomeScreen(
                         color = Color(0xFF4E4640)
                     )
                     Text(
-                        text = "Mari refleksikan kenanganmu.",
+                        text = "Jelajahi kenangan publik",
                         fontSize = 14.sp,
                         color = Color(0xFF8C8075)
                     )
@@ -87,14 +84,14 @@ fun HomeScreen(
                 }
             }
 
-            // Local Search bar
+            // Search input field
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 8.dp),
-                placeholder = { Text("Cari kenangan...", color = Color(0xFFB0A59A)) },
+                placeholder = { Text("Cari album publik...", color = Color(0xFFB0A59A)) },
                 leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = Color(0xFF8C8075)) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
@@ -113,7 +110,7 @@ fun HomeScreen(
                 )
             )
 
-            // Memories list
+            // Content Feed
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 100.dp),
@@ -127,17 +124,16 @@ fun HomeScreen(
                                 .padding(vertical = 40.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            val message = if (searchQuery.isEmpty()) {
-                                "Belum ada kenangan. Tekan + untuk menambah."
-                            } else {
-                                "Tidak ditemukan kenangan dengan kata kunci \"$searchQuery\"."
-                            }
-                            Text(message, color = Color(0xFF8C8075), fontWeight = FontWeight.Medium)
+                            Text(
+                                text = if (searchQuery.isEmpty()) "Belum ada album publik." else "Tidak ada album publik yang cocok.",
+                                color = Color(0xFF8C8075),
+                                fontWeight = FontWeight.Medium
+                            )
                         }
                     }
                 } else {
                     items(memories, key = { it.id }) { memory ->
-                        MemoryCard(
+                        PublicMemoryCard(
                             memory = memory,
                             onClick = {
                                 navController.navigate(Screen.DetailMemory.createRoute(memory.id))
@@ -154,15 +150,15 @@ fun HomeScreen(
         ) {
             FloatingNavigationDock(
                 navController = navController,
-                currentRoute = Screen.Home.route
+                currentRoute = Screen.SearchMemory.route
             )
         }
     }
 }
 
 @Composable
-fun MemoryCard(memory: Memory, onClick: () -> Unit) {
-    val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
+fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
+    val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
     val dateString = formatter.format(Date(memory.createdAt))
 
     Card(
@@ -177,7 +173,7 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first(),
-                    contentDescription = "Foto Kenangan",
+                    contentDescription = "Foto Sampul",
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
@@ -193,11 +189,11 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF4E4640)
             )
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             Text(
-                text = dateString,
+                text = "Oleh Pengguna Lain • $dateString",
                 fontSize = 12.sp,
                 color = Color(0xFF8C8075)
             )
