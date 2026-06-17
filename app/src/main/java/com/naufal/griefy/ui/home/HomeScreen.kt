@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -196,11 +197,41 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
             
             Spacer(modifier = Modifier.height(4.dp))
             
-            Text(
-                text = dateString,
-                fontSize = 12.sp,
-                color = Color(0xFF8C8075)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = dateString,
+                    fontSize = 12.sp,
+                    color = Color(0xFF8C8075),
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (!memory.songTrackId.isNullOrEmpty()) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFFEDE8E0))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MusicNote,
+                            contentDescription = "Lagu Tersemat",
+                            tint = Color(0xFF75685F),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Lagu Tersemat",
+                            fontSize = 10.sp,
+                            color = Color(0xFF5C524A),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
