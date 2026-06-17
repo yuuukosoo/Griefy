@@ -48,17 +48,17 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF7F2)) // Cozy warm paper background (Mymory style)
+            .background(Color(0xFFFAF7F2))
             .statusBarsPadding()
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Header Row (Left: Greeting, Right: Settings Gear)
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .padding(horizontal = 48.dp, vertical = 32.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -151,7 +151,7 @@ fun HomeScreen(
             }
         }
 
-        // Shared Custom Navigation Dock overlay
+
         Box(
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
