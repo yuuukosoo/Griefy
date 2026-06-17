@@ -78,6 +78,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
 
             val tokenResponse = authApi.getAccessToken(
+                grantType = "client_credentials",
                 clientId = cleanClientId,
                 clientSecret = cleanClientSecret
             )
@@ -96,6 +97,10 @@ class MemoryRepositoryImpl @Inject constructor(
                     previewUrl = trackDto.preview_url
                 )
             }
+        } catch (e: retrofit2.HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            android.util.Log.e("SPOTIFY_ERROR", "HTTP Error ${e.code()}: $errorBody", e)
+            emptyList()
         } catch (e: Exception) {
             android.util.Log.e("SPOTIFY_ERROR", "Gagal ambil lagu: ${e.message}", e)
             emptyList()
@@ -111,6 +116,7 @@ class MemoryRepositoryImpl @Inject constructor(
             val cleanClientSecret = rawClientSecret.replace("\"", "").trim()
 
             val tokenResponse = authApi.getAccessToken(
+                grantType = "client_credentials",
                 clientId = cleanClientId,
                 clientSecret = cleanClientSecret
             )
@@ -125,6 +131,10 @@ class MemoryRepositoryImpl @Inject constructor(
                 imageUrl = trackDto.album.images.firstOrNull()?.url ?: "",
                 previewUrl = trackDto.preview_url
             )
+        } catch (e: retrofit2.HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            android.util.Log.e("SPOTIFY_ERROR", "HTTP Error ${e.code()}: $errorBody", e)
+            null
         } catch (e: Exception) {
             android.util.Log.e("SPOTIFY_ERROR", "Gagal ambil detail lagu: ${e.message}", e)
             null
