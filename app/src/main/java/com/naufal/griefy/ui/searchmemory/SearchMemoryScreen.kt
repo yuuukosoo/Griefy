@@ -49,40 +49,6 @@ fun SearchMemoryScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             // Header Row (Left: Greeting, Right: Settings Gear)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "Halo, Khalish",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4E4640)
-                    )
-                    Text(
-                        text = "Jelajahi kenangan publik",
-                        fontSize = 14.sp,
-                        color = Color(0xFF8C8075)
-                    )
-                }
-
-                IconButton(
-                    onClick = { navController.navigate(Screen.Settings.route) },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color(0xFFEDE8E0), CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Pengaturan",
-                        tint = Color(0xFF5C524A)
-                    )
-                }
-            }
 
             // Search input field
             OutlinedTextField(

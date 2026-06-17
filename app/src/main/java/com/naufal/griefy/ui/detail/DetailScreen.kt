@@ -105,7 +105,7 @@ fun DetailScreen(
                         modifier = Modifier
                             .padding(start = 16.dp)
                             .size(36.dp)
-                            
+
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,

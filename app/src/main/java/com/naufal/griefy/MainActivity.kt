@@ -22,6 +22,7 @@ import com.naufal.griefy.ui.login.LoginScreen
 import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.ui.profile.ProfileScreen
 import com.naufal.griefy.ui.register.RegisterScreen
+import com.naufal.griefy.ui.splash.SplashScreen
 import com.naufal.griefy.ui.search.SearchSongScreen
 import com.naufal.griefy.ui.searchmemory.SearchMemoryScreen
 import com.naufal.griefy.ui.reminders.ReminderScreen
@@ -57,8 +58,12 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.Login.route
+                        startDestination = Screen.Splash.route
                     ) {
+
+                        composable(Screen.Splash.route) {
+                            SplashScreen(navController = navController)
+                        }
 
                         composable(Screen.Login.route) {
                             LoginScreen(navController = navController)
