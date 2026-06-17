@@ -22,9 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,20 +36,17 @@ fun SettingsScreen(navController: NavController) {
     // State sementara untuk demo (Nanti disambungkan ke Local Database/DataStore)
     var isDarkMode by remember { mutableStateOf(false) }
 
-
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            Toast.makeText(context, "Izin diberikan! Coba klik lagi.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.settings_permission_granted), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "Izin notifikasi ditolak :(", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.settings_permission_denied), Toast.LENGTH_SHORT).show()
         }
     }
 
-
     fun setTestReminder() {
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -61,24 +60,26 @@ fun SettingsScreen(navController: NavController) {
             context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-
         val triggerTime = System.currentTimeMillis() + (10 * 1000)
 
         try {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
-            Toast.makeText(context, "Alarm diatur! Tutup aplikasi sekarang & tunggu 10 dtk.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.settings_alarm_set), Toast.LENGTH_LONG).show()
         } catch (_: SecurityException) {
-            Toast.makeText(context, "Error Alarm: Izinkan Alarms & Reminders di Settings HP", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.settings_alarm_error), Toast.LENGTH_LONG).show()
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Pengaturan") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = stringResource(R.string.settings_back_description)
+                        )
                     }
                 }
             )
@@ -90,42 +91,42 @@ fun SettingsScreen(navController: NavController) {
                 .padding(paddingValues)
         ) {
 
-            SettingsCategoryTitle("PREFERENSI TAMPILAN")
+            SettingsCategoryTitle(stringResource(R.string.settings_pref_display))
             SettingsItem(
                 icon = Icons.Default.Language,
-                title = "Ubah Bahasa",
-                subtitle = "Indonesia",
+                title = stringResource(R.string.settings_change_language),
+                subtitle = stringResource(R.string.settings_language_indonesian),
                 onClick = { /* TODO */ }
             )
             SettingsSwitchItem(
                 icon = Icons.Default.DarkMode,
-                title = "Mode Gelap",
+                title = stringResource(R.string.settings_dark_mode),
                 isChecked = isDarkMode,
                 onCheckedChange = { isDarkMode = it }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            SettingsCategoryTitle("MANAJEMEN MEMORI")
+            SettingsCategoryTitle(stringResource(R.string.settings_pref_memory))
             SettingsItem(
                 icon = Icons.Default.Notifications,
-                title = "Pengingat Hari Peringatan",
-                subtitle = "Atur pengingat hari penting kenangan",
+                title = stringResource(R.string.settings_reminders_title),
+                subtitle = stringResource(R.string.settings_reminders_subtitle),
                 onClick = { navController.navigate(Screen.Reminders.route) }
             )
             SettingsItem(
                 icon = Icons.Default.Delete,
-                title = "Baru Saja Dihapus (Trash)",
-                subtitle = "Pulihkan kenangan dalam 30 hari",
+                title = stringResource(R.string.settings_trash_title),
+                subtitle = stringResource(R.string.settings_trash_subtitle),
                 onClick = { navController.navigate(Screen.Trash.route) }
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            SettingsCategoryTitle("AKUN")
+            SettingsCategoryTitle(stringResource(R.string.settings_pref_account))
             SettingsItem(
                 icon = Icons.AutoMirrored.Filled.ExitToApp,
-                title = "Keluar (Logout)",
+                title = stringResource(R.string.settings_logout),
                 titleColor = MaterialTheme.colorScheme.error,
                 onClick = {
                     navController.navigate(Screen.Login.route) {
@@ -171,7 +172,11 @@ fun SettingsItem(
                 Text(text = subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
             }
         }
-        Icon(imageVector = Icons.Default.ChevronRight, contentDescription = "Detail", tint = MaterialTheme.colorScheme.outline)
+        Icon(
+            imageVector = Icons.Default.ChevronRight, 
+            contentDescription = stringResource(R.string.settings_detail_description), 
+            tint = MaterialTheme.colorScheme.outline
+        )
     }
 }
 

@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Griefy</string>
+    <string name="settings_title">Pengaturan</string>
+    <string name="settings_back_description">Kembali</string>
+    <string name="settings_pref_display">PREFERENSI TAMPILAN</string>
+    <string name="settings_change_language">Ubah Bahasa</string>
+    <string name="settings_language_indonesian">Indonesia</string>
+    <string name="settings_dark_mode">Mode Gelap</string>
+    <string name="settings_pref_memory">MANAJEMEN MEMORI</string>
+    <string name="settings_reminders_title">Pengingat Hari Peringatan</string>
+    <string name="settings_reminders_subtitle">Atur pengingat hari penting kenangan</string>
+    <string name="settings_trash_title">Baru Saja Dihapus (Trash)</string>
+    <string name="settings_trash_subtitle">Pulihkan kenangan dalam 30 hari</string>
+    <string name="settings_pref_account">AKUN</string>
+    <string name="settings_logout">Keluar (Logout)</string>
+    <string name="settings_permission_granted">Izin diberikan! Coba klik lagi.</string>
+    <string name="settings_permission_denied">Izin notifikasi ditolak :(</string>
+    <string name="settings_alarm_set">Alarm diatur! Tutup aplikasi sekarang &amp; tunggu 10 dtk.</string>
+    <string name="settings_alarm_error">Error Alarm: Izinkan Alarms &amp; Reminders di Settings HP</string>
+    <string name="settings_detail_description">Detail</string>
+</resources>

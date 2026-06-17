@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">Griefy</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_back_description">Back</string>
+    <string name="settings_pref_display">DISPLAY PREFERENCES</string>
+    <string name="settings_change_language">Change Language</string>
+    <string name="settings_language_indonesian">Indonesian</string>
+    <string name="settings_dark_mode">Dark Mode</string>
+    <string name="settings_pref_memory">MEMORY MANAGEMENT</string>
+    <string name="settings_reminders_title">Remembrance Day Reminders</string>
+    <string name="settings_reminders_subtitle">Set reminders for important memories</string>
+    <string name="settings_trash_title">Recently Deleted (Trash)</string>
+    <string name="settings_trash_subtitle">Restore memories within 30 days</string>
+    <string name="settings_pref_account">ACCOUNT</string>
+    <string name="settings_logout">Logout</string>
+    <string name="settings_permission_granted">Permission granted! Please click again.</string>
+    <string name="settings_permission_denied">Notification permission denied :(</string>
+    <string name="settings_alarm_set">Alarm set! Close the app now &amp; wait 10 seconds.</string>
+    <string name="settings_alarm_error">Alarm Error: Allow Alarms &amp; Reminders in Device Settings</string>
+    <string name="settings_detail_description">Details</string>
 </resources>
