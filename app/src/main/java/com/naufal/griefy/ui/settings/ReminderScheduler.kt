@@ -15,6 +15,8 @@ class ReminderScheduler(private val context: Context) {
             putExtra("REMINDER_ID", day.id)
             putExtra("REMINDER_TITLE", day.title)
             putExtra("REMINDER_DESC", day.description)
+            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+            addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
