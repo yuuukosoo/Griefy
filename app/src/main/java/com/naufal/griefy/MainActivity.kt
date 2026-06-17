@@ -12,6 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.naufal.griefy.ui.create.CreateMemoryScreen
 import com.naufal.griefy.ui.detail.DetailScreen
 import com.naufal.griefy.ui.edit.EditMemoryScreen
@@ -25,12 +27,24 @@ import com.naufal.griefy.ui.reminders.ReminderScreen
 import com.naufal.griefy.ui.settings.SettingsScreen
 import com.naufal.griefy.ui.theme.GriefyTheme
 import com.naufal.griefy.ui.trash.TrashScreen
+import com.naufal.griefy.worker.TrashCleanupWorker
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val trashCleanupWorkRequest = PeriodicWorkRequestBuilder<TrashCleanupWorker>(
+            1, TimeUnit.DAYS 
+        ).build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "TrashCleanupWork",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            trashCleanupWorkRequest
+        )
         setContent {
             GriefyTheme {
                 Surface(
