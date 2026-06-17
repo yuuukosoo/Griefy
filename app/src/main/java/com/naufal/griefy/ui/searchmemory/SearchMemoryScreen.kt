@@ -48,9 +48,9 @@ fun SearchMemoryScreen(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Header Row (Left: Greeting, Right: Settings Gear)
 
-            // Search input field
+
+
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },
