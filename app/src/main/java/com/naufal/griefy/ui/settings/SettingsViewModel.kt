@@ -2,6 +2,7 @@ package com.naufal.griefy.ui.settings
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext context: Context
 ) : ViewModel() {
 
     private val sharedPreferences = context.getSharedPreferences("settings_pref", Context.MODE_PRIVATE)
@@ -26,7 +27,9 @@ class SettingsViewModel @Inject constructor(
 
     fun setDarkMode(enabled: Boolean) {
         _isDarkMode.value = enabled
-        sharedPreferences.edit().putBoolean("dark_mode", enabled).apply()
+        sharedPreferences.edit {
+            putBoolean("dark_mode", enabled)
+        }
     }
 
     fun changeLanguage(langCode: String) {
