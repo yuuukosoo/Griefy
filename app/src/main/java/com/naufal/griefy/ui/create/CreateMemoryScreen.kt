@@ -100,7 +100,7 @@ fun CreateMemoryScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 48.dp)
+                .padding(start = 48.dp, end = 48.dp, bottom = 16.dp, top = 48.dp)
                 .verticalScroll(rememberScrollState())
         ) {
 
@@ -108,11 +108,13 @@ fun CreateMemoryScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = { navController.navigateUp() },
+                Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { navController.navigateUp() },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -248,7 +250,7 @@ fun CreateMemoryScreen(
                 onValueChange = { viewModel.onContentChange(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
+                    .heightIn(min = 250.dp),
                 placeholder = {
                     Text(
                         text = stringResource(R.string.create_content_placeholder),
@@ -368,39 +370,33 @@ fun CreateMemoryScreen(
                 }
             }
 
-            // Flat Elegant Add Song & Add Label Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // Flat Elegant Add Song Button
+            Button(
+                onClick = { navController.navigate(Screen.SearchPublic.route) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                // Add Song Button
-                Button(
-                    onClick = { navController.navigate(Screen.SearchPublic.route) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(38.dp)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp)),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Text(text = stringResource(R.string.create_add_song), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
-                }
+                Text(text = stringResource(R.string.create_add_song), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
 
-                // Add Label Button
-                Button(
-                    onClick = { showAddLabelDialog = true },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(38.dp)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp)),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Text(text = stringResource(R.string.create_add_label), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
-                }
+            // Flat Elegant Add Label Button
+            Button(
+                onClick = { showAddLabelDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Text(text = stringResource(R.string.create_add_label), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
 
             Row(
@@ -414,15 +410,15 @@ fun CreateMemoryScreen(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(32.dp)
+                        .height(36.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(if (!isPublic) Color(0xFF8C7D73) else Color.Transparent)
+                        .background(if (!isPublic) MaterialTheme.colorScheme.primary else Color.Transparent)
                         .clickable { viewModel.onPrivacyChange(false) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = stringResource(R.string.private_text),
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (!isPublic) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -432,22 +428,22 @@ fun CreateMemoryScreen(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(32.dp)
+                        .height(36.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(if (isPublic) Color(0xFF8C7D73) else Color.Transparent)
+                        .background(if (isPublic) MaterialTheme.colorScheme.primary else Color.Transparent)
                         .clickable { viewModel.onPrivacyChange(true) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = stringResource(R.string.public_text),
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (isPublic) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Save Button
             Button(
@@ -460,7 +456,7 @@ fun CreateMemoryScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(46.dp),
+                    .height(56.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), // Cozy warm clay
                 enabled = titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty()

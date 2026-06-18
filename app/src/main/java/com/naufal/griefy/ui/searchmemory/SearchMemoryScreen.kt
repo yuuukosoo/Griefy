@@ -78,7 +78,7 @@ fun SearchMemoryScreen(
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 100.dp),
+                contentPadding = PaddingValues(start = 48.dp, end = 48.dp, top = 8.dp, bottom = 100.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 if (memories.isEmpty()) {

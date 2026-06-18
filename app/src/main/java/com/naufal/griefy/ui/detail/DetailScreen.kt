@@ -156,7 +156,7 @@ fun DetailScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                        .padding(horizontal = 48.dp, vertical = 16.dp)
                         .navigationBarsPadding(),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -294,8 +294,8 @@ fun DetailScreen(
                             state = pagerState,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(220.dp)
-                                .padding(horizontal = 24.dp)
+                                .padding(horizontal = 48.dp)
+                                .aspectRatio(1f)
                                 .clip(RoundedCornerShape(16.dp))
                         ) { page ->
                             AsyncImage(
@@ -335,7 +335,7 @@ fun DetailScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
+                        .padding(horizontal = 48.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -387,7 +387,7 @@ fun DetailScreen(
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(horizontal = 24.dp)
+                    modifier = Modifier.padding(horizontal = 48.dp)
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -396,7 +396,7 @@ fun DetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(horizontal = 24.dp)
+                        .padding(horizontal = 48.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
                     Text(
