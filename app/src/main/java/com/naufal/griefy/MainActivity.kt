@@ -27,6 +27,9 @@ import com.naufal.griefy.ui.search.SearchSongScreen
 import com.naufal.griefy.ui.searchmemory.SearchMemoryScreen
 import com.naufal.griefy.ui.reminders.ReminderScreen
 import com.naufal.griefy.ui.settings.SettingsScreen
+import android.content.Context
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.*
 import com.naufal.griefy.ui.theme.GriefyTheme
 import com.naufal.griefy.ui.trash.TrashScreen
 import com.naufal.griefy.worker.TrashCleanupWorker
@@ -48,7 +51,36 @@ class MainActivity : AppCompatActivity() {
             trashCleanupWorkRequest
         )
         setContent {
-            GriefyTheme {
+            val sharedPreferences = remember {
+                getSharedPreferences("settings_pref", Context.MODE_PRIVATE)
+            }
+            val systemDark = isSystemInDarkTheme()
+            var isDarkModeEnabled by remember {
+                mutableStateOf(
+                    if (sharedPreferences.contains("dark_mode")) {
+                        sharedPreferences.getBoolean("dark_mode", false)
+                    } else {
+                        systemDark
+                    }
+                )
+            }
+
+            val listener = remember {
+                android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                    if (key == "dark_mode") {
+                        isDarkModeEnabled = sharedPreferences.getBoolean("dark_mode", false)
+                    }
+                }
+            }
+
+            DisposableEffect(sharedPreferences, listener) {
+                sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
+                onDispose {
+                    sharedPreferences.unregisterOnSharedPreferenceChangeListener(listener)
+                }
+            }
+
+            GriefyTheme(darkTheme = isDarkModeEnabled) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
