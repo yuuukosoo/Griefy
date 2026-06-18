@@ -37,8 +37,20 @@ fun TrashScreen(
     if (showEmptyTrashDialog) {
         AlertDialog(
             onDismissRequest = { showEmptyTrashDialog = false },
-            title = { Text(stringResource(R.string.trash_dialog_title)) },
-            text = { Text(stringResource(R.string.trash_dialog_text)) },
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = { 
+                Text(
+                    text = stringResource(R.string.trash_dialog_title), 
+                    color = MaterialTheme.colorScheme.onSurface, 
+                    fontWeight = FontWeight.Bold
+                ) 
+            },
+            text = { 
+                Text(
+                    text = stringResource(R.string.trash_dialog_text), 
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                ) 
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -47,11 +59,14 @@ fun TrashScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text(stringResource(R.string.trash_dialog_confirm))
+                    Text(stringResource(R.string.trash_dialog_confirm), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEmptyTrashDialog = false }) { 
+                TextButton(
+                    onClick = { showEmptyTrashDialog = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) { 
                     Text(stringResource(R.string.cancel)) 
                 }
             }
