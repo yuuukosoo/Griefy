@@ -27,7 +27,7 @@ fun FloatingNavigationDock(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 24.dp),
+            .padding(horizontal = 48.dp, vertical = 24.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
         Row(
@@ -63,7 +63,7 @@ fun FloatingNavigationDock(
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = stringResource(R.string.nav_home),
-                            tint = if (currentRoute == Screen.Home.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            tint = if (currentRoute == Screen.Home.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                     }
 
@@ -80,7 +80,7 @@ fun FloatingNavigationDock(
                         Icon(
                             imageVector = Icons.Default.Search,
                             contentDescription = stringResource(R.string.nav_search_memory),
-                            tint = if (currentRoute == Screen.SearchMemory.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            tint = if (currentRoute == Screen.SearchMemory.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                     }
 
@@ -97,7 +97,7 @@ fun FloatingNavigationDock(
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = stringResource(R.string.nav_profile),
-                            tint = if (currentRoute == Screen.Profile.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                            tint = if (currentRoute == Screen.Profile.route) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                     }
                 }

@@ -96,7 +96,7 @@ fun HomeScreen(
                 onValueChange = { viewModel.setSearchQuery(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                    .padding(horizontal = 48.dp, vertical = 8.dp),
                 placeholder = { Text(stringResource(R.string.home_search_placeholder), color = MaterialTheme.colorScheme.outline) },
                 leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                 trailingIcon = {
@@ -119,7 +119,7 @@ fun HomeScreen(
             // Memories list
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 100.dp),
+                contentPadding = PaddingValues(start = 48.dp, end = 48.dp, top = 8.dp, bottom = 100.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 if (memories.isEmpty()) {
