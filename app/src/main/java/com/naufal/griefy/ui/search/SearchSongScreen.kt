@@ -198,10 +198,7 @@ fun SongCard(
             .fillMaxWidth()
             .clickable { onCardClick() },
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) 
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) 
-            else 
-                MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         border = null,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
