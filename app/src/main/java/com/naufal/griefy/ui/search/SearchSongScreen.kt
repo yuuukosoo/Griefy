@@ -199,14 +199,11 @@ fun SongCard(
             .clickable { onCardClick() },
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) 
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) 
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.18f) 
             else 
                 MaterialTheme.colorScheme.surface
         ),
-        border = if (isSelected) 
-            BorderStroke(2.dp, MaterialTheme.colorScheme.primary) 
-        else 
-            null,
+        border = null,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
