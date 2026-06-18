@@ -9,10 +9,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -81,18 +85,21 @@ fun SearchSongScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 modifier = Modifier.padding(top = 32.dp),
-                title = { Text(stringResource(R.string.search_song_title)) },
+                title = { Text(stringResource(R.string.search_song_title), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { paddingValues ->
@@ -100,20 +107,44 @@ fun SearchSongScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(horizontal = 48.dp, vertical = 16.dp)
         ) {
 
             OutlinedTextField(
                 value = viewModel.searchQuery,
                 onValueChange = { viewModel.onQueryChange(it) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(stringResource(R.string.search_song_placeholder)) },
+                placeholder = { Text(stringResource(R.string.search_song_placeholder), color = MaterialTheme.colorScheme.outline) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
                 trailingIcon = {
-                    IconButton(onClick = { viewModel.searchSongs() }) {
-                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.clear))
+                    if (viewModel.searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { 
+                            viewModel.onQueryChange("")
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = stringResource(R.string.clear),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 },
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { viewModel.searchSongs() }),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -168,14 +199,15 @@ fun SongCard(
             .clickable { onCardClick() },
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) 
-                MaterialTheme.colorScheme.primaryContainer 
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) 
             else 
-                MaterialTheme.colorScheme.surfaceVariant
+                MaterialTheme.colorScheme.surface
         ),
         border = if (isSelected) 
             BorderStroke(2.dp, MaterialTheme.colorScheme.primary) 
         else 
-            null
+            null,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -215,13 +247,14 @@ fun SongCard(
                 Text(
                     text = song.title, 
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = song.artistName, 
                     style = MaterialTheme.typography.bodyMedium, 
-                    color = MaterialTheme.colorScheme.outline,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
