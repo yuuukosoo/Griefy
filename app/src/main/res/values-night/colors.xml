@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Color (Dark Theme) -->
+    <color name="brand_primary">#A3BDA2</color>
+
+    <!-- Secondary Color (Dark Theme) -->
+    <color name="brand_background">#181A17</color>
+
+    <!-- Neutral Colors (Dark Theme) -->
+    <color name="neutral_surface">#222521</color>
+    <color name="neutral_outline">#373C35</color>
+    <color name="neutral_text">#E0DDD6</color>
+
+    <!-- Accent Colors (Dark Theme) -->
+    <color name="accent_save">#E2BA9F</color>
+    <color name="accent_error">#D79A9C</color>
+</resources>

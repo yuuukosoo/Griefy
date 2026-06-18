@@ -20,7 +20,22 @@ fun GriefyTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val customColorScheme = lightColorScheme(
+    val customLightColorScheme = lightColorScheme(
+        primary = colorResource(id = R.color.brand_primary),
+        background = colorResource(id = R.color.brand_background),
+        surface = colorResource(id = R.color.neutral_surface),
+        surfaceVariant = colorResource(id = R.color.neutral_outline),
+        onSurfaceVariant = colorResource(id = R.color.neutral_text),
+        outline = colorResource(id = R.color.neutral_outline),
+        onBackground = colorResource(id = R.color.neutral_text),
+        onSurface = colorResource(id = R.color.neutral_text),
+        onPrimary = colorResource(id = R.color.neutral_surface),
+        secondary = colorResource(id = R.color.accent_save),
+        error = colorResource(id = R.color.accent_error),
+        onError = colorResource(id = R.color.neutral_surface)
+    )
+
+    val customDarkColorScheme = darkColorScheme(
         primary = colorResource(id = R.color.brand_primary),
         background = colorResource(id = R.color.brand_background),
         surface = colorResource(id = R.color.neutral_surface),
@@ -40,7 +55,8 @@ fun GriefyTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        else -> customColorScheme
+        darkTheme -> customDarkColorScheme
+        else -> customLightColorScheme
     }
 
     MaterialTheme(
