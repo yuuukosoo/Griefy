@@ -1,8 +1,10 @@
 package com.naufal.griefy.ui.trash
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,6 +19,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -33,10 +37,16 @@ fun TrashScreen(
     val trashedMemories by viewModel.trashedMemories.collectAsState()
 
     var showEmptyTrashDialog by remember { mutableStateOf(false) }
+    var showDeleteSingleDialog by remember { mutableStateOf(false) }
+    var memoryToDeleteId by remember { mutableStateOf<Int?>(null) }
 
     if (showEmptyTrashDialog) {
         AlertDialog(
             onDismissRequest = { showEmptyTrashDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 48.dp),
             containerColor = MaterialTheme.colorScheme.surface,
             title = { 
                 Text(
@@ -68,6 +78,58 @@ fun TrashScreen(
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                 ) { 
                     Text(stringResource(R.string.cancel)) 
+                }
+            }
+        )
+    }
+
+    if (showDeleteSingleDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteSingleDialog = false
+                memoryToDeleteId = null
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 48.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(
+                    text = stringResource(R.string.dialog_delete_permanent_title),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.dialog_delete_permanent_text),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        memoryToDeleteId?.let { id ->
+                            viewModel.deletePermanently(id)
+                        }
+                        showDeleteSingleDialog = false
+                        memoryToDeleteId = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteSingleDialog = false
+                        memoryToDeleteId = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -127,7 +189,10 @@ fun TrashScreen(
                         TrashedMemoryCard(
                             memory = memory,
                             onRestore = { viewModel.restoreMemory(memory.id) },
-                            onDelete = { viewModel.deletePermanently(memory.id) }
+                            onDelete = {
+                                memoryToDeleteId = memory.id
+                                showDeleteSingleDialog = true
+                            }
                         )
                     }
                 }
@@ -144,6 +209,39 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
+            // Profile Header Row
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!memory.userAvatar.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = memory.userAvatar,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize().clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text("👤", fontSize = 10.sp)
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = memory.userName ?: "Khalish",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
 
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(

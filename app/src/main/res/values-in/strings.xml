@@ -144,4 +144,14 @@
     <string name="settings_alarm_set">Alarm diatur! Tutup aplikasi sekarang &amp; tunggu 10 dtk.</string>
     <string name="settings_alarm_error">Error Alarm: Izinkan Alarms &amp; Reminders di Settings HP</string>
     <string name="settings_detail_description">Detail</string>
+
+    <!-- Dialog Confirmation Strings -->
+    <string name="dialog_delete_memory_title">Hapus Memori?</string>
+    <string name="dialog_delete_memory_text">Apakah Anda yakin ingin menghapus memori ini ke tempat sampah?</string>
+    <string name="dialog_delete_reminder_title">Hapus Pengingat?</string>
+    <string name="dialog_delete_reminder_text">Apakah Anda yakin ingin menghapus pengingat ini?</string>
+    <string name="dialog_delete_permanent_title">Hapus Permanen?</string>
+    <string name="dialog_delete_permanent_text">Apakah Anda yakin ingin menghapus memori ini secara permanen? Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="dialog_logout_title">Keluar Akun?</string>
+    <string name="dialog_logout_text">Apakah Anda yakin ingin keluar dari akun Anda?</string>
 </resources>

@@ -94,7 +94,9 @@ class CreateMemoryViewModel @Inject constructor(
                 isPublic = isPublic,
                 songTrackId = selectedSongTrackId,
                 songTitle = selectedSongTitle,
-                isTrashed = false
+                isTrashed = false,
+                userName = "Khalish",
+                userAvatar = null
             )
 
             repository.addMemory(newMemory)

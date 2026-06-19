@@ -54,6 +54,7 @@ fun DetailScreen(
 ) {
     val memory by viewModel.memory.collectAsState()
     val songDetails by viewModel.songDetails.collectAsState()
+    var showDeleteDialog by remember { mutableStateOf(false) }
     var selectedImageIndexForFullScreen by remember { mutableStateOf<Int?>(null) }
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
 
@@ -135,9 +136,7 @@ fun DetailScreen(
 
                     IconButton(
                         onClick = {
-                            viewModel.moveToTrash(
-                                onDeleteSuccess = { navController.navigateUp() }
-                            )
+                            showDeleteDialog = true
                         },
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
@@ -282,6 +281,41 @@ fun DetailScreen(
                         bottom = paddingValues.calculateBottomPadding() + 8.dp
                     )
             ) {
+                // Profile Header Row
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 48.dp)
+                        .padding(bottom = 12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (!mem.userAvatar.isNullOrEmpty()) {
+                            AsyncImage(
+                                model = mem.userAvatar,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Text("👤", fontSize = 10.sp)
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = mem.userName ?: "Khalish",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+
                 if (mem.imageUris.isNotEmpty()) {
                     val pagerState = rememberPagerState(initialPage = 0) { mem.imageUris.size }
                     
@@ -358,7 +392,7 @@ fun DetailScreen(
 
                     if (mem.tags.isNotEmpty()) {
                         LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             itemsIndexed(mem.tags) { _, tag ->
@@ -448,5 +482,50 @@ fun DetailScreen(
                 }
             }
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 48.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(
+                    text = stringResource(R.string.dialog_delete_memory_title),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.dialog_delete_memory_text),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        viewModel.moveToTrash(
+                            onDeleteSuccess = { navController.navigateUp() }
+                        )
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }

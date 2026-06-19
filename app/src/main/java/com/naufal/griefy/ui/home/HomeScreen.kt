@@ -177,6 +177,40 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // Profile Header Row
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!memory.userAvatar.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = memory.userAvatar,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize().clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text("👤", fontSize = 10.sp)
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = memory.userName ?: "Khalish",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first(),

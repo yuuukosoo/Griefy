@@ -144,4 +144,14 @@
     <string name="settings_alarm_set">Alarm set! Close the app now &amp; wait 10 seconds.</string>
     <string name="settings_alarm_error">Alarm Error: Allow Alarms &amp; Reminders in Device Settings</string>
     <string name="settings_detail_description">Details</string>
+
+    <!-- Dialog Confirmation Strings -->
+    <string name="dialog_delete_memory_title">Delete Memory?</string>
+    <string name="dialog_delete_memory_text">Are you sure you want to move this memory to trash?</string>
+    <string name="dialog_delete_reminder_title">Delete Reminder?</string>
+    <string name="dialog_delete_reminder_text">Are you sure you want to delete this reminder?</string>
+    <string name="dialog_delete_permanent_title">Delete Permanently?</string>
+    <string name="dialog_delete_permanent_text">Are you sure you want to permanently delete this memory? This action cannot be undone.</string>
+    <string name="dialog_logout_title">Logout?</string>
+    <string name="dialog_logout_text">Are you sure you want to log out of your account?</string>
 </resources>
