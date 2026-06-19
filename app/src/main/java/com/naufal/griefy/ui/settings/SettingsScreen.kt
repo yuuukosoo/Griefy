@@ -298,6 +298,7 @@ fun SettingsScreen(
                 TextButton(
                     onClick = {
                         showLogoutDialog = false
+                        com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0)
                         }
