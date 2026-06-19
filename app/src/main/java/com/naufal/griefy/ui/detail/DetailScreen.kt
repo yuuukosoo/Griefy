@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import com.naufal.griefy.util.toImageModel
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -333,7 +334,7 @@ fun DetailScreen(
                                 .clip(RoundedCornerShape(16.dp))
                         ) { page ->
                             AsyncImage(
-                                model = mem.imageUris[page],
+                                model = mem.imageUris[page].toImageModel(),
                                 contentDescription = stringResource(R.string.home_memory_photo_desc),
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -460,7 +461,7 @@ fun DetailScreen(
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
                     AsyncImage(
-                        model = memory!!.imageUris[page],
+                        model = memory!!.imageUris[page].toImageModel(),
                         contentDescription = stringResource(R.string.home_memory_photo_desc),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit

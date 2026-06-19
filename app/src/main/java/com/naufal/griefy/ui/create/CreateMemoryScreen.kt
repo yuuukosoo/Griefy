@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import com.naufal.griefy.util.toImageModel
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -180,7 +181,7 @@ fun CreateMemoryScreen(
                                     .aspectRatio(1f) // Square image item
                             ) {
                                 AsyncImage(
-                                    model = uri,
+                                    model = uri.toString().toImageModel(),
                                     contentDescription = stringResource(R.string.create_selected_photo_desc),
                                     modifier = Modifier
                                         .fillMaxSize()
