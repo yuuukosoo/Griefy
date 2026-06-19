@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -22,6 +24,7 @@ import coil.compose.AsyncImage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -33,24 +36,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
 
 @Composable
-fun ProfileScreen(navController: NavController) {
-    var isEditing by remember { mutableStateOf(false) }
-    var username by remember { mutableStateOf("Khalish") }
-    var email by remember { mutableStateOf("khalish@example.com") }
-    var gender by remember { mutableStateOf("Laki-laki") }
-    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
+fun ProfileScreen(
+    navController: NavController,
+    viewModel: ProfileViewModel = hiltViewModel()
+) {
+    val isEditing = viewModel.isEditing
+    val username = viewModel.username
+    val email = viewModel.email
+    val gender = viewModel.gender
+    val profileImageUriString = viewModel.profileImageUriString
+    val profileImageUri = profileImageUriString?.let { Uri.parse(it) }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            profileImageUri = uri
+            viewModel.setProfileImageUri(uri.toString())
         }
     }
 
@@ -63,6 +71,7 @@ fun ProfileScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             // Header Row (Left: Screen Title)
             Row(
@@ -142,7 +151,7 @@ fun ProfileScreen(navController: NavController) {
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    IconButton(onClick = { isEditing = !isEditing }) {
+                    IconButton(onClick = { viewModel.setIsEditing(!isEditing) }) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit Profile",
@@ -158,7 +167,7 @@ fun ProfileScreen(navController: NavController) {
                     label = "Username",
                     value = username,
                     isEditing = isEditing,
-                    onValueChange = { username = it }
+                    onValueChange = { viewModel.onUsernameChange(it) }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 ProfileInfoItem(
@@ -166,7 +175,7 @@ fun ProfileScreen(navController: NavController) {
                     label = "Email address",
                     value = email,
                     isEditing = isEditing,
-                    onValueChange = { email = it }
+                    onValueChange = { viewModel.onEmailChange(it) }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 ProfileInfoItem(
@@ -174,14 +183,14 @@ fun ProfileScreen(navController: NavController) {
                     label = "Gender",
                     value = gender,
                     isEditing = isEditing,
-                    onValueChange = { gender = it },
+                    onValueChange = { viewModel.onGenderChange(it) },
                     options = listOf("Laki-laki", "Perempuan")
                 )
 
                 if (isEditing) {
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
-                        onClick = { isEditing = false },
+                        onClick = { viewModel.setIsEditing(false) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -195,6 +204,7 @@ fun ProfileScreen(navController: NavController) {
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(100.dp))
             }
         }
 

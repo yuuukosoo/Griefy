@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -41,6 +43,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +51,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -62,6 +66,7 @@ fun SettingsScreen(
 ) {
     val isDarkMode by viewModel.isDarkMode.collectAsState()
     val currentLangCode by viewModel.currentLanguageCode.collectAsState()
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     val currentLanguageName = if (currentLangCode == "in" || currentLangCode == "id") {
         stringResource(R.string.settings_language_indonesian)
@@ -187,6 +192,7 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 48.dp)
+                .verticalScroll(rememberScrollState())
         ) {
 
             SettingsCategoryTitle(stringResource(R.string.settings_pref_display))
@@ -259,13 +265,57 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_logout),
                     titleColor = MaterialTheme.colorScheme.error,
                     onClick = {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(0)
-                        }
+                        showLogoutDialog = true
                     }
                 )
             }
+            Spacer(modifier = Modifier.height(100.dp))
         }
+    }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 48.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(
+                    text = stringResource(R.string.dialog_logout_title),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.dialog_logout_text),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0)
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.settings_logout), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showLogoutDialog = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }
 

@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -106,6 +107,8 @@ fun ReminderScreen(
 
     var showDialog by remember { mutableStateOf(false) }
     var editingReminder by remember { mutableStateOf<RemembranceDay?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var reminderToDelete by remember { mutableStateOf<RemembranceDay?>(null) }
 
     var titleText by remember { mutableStateOf("") }
     var descText by remember { mutableStateOf("") }
@@ -212,12 +215,67 @@ fun ReminderScreen(
                                 reminder = reminder,
                                 dateTimeString = formatter.format(Date(reminder.dateTime)),
                                 onEdit = { openDialog(reminder) },
-                                onDelete = { viewModel.deleteReminder(reminder) }
+                                onDelete = {
+                                    reminderToDelete = reminder
+                                    showDeleteDialog = true
+                                }
                             )
                         }
                     }
                 }
             }
+        }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                    reminderToDelete = null
+                },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 48.dp),
+                containerColor = MaterialTheme.colorScheme.surface,
+                title = {
+                    Text(
+                        text = stringResource(R.string.dialog_delete_reminder_title),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(R.string.dialog_delete_reminder_text),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            reminderToDelete?.let {
+                                viewModel.deleteReminder(it)
+                            }
+                            showDeleteDialog = false
+                            reminderToDelete = null
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text(stringResource(R.string.delete), fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog = false
+                            reminderToDelete = null
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
         }
 
         if (showDialog) {
