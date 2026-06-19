@@ -23,9 +23,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.naufal.griefy.R
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.naufal.griefy.domain.util.Resource
 
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(
+    navController: NavController,
+    viewModel: RegisterViewModel = hiltViewModel()
+) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -33,6 +40,24 @@ fun RegisterScreen(navController: NavController) {
 
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+    val registerState by viewModel.registerState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(registerState) {
+        when (registerState) {
+            is Resource.Success -> {
+                Toast.makeText(context, "Registrasi sukses! Silakan masuk.", Toast.LENGTH_LONG).show()
+                navController.navigateUp()
+                viewModel.resetState()
+            }
+            is Resource.Error -> {
+                Toast.makeText(context, registerState?.message ?: "Registrasi gagal", Toast.LENGTH_LONG).show()
+                viewModel.resetState()
+            }
+            else -> {}
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -179,13 +204,14 @@ fun RegisterScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    navController.navigateUp()
+                    viewModel.register(name, email, password, confirmPassword)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                enabled = registerState !is Resource.Loading
             ) {
                 Text(
                     text = stringResource(R.string.register_button),
@@ -221,11 +247,20 @@ fun RegisterScreen(navController: NavController) {
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         modifier = Modifier.clickable {
-                            navController.navigateUp()
+                            if (registerState !is Resource.Loading) {
+                                navController.navigateUp()
+                            }
                         }
                     )
                 }
             }
+        }
+
+        if (registerState is Resource.Loading) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
     }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1012618123831",
+    "project_id": "griefy-bca61",
+    "storage_bucket": "griefy-bca61.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1012618123831:android:7395967e82a07a03d4bdb2",
+        "android_client_info": {
+          "package_name": "com.naufal.griefy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBengAPu7FsyvyToKc3s60A_5wg-4e1RIA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -23,7 +23,9 @@ import kotlinx.coroutines.delay
 fun SplashScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         delay(3000) // Display splash screen for 3 seconds
-        navController.navigate(Screen.Login.route) {
+        val isLoggedIn = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser != null
+        val startRoute = if (isLoggedIn) Screen.Home.route else Screen.Login.route
+        navController.navigate(startRoute) {
             popUpTo(Screen.Splash.route) { inclusive = true }
         }
     }

@@ -22,12 +22,39 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.naufal.griefy.domain.util.Resource
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val loginState by viewModel.loginState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(loginState) {
+        when (loginState) {
+            is Resource.Success -> {
+                Toast.makeText(context, "Selamat datang kembali!", Toast.LENGTH_SHORT).show()
+                navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.Login.route) { inclusive = true }
+                }
+                viewModel.resetState()
+            }
+            is Resource.Error -> {
+                Toast.makeText(context, loginState?.message ?: "Gagal masuk", Toast.LENGTH_LONG).show()
+                viewModel.resetState()
+            }
+            else -> {}
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -114,15 +141,14 @@ fun LoginScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
+                    viewModel.login(email, password)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                enabled = loginState !is Resource.Loading
             ) {
                 Text(
                     text = stringResource(R.string.login_button),
@@ -148,10 +174,19 @@ fun LoginScreen(navController: NavController) {
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     modifier = Modifier.clickable {
-                        navController.navigate(Screen.Register.route)
+                        if (loginState !is Resource.Loading) {
+                            navController.navigate(Screen.Register.route)
+                        }
                     }
                 )
             }
+        }
+
+        if (loginState is Resource.Loading) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
     }
 }

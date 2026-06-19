@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Memory
+import com.naufal.griefy.util.toImageModel
 import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
 import java.text.SimpleDateFormat
@@ -175,7 +176,7 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
 
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
-                    model = memory.imageUris.first(),
+                    model = memory.imageUris.first().toImageModel(),
                     contentDescription = stringResource(R.string.home_memory_photo_desc),
                     modifier = Modifier
                         .fillMaxWidth()

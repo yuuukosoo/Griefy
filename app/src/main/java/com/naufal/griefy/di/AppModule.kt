@@ -10,6 +10,10 @@ import com.naufal.griefy.data.repository.MemoryRepositoryImpl
 import com.naufal.griefy.data.repository.RemembranceRepositoryImpl
 import com.naufal.griefy.domain.repository.MemoryRepository
 import com.naufal.griefy.domain.repository.RemembranceRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.naufal.griefy.data.repository.AuthRepositoryImpl
+import com.naufal.griefy.domain.repository.AuthRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,9 +56,11 @@ object AppModule {
     @Singleton
     fun provideMemoryRepository(
         dao: MemoryDao,
-        deezerApi: DeezerApi
+        deezerApi: DeezerApi,
+        app: Application,
+        firestore: FirebaseFirestore
     ): MemoryRepository {
-        return MemoryRepositoryImpl(dao, deezerApi)
+        return MemoryRepositoryImpl(dao, deezerApi, app, firestore)
     }
 
     @Provides
@@ -73,5 +79,25 @@ object AppModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(DeezerApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        firebaseAuth: FirebaseAuth
+    ): AuthRepository {
+        return AuthRepositoryImpl(firebaseAuth)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
     }
 }

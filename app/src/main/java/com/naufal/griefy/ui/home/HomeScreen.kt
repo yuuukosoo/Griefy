@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.naufal.griefy.util.toImageModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.R
@@ -213,7 +214,7 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit) {
 
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
-                    model = memory.imageUris.first(),
+                    model = memory.imageUris.first().toImageModel(),
                     contentDescription = stringResource(R.string.home_memory_photo_desc),
                     modifier = Modifier
                         .fillMaxWidth()

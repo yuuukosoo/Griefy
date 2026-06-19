@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Memory
+import com.naufal.griefy.util.toImageModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -245,7 +246,7 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
 
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
-                    model = memory.imageUris.first(),
+                    model = memory.imageUris.first().toImageModel(),
                     contentDescription = stringResource(R.string.trash_thumbnail_desc),
                     modifier = Modifier.fillMaxWidth().height(140.dp).clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Crop
