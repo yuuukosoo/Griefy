@@ -22,6 +22,8 @@ fun GriefyTheme(
 ) {
     val customLightColorScheme = lightColorScheme(
         primary = colorResource(id = R.color.brand_primary),
+        primaryContainer = colorResource(id = R.color.brand_primary_container),
+        onPrimaryContainer = colorResource(id = R.color.brand_primary),
         background = colorResource(id = R.color.brand_background),
         surface = colorResource(id = R.color.neutral_surface),
         surfaceVariant = colorResource(id = R.color.neutral_outline),
@@ -37,6 +39,8 @@ fun GriefyTheme(
 
     val customDarkColorScheme = darkColorScheme(
         primary = colorResource(id = R.color.brand_primary),
+        primaryContainer = colorResource(id = R.color.brand_primary_container),
+        onPrimaryContainer = colorResource(id = R.color.brand_primary),
         background = colorResource(id = R.color.brand_background),
         surface = colorResource(id = R.color.neutral_surface),
         surfaceVariant = colorResource(id = R.color.neutral_outline),
