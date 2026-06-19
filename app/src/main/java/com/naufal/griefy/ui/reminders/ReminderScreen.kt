@@ -128,18 +128,21 @@ fun ReminderScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.reminder_title), fontWeight = FontWeight.Bold) },
-                modifier = Modifier.padding(top = 32.dp),
+                modifier = Modifier.padding(top = 32.dp, start = 32.dp, end = 32.dp),
+                title = { Text(stringResource(R.string.reminder_title), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         },
         floatingActionButton = {
@@ -220,12 +223,14 @@ fun ReminderScreen(
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
+                containerColor = MaterialTheme.colorScheme.surface,
                 title = {
                     Text(
                         text = if (editingReminder != null) 
                             stringResource(R.string.reminder_dialog_edit) 
                         else 
                             stringResource(R.string.reminder_dialog_add),
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -241,7 +246,15 @@ fun ReminderScreen(
                             onValueChange = { titleText = it },
                             label = { Text(stringResource(R.string.reminder_name_label)) },
                             modifier = Modifier.fillMaxWidth(),
-                            singleLine = true
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         )
 
                         OutlinedTextField(
@@ -249,7 +262,15 @@ fun ReminderScreen(
                             onValueChange = { descText = it },
                             label = { Text(stringResource(R.string.reminder_note_label)) },
                             modifier = Modifier.fillMaxWidth(),
-                            maxLines = 3
+                            maxLines = 3,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         )
 
                         val calendar = remember { Calendar.getInstance() }.apply {
@@ -262,7 +283,8 @@ fun ReminderScreen(
                             Text(
                                 text = stringResource(R.string.reminder_time_label),
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             Row(
@@ -285,7 +307,10 @@ fun ReminderScreen(
                                         ).show()
                                     },
                                     modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.filledTonalButtonColors()
+                                    colors = ButtonDefaults.filledTonalButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 ) {
                                     Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
@@ -308,7 +333,10 @@ fun ReminderScreen(
                                         ).show()
                                     },
                                     modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.filledTonalButtonColors()
+                                    colors = ButtonDefaults.filledTonalButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 ) {
                                     Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
@@ -321,7 +349,7 @@ fun ReminderScreen(
                                     .fillMaxWidth()
                                     .padding(top = 4.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                                 )
                             ) {
                                 Row(
@@ -339,7 +367,7 @@ fun ReminderScreen(
                                         text = formatter.format(Date(selectedDateTime)),
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -368,13 +396,20 @@ fun ReminderScreen(
                                 showDialog = false
                             }
                         },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
                         enabled = titleText.isNotBlank()
                     ) {
-                        Text(stringResource(R.string.save))
+                        Text(stringResource(R.string.save), fontWeight = FontWeight.Bold)
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDialog = false }) {
+                    TextButton(
+                        onClick = { showDialog = false },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                    ) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
@@ -395,17 +430,11 @@ fun ReminderCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isPast) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.primary
-            }
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isPast) 0.dp else 2.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(24.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -419,14 +448,14 @@ fun ReminderCard(
                         text = reminder.title,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     if (reminder.description.isNotBlank()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = reminder.description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -438,20 +467,20 @@ fun ReminderCard(
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = stringResource(R.string.reminder_dialog_edit),
-                            tint = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     IconButton(onClick = onDelete) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = stringResource(R.string.delete),
-                            tint = if (isPast) MaterialTheme.colorScheme.error.copy(alpha = 0.8f) else MaterialTheme.colorScheme.errorContainer
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -459,28 +488,28 @@ fun ReminderCard(
                 Icon(
                     imageVector = if (isPast) Icons.Default.NotificationsNone else Icons.Default.NotificationsActive,
                     contentDescription = null,
-                    tint = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onPrimary,
+                    tint = if (isPast) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = dateTimeString,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isPast) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onPrimary,
+                    color = if (isPast) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 if (isPast) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Surface(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
+                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.reminder_passed),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                            color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }

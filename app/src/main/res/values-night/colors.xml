@@ -2,6 +2,7 @@
 <resources>
     <!-- Brand Color (Dark Theme) -->
     <color name="brand_primary">#A3BDA2</color>
+    <color name="brand_primary_container">#354234</color>
 
     <!-- Secondary Color (Dark Theme) -->
     <color name="brand_background">#181A17</color>

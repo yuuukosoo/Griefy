@@ -27,6 +27,10 @@ import com.naufal.griefy.ui.search.SearchSongScreen
 import com.naufal.griefy.ui.searchmemory.SearchMemoryScreen
 import com.naufal.griefy.ui.reminders.ReminderScreen
 import com.naufal.griefy.ui.settings.SettingsScreen
+import androidx.appcompat.app.AppCompatDelegate
+import android.content.Context
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.*
 import com.naufal.griefy.ui.theme.GriefyTheme
 import com.naufal.griefy.ui.trash.TrashScreen
 import com.naufal.griefy.worker.TrashCleanupWorker
@@ -36,6 +40,13 @@ import java.util.concurrent.TimeUnit
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val sharedPreferences = getSharedPreferences("settings_pref", Context.MODE_PRIVATE)
+        if (sharedPreferences.contains("dark_mode")) {
+            val isDark = sharedPreferences.getBoolean("dark_mode", false)
+            AppCompatDelegate.setDefaultNightMode(
+                if (isDark) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
         super.onCreate(savedInstanceState)
 
         val trashCleanupWorkRequest = PeriodicWorkRequestBuilder<TrashCleanupWorker>(
