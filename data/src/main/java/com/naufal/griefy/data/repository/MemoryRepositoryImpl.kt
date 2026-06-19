@@ -1,48 +1,142 @@
 package com.naufal.griefy.data.repository
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Base64
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.naufal.griefy.data.local.MemoryDao
 import com.naufal.griefy.data.remote.DeezerApi
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.repository.MemoryRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
-
 
 class MemoryRepositoryImpl @Inject constructor(
     private val dao: MemoryDao,
-    private val deezerApi: DeezerApi
+    private val deezerApi: DeezerApi,
+    private val context: Context,
+    private val firestore: FirebaseFirestore
 ) : MemoryRepository {
 
-    override fun getAllMemories(): Flow<List<Memory>> {
+    private val repositoryScope = CoroutineScope(Dispatchers.IO)
 
+    override fun getAllMemories(): Flow<List<Memory>> {
         return dao.getAllMemories().map { entities ->
-            entities.map { it.toDomain() }
+            entities.filter { !it.isPublic || it.userName == "Khalish" || it.userName.isNullOrEmpty() }.map { it.toDomain() }
         }
     }
 
-    override fun getPublicMemories(): Flow<List<Memory>> {
+    override fun getPublicMemories(): Flow<List<Memory>> = callbackFlow {
+        // Real-time listener for Firestore public memories
+        val listener = firestore.collection("public_memories")
+            .whereEqualTo("isPublic", true)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    android.util.Log.e("FIRESTORE_ERROR", "Error fetching public memories: ${error.message}", error)
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val remoteMemories = snapshot.documents.mapNotNull { doc ->
+                        try {
+                            val title = doc.getString("title") ?: ""
+                            val content = doc.getString("content") ?: ""
+                            val createdAt = doc.getLong("createdAt") ?: 0L
+                            val tags = doc.get("tags") as? List<String> ?: emptyList()
+                            val songTrackId = doc.getString("songTrackId")
+                            val songTitle = doc.getString("songTitle")
+                            val userName = doc.getString("userName")
+                            val userAvatar = doc.getString("userAvatar")
+                            val imageUris = doc.get("imageUris") as? List<String> ?: emptyList()
 
-        return dao.getAllMemories().map { entities ->
-            entities.filter { it.isPublic }.map { it.toDomain() }
-        }
+                            Memory(
+                                id = doc.getLong("localId")?.toInt() ?: 0,
+                                title = title,
+                                content = content,
+                                imageUris = imageUris,
+                                createdAt = createdAt,
+                                tags = tags,
+                                isPublic = true,
+                                songTrackId = songTrackId,
+                                songTitle = songTitle,
+                                isTrashed = false,
+                                userName = userName,
+                                userAvatar = userAvatar
+                            )
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+
+                    // Cache strategy: save remote memories to Room to allow offline viewing
+                    repositoryScope.launch {
+                        try {
+                            val localMemories = dao.getAllMemoriesOnce()
+                            for (remote in remoteMemories) {
+                                val exists = localMemories.any { it.createdAt == remote.createdAt && it.title == remote.title }
+                                if (!exists) {
+                                    // Insert remote memory to Room database as cache
+                                    dao.insertMemory(remote.toEntity())
+                                }
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("ROOM_CACHE_ERROR", "Gagal menyimpan cache ke Room: ${e.message}", e)
+                        }
+                    }
+
+                    trySend(remoteMemories)
+                }
+            }
+        awaitClose { listener.remove() }
     }
 
     override suspend fun getMemoryById(id: Int): Memory? {
         return dao.getMemoryById(id)?.toDomain()
     }
 
-
     override fun getMemoryByIdAsFlow(id: Int): Flow<Memory?> {
         return dao.getMemoryByIdAsFlow(id).map { it?.toDomain() }
     }
 
     override suspend fun addMemory(memory: Memory) {
-        dao.insertMemory(memory.toEntity())
+        var processedMemory = memory
+        if (memory.isPublic && memory.imageUris.isNotEmpty()) {
+            val base64Uris = memory.imageUris.mapNotNull { getBase64FromUri(context, it) }
+            processedMemory = memory.copy(imageUris = base64Uris)
+        }
+
+        // Save locally and get the generated ID
+        val localId = dao.insertMemory(processedMemory.toEntity()).toInt()
+        val finalMemory = processedMemory.copy(id = localId)
+
+        // Upload to Firestore if public
+        if (finalMemory.isPublic) {
+            uploadToFirestore(finalMemory)
+        }
     }
 
     override suspend fun updateMemory(memory: Memory) {
-        dao.updateMemory(memory.toEntity())
+        var processedMemory = memory
+        if (memory.isPublic && memory.imageUris.isNotEmpty()) {
+            val base64Uris = memory.imageUris.mapNotNull { getBase64FromUri(context, it) }
+            processedMemory = memory.copy(imageUris = base64Uris)
+        }
+
+        dao.updateMemory(processedMemory.toEntity())
+
+        if (processedMemory.isPublic) {
+            uploadToFirestore(processedMemory)
+        }
     }
 
     override suspend fun moveToTrash(id: Int) {
@@ -96,5 +190,79 @@ class MemoryRepositoryImpl @Inject constructor(
             android.util.Log.e("DEEZER_ERROR", "Gagal ambil detail lagu dari Deezer: ${e.message}", e)
             null
         }
+    }
+
+    // Helper to compress local Uri to Base64 String
+    private fun getBase64FromUri(context: Context, uriString: String): String? {
+        if (uriString.startsWith("base64:") || uriString.isBlank()) return uriString
+        return try {
+            val uri = Uri.parse(uriString)
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val originalBitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            if (originalBitmap == null) return null
+
+            val maxDimension = 300
+            val width = originalBitmap.width
+            val height = originalBitmap.height
+            val scaledBitmap = if (width > maxDimension || height > maxDimension) {
+                val ratio = width.toFloat() / height.toFloat()
+                val newWidth: Int
+                val newHeight: Int
+                if (ratio > 1) {
+                    newWidth = maxDimension
+                    newHeight = (maxDimension / ratio).toInt()
+                } else {
+                    newHeight = maxDimension
+                    newWidth = (maxDimension * ratio).toInt()
+                }
+                Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true)
+            } else {
+                originalBitmap
+            }
+
+            val outputStream = ByteArrayOutputStream()
+            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+            val imageBytes = outputStream.toByteArray()
+            outputStream.close()
+
+            "base64:" + Base64.encodeToString(imageBytes, Base64.DEFAULT).trim()
+        } catch (e: Exception) {
+            android.util.Log.e("BASE64_ERROR", "Error converting image to Base64: ${e.message}", e)
+            null
+        }
+    }
+
+    // Helper to upload memory to Firestore
+    private fun uploadToFirestore(memory: Memory) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "anonymous"
+        val docId = "${uid}_${memory.id}"
+
+        val firestoreData = mapOf(
+            "id" to docId,
+            "localId" to memory.id,
+            "userId" to uid,
+            "title" to memory.title,
+            "content" to memory.content,
+            "createdAt" to memory.createdAt,
+            "imageUris" to memory.imageUris,
+            "tags" to memory.tags,
+            "isPublic" to true,
+            "songTrackId" to memory.songTrackId,
+            "songTitle" to memory.songTitle,
+            "userName" to (memory.userName ?: "Anonim"),
+            "userAvatar" to memory.userAvatar
+        )
+
+        firestore.collection("public_memories")
+            .document(docId)
+            .set(firestoreData)
+            .addOnSuccessListener {
+                android.util.Log.d("FIRESTORE_SYNC", "Memori berhasil disinkronkan ke Firestore")
+            }
+            .addOnFailureListener { e ->
+                android.util.Log.e("FIRESTORE_SYNC", "Gagal sinkronisasi ke Firestore: ${e.message}", e)
+            }
     }
 }
