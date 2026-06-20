@@ -256,7 +256,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
             if (originalBitmap == null) return null
 
-            val maxDimension = 300
+            val maxDimension = 800
             val width = originalBitmap.width
             val height = originalBitmap.height
             val scaledBitmap = if (width > maxDimension || height > maxDimension) {
@@ -276,7 +276,7 @@ class MemoryRepositoryImpl @Inject constructor(
             }
 
             val outputStream = ByteArrayOutputStream()
-            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
             val imageBytes = outputStream.toByteArray()
             outputStream.close()
 
