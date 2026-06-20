@@ -154,4 +154,20 @@
     <string name="dialog_delete_permanent_text">Apakah Anda yakin ingin menghapus memori ini secara permanen? Tindakan ini tidak dapat dibatalkan.</string>
     <string name="dialog_logout_title">Keluar Akun?</string>
     <string name="dialog_logout_text">Apakah Anda yakin ingin keluar dari akun Anda?</string>
+
+    <!-- Error / Validation Strings -->
+    <string name="error_dialog_title">Gagal Mengisi Form</string>
+    <string name="error_dialog_dismiss">Mengerti</string>
+    <string name="error_email_password_empty">Email dan password tidak boleh kosong.</string>
+    <string name="error_all_fields_required">Semua form wajib diisi.</string>
+    <string name="error_password_mismatch">Konfirmasi password tidak cocok.</string>
+    <string name="error_password_too_short">Password harus minimal 6 karakter.</string>
+    <string name="error_user_not_found">User tidak ditemukan.</string>
+    <string name="error_registration_failed">Registrasi gagal.</string>
+    <string name="error_login_failed">Terjadi kesalahan saat masuk.</string>
+    <string name="error_register_failed">Terjadi kesalahan saat mendaftar.</string>
+    <string name="login_success_toast">Selamat datang kembali!</string>
+    <string name="register_success_toast">Registrasi sukses! Silakan masuk.</string>
 </resources>
+
+
