@@ -52,10 +52,11 @@ class HomeViewModel @Inject constructor(
                 memory
             }
         }
+        val sortedList = processedList.sortedByDescending { it.createdAt }
         if (query.isBlank()) {
-            processedList
+            sortedList
         } else {
-            processedList.filter { memory ->
+            sortedList.filter { memory ->
                 memory.title.contains(query, ignoreCase = true) ||
                 memory.content.contains(query, ignoreCase = true) ||
                 memory.tags.any { tag -> tag.contains(query, ignoreCase = true) }

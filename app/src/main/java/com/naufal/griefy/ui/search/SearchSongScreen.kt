@@ -201,7 +201,7 @@ fun SongCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         border = null,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),

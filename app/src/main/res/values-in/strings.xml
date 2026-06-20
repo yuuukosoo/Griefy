@@ -19,7 +19,7 @@
     <string name="login_email">Email</string>
     <string name="login_password">Password</string>
     <string name="login_button">Login</string>
-    <string name="login_no_account">Don\'t have an account? </string>
+    <string name="login_no_account">Don\'t have an account?</string>
     <string name="login_sign_up">Sign Up</string>
 
     <!-- Register Screen -->
@@ -30,11 +30,10 @@
     <string name="register_confirm_password">Confirm Password</string>
     <string name="register_button">Register</string>
     <string name="register_already_have_account">If you already have an account register</string>
-    <string name="register_you_can">You can </string>
     <string name="register_login_here">Login here !</string>
 
     <!-- Home Screen -->
-    <string name="home_greeting">Halo, Khalish</string>
+    <string name="home_greeting">Halo, %1$s</string>
     <string name="home_subtitle">Mari refleksikan kenanganmu.</string>
     <string name="home_search_placeholder">Cari kenangan...</string>
     <string name="home_empty_memories">Belum ada kenangan. Tekan + untuk menambah.</string>
@@ -154,6 +153,9 @@
     <string name="dialog_delete_permanent_text">Apakah Anda yakin ingin menghapus memori ini secara permanen? Tindakan ini tidak dapat dibatalkan.</string>
     <string name="dialog_logout_title">Keluar Akun?</string>
     <string name="dialog_logout_text">Apakah Anda yakin ingin keluar dari akun Anda?</string>
+    <string name="settings_delete_account">Hapus Akun</string>
+    <string name="dialog_delete_account_title">Hapus Akun?</string>
+    <string name="dialog_delete_account_text">Apakah Anda yakin ingin menghapus akun Anda secara permanen? Tindakan ini tidak dapat dibatalkan dan semua data Anda akan dihapus secara permanen.</string>
 
     <!-- Error / Validation Strings -->
     <string name="error_dialog_title">Gagal Mengisi Form</string>
@@ -168,6 +170,32 @@
     <string name="error_register_failed">Terjadi kesalahan saat mendaftar.</string>
     <string name="login_success_toast">Selamat datang kembali!</string>
     <string name="register_success_toast">Registrasi sukses! Silakan masuk.</string>
+
+    <!-- Profile & User Details Strings -->
+    <string name="profile_personal_info">Informasi Pribadi</string>
+    <string name="profile_username_label">Username</string>
+    <string name="profile_email_label">Alamat Email</string>
+    <string name="profile_gender_label">Gender</string>
+    <string name="profile_confirm_button">Konfirmasi</string>
+    <string name="profile_success_toast">Profil berhasil diperbarui</string>
+    <string name="profile_error_image">Gagal memproses gambar</string>
+    <string name="profile_error_auth">User tidak terautentikasi</string>
+    <string name="profile_error_save">Gagal menyimpan profil</string>
+
+    <string name="profile_other_user_info">Informasi Pengguna</string>
+    <string name="profile_other_total_memories">Total Memori</string>
+    <string name="profile_not_found">Profil tidak ditemukan</string>
+    <string name="profile_load_failed">Gagal memuat profil</string>
+    <string name="profile_try_again">Coba Lagi</string>
+    <string name="profile_deleted_account_msg">Akun telah dihapus oleh pengguna</string>
+    <string name="profile_gender_male">Laki-laki</string>
+    <string name="profile_gender_female">Perempuan</string>
+    <string name="profile_gender_unspecified">Tidak ditentukan</string>
+    <string name="profile_memories_count">%1$d Memori</string>
+    <string name="profile_desc_back">Kembali</string>
+    <string name="profile_desc_photo">Foto Profil</string>
+    <string name="profile_desc_edit_photo">Ubah Foto Profil</string>
+    <string name="profile_desc_edit_profile">Ubah Profil</string>
 </resources>
 
 

@@ -39,7 +39,7 @@ class TrashViewModel @Inject constructor(
         repository.getTrashedMemories(),
         userProfile
     ) { memoriesList, profile ->
-        memoriesList.map { memory ->
+        val processedList = memoriesList.map { memory ->
             if (profile != null && (memory.userName == "Khalish" || memory.userName.isNullOrEmpty() || memory.userName == profile.displayName)) {
                 memory.copy(
                     userName = profile.displayName,
@@ -49,6 +49,7 @@ class TrashViewModel @Inject constructor(
                 memory
             }
         }
+        processedList.sortedByDescending { it.createdAt }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

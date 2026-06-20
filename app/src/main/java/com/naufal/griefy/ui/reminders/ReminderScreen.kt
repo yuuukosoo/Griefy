@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -137,11 +138,15 @@ fun ReminderScreen(
                 modifier = Modifier.padding(top = 32.dp, start = 32.dp, end = 32.dp),
                 title = { Text(stringResource(R.string.reminder_title), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(
+                        onClick = { navController.navigateUp() },
+                        colors = IconButtonDefaults.iconButtonColors(containerColor = Color.Transparent)
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
                             contentDescription = stringResource(R.string.back),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
@@ -153,6 +158,8 @@ fun ReminderScreen(
                 onClick = { openDialog() },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape,
+                elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                 modifier = Modifier.padding(end = 32.dp, bottom = 16.dp)
             ) {
                 Icon(
@@ -184,24 +191,10 @@ fun ReminderScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.NotificationsActive,
-                            contentDescription = null,
-                            modifier = Modifier.size(72.dp),
-                            tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = stringResource(R.string.reminder_empty_title),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(R.string.reminder_empty_subtitle),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 } else {
@@ -281,6 +274,10 @@ fun ReminderScreen(
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 48.dp),
                 containerColor = MaterialTheme.colorScheme.surface,
                 title = {
                     Text(
@@ -489,7 +486,7 @@ fun ReminderCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.padding(24.dp)
@@ -584,7 +581,7 @@ fun ExactAlarmWarningCard(context: Context) {
             .fillMaxWidth()
             .padding(horizontal = 48.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFDF3E7) // warm light orange/peach
+            containerColor = Color(0xFFFDF3E7)
         ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -652,7 +649,7 @@ fun BatteryOptimizationWarningCard(context: Context) {
             .fillMaxWidth()
             .padding(horizontal = 48.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF0FDF4) // light green/teal tint
+            containerColor = Color(0xFFF0FDF4)
         ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)

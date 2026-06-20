@@ -52,6 +52,16 @@ class AuthRepositoryImpl @Inject constructor(
                     .build()
                 firebaseUser.updateProfile(profileUpdates).await()
                 
+                // Create user document in Firestore users collection
+                val userMap = mapOf(
+                    "uid" to firebaseUser.uid,
+                    "email" to (firebaseUser.email ?: ""),
+                    "displayName" to name,
+                    "gender" to null,
+                    "avatarBase64" to null
+                )
+                firestore.collection("users").document(firebaseUser.uid).set(userMap).await()
+                
                 val user = User(
                     uid = firebaseUser.uid,
                     email = firebaseUser.email ?: "",
@@ -106,7 +116,15 @@ class AuthRepositoryImpl @Inject constructor(
                         )
                     ))
                 } else {
-                    emit(Resource.Error("Profil pengguna tidak ditemukan"))
+                    emit(Resource.Success(
+                        UserProfile(
+                            uid = uid,
+                            email = "deleted",
+                            displayName = "Akun Dihapus",
+                            gender = null,
+                            avatarBase64 = null
+                        )
+                    ))
                 }
             }
         } catch (e: Exception) {
@@ -138,6 +156,26 @@ class AuthRepositoryImpl @Inject constructor(
             Resource.Success(Unit)
         } catch (e: Exception) {
             Resource.Error(e.localizedMessage ?: "Gagal menyimpan profil")
+        }
+    }
+
+    override suspend fun deleteAccount(): Resource<Unit> {
+        return try {
+            val currentUser = firebaseAuth.currentUser
+            if (currentUser != null) {
+                val uid = currentUser.uid
+                // 1. Delete user profile from Firestore
+                firestore.collection("users").document(uid).delete().await()
+                
+                // 2. Delete user from FirebaseAuth
+                currentUser.delete().await()
+                
+                Resource.Success(Unit)
+            } else {
+                Resource.Error("User tidak terautentikasi")
+            }
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Gagal menghapus akun")
         }
     }
 }

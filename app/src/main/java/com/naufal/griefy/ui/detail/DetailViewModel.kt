@@ -61,6 +61,15 @@ class DetailViewModel @Inject constructor(
     private val _songDetails = MutableStateFlow<Song?>(null)
     val songDetails: StateFlow<Song?> = _songDetails.asStateFlow()
 
+    val isOwnMemory: StateFlow<Boolean> = memory.map { mem ->
+        val currentUser = authRepository.getCurrentUser()
+        mem != null && currentUser != null && mem.userId == currentUser.uid
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
     init {
         viewModelScope.launch {
             repository.getMemoryByIdAsFlow(memoryId).collect { memory ->

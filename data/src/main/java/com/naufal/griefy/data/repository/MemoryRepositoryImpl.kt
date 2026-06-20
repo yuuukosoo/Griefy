@@ -318,4 +318,8 @@ class MemoryRepositoryImpl @Inject constructor(
                 android.util.Log.e("FIRESTORE_SYNC", "Gagal sinkronisasi ke Firestore: ${e.message}", e)
             }
     }
+
+    override suspend fun clearAllLocalMemories() {
+        dao.clearAllLocalMemories()
+    }
 }

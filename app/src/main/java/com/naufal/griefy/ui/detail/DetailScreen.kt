@@ -39,6 +39,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import android.content.res.Configuration
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.R
@@ -55,6 +57,9 @@ fun DetailScreen(
 ) {
     val memory by viewModel.memory.collectAsState()
     val songDetails by viewModel.songDetails.collectAsState()
+    val isOwnMemory by viewModel.isOwnMemory.collectAsState()
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     var showDeleteDialog by remember { mutableStateOf(false) }
     var selectedImageIndexForFullScreen by remember { mutableStateOf<Int?>(null) }
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
@@ -125,27 +130,29 @@ fun DetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            memory?.let { mem ->
-                                navController.navigate(Screen.EditMemory.createRoute(mem.id))
+                    if (isOwnMemory) {
+                        IconButton(
+                            onClick = {
+                                memory?.let { mem ->
+                                    navController.navigate(Screen.EditMemory.createRoute(mem.id))
+                                }
                             }
+                        ) {
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                    ) {
-                        Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(R.string.edit), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
 
-                    IconButton(
-                        onClick = {
-                            showDeleteDialog = true
-                        },
-                        modifier = Modifier.padding(end = 40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(R.string.delete),
-                            tint = MaterialTheme.colorScheme.error
-                        )
+                        IconButton(
+                            onClick = {
+                                showDeleteDialog = true
+                            },
+                            modifier = Modifier.padding(end = 40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = stringResource(R.string.delete),
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -159,8 +166,8 @@ fun DetailScreen(
                         .padding(horizontal = 48.dp, vertical = 16.dp)
                         .navigationBarsPadding(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFC4D8BF)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     val context = LocalContext.current
                     Column(
@@ -194,7 +201,7 @@ fun DetailScreen(
                                 Text(
                                     text = song.artistName,
                                     fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -210,7 +217,7 @@ fun DetailScreen(
                                 Icon(
                                     imageVector = Icons.Default.MusicNote,
                                     contentDescription = stringResource(R.string.detail_open_deezer_desc),
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    tint = Color.White,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -241,7 +248,7 @@ fun DetailScreen(
                                             stringResource(R.string.detail_pause_desc) 
                                         else 
                                             stringResource(R.string.detail_play_desc),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        tint = Color.White,
                                         modifier = Modifier.size(28.dp)
                                     )
                                 }
@@ -255,14 +262,14 @@ fun DetailScreen(
                                         .weight(1f)
                                         .height(6.dp)
                                         .clip(RoundedCornerShape(3.dp)),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    trackColor = MaterialTheme.colorScheme.background
+                                    color = Color.White,
+                                    trackColor = Color.White.copy(alpha = 0.4f)
                                 )
                             } else {
                                 Text(
                                     text = stringResource(R.string.detail_preview_unavailable),
                                     fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                                     modifier = Modifier.padding(vertical = 8.dp)
                                 )
                             }
@@ -277,6 +284,7 @@ fun DetailScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
+                    .verticalScroll(rememberScrollState())
                     .padding(
                         top = paddingValues.calculateTopPadding(),
                         bottom = paddingValues.calculateBottomPadding() + 8.dp
@@ -339,19 +347,30 @@ fun DetailScreen(
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                     ) {
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier
+                        val pagerModifier = if (isLandscape) {
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 48.dp)
+                                .height(220.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                        } else {
+                            Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 48.dp)
                                 .aspectRatio(1f)
                                 .clip(RoundedCornerShape(16.dp))
+                        }
+
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = pagerModifier
                         ) { page ->
                             AsyncImage(
                                 model = mem.imageUris[page].toImageModel(),
                                 contentDescription = stringResource(R.string.home_memory_photo_desc),
                                 modifier = Modifier
                                     .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp))
                                     .clickable { selectedImageIndexForFullScreen = page },
                                 contentScale = ContentScale.Crop
                             )
@@ -441,20 +460,15 @@ fun DetailScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Box(
+                Text(
+                    text = mem.content,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 24.sp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
                         .padding(horizontal = 48.dp)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    Text(
-                        text = mem.content,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 24.sp
-                    )
-                }
+                )
             }
         }
     }

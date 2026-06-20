@@ -46,4 +46,7 @@ interface MemoryDao {
 
     @Query("DELETE FROM memory_table WHERE id = :id")
     suspend fun deletePermanently(id: Int)
+
+    @Query("DELETE FROM memory_table")
+    suspend fun clearAllLocalMemories()
 }

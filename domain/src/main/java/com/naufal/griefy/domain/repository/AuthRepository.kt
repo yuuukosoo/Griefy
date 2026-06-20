@@ -13,4 +13,5 @@ interface AuthRepository {
     
     fun getUserProfile(uid: String): Flow<Resource<UserProfile>>
     suspend fun saveUserProfile(profile: UserProfile): Resource<Unit>
+    suspend fun deleteAccount(): Resource<Unit>
 }

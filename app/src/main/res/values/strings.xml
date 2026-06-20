@@ -30,11 +30,10 @@
     <string name="register_confirm_password">Confirm Password</string>
     <string name="register_button">Register</string>
     <string name="register_already_have_account">If you already have an account register</string>
-    <string name="register_you_can">You can </string>
     <string name="register_login_here">Login here !</string>
 
     <!-- Home Screen -->
-    <string name="home_greeting">Hello, Khalish</string>
+    <string name="home_greeting">Hello, %1$s</string>
     <string name="home_subtitle">Let\'s reflect on your memories.</string>
     <string name="home_search_placeholder">Search memories...</string>
     <string name="home_empty_memories">No memories yet. Press + to add.</string>
@@ -154,6 +153,9 @@
     <string name="dialog_delete_permanent_text">Are you sure you want to permanently delete this memory? This action cannot be undone.</string>
     <string name="dialog_logout_title">Logout?</string>
     <string name="dialog_logout_text">Are you sure you want to log out of your account?</string>
+    <string name="settings_delete_account">Delete Account</string>
+    <string name="dialog_delete_account_title">Delete Account?</string>
+    <string name="dialog_delete_account_text">Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be permanently deleted.</string>
 
     <!-- Error / Validation Strings -->
     <string name="error_dialog_title">Form Error</string>
@@ -168,5 +170,31 @@
     <string name="error_register_failed">An error occurred while registering.</string>
     <string name="login_success_toast">Welcome back!</string>
     <string name="register_success_toast">Registration successful! Please sign in.</string>
+
+    <!-- Profile & User Details Strings -->
+    <string name="profile_personal_info">Personal Information</string>
+    <string name="profile_username_label">Username</string>
+    <string name="profile_email_label">Email address</string>
+    <string name="profile_gender_label">Gender</string>
+    <string name="profile_confirm_button">Confirm</string>
+    <string name="profile_success_toast">Profile updated successfully</string>
+    <string name="profile_error_image">Failed to process image</string>
+    <string name="profile_error_auth">User not authenticated</string>
+    <string name="profile_error_save">Failed to save profile</string>
+
+    <string name="profile_other_user_info">User Information</string>
+    <string name="profile_other_total_memories">Total Memories</string>
+    <string name="profile_not_found">Profile not found</string>
+    <string name="profile_load_failed">Failed to load profile</string>
+    <string name="profile_try_again">Try Again</string>
+    <string name="profile_deleted_account_msg">Account has been deleted by user</string>
+    <string name="profile_gender_male">Male</string>
+    <string name="profile_gender_female">Female</string>
+    <string name="profile_gender_unspecified">Not specified</string>
+    <string name="profile_memories_count">%1$d Memories</string>
+    <string name="profile_desc_back">Back</string>
+    <string name="profile_desc_photo">Profile Photo</string>
+    <string name="profile_desc_edit_photo">Edit Profile Picture</string>
+    <string name="profile_desc_edit_profile">Edit Profile</string>
 </resources>
-
+
