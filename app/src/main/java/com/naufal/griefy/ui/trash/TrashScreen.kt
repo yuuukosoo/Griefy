@@ -172,7 +172,7 @@ fun TrashScreen(
             Text(
                 text = stringResource(R.string.trash_subtitle),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(horizontal = 48.dp, vertical = 8.dp)
             )
 
@@ -180,7 +180,7 @@ fun TrashScreen(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
                         text = stringResource(R.string.trash_empty),
-                        color = MaterialTheme.colorScheme.outline
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             } else {
@@ -222,7 +222,7 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             // Profile Header Row

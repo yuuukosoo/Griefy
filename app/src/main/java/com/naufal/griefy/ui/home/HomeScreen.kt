@@ -45,6 +45,7 @@ fun HomeScreen(
 ) {
     val memories by viewModel.memories.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val userProfile by viewModel.userProfile.collectAsState()
 
     Box(
         modifier = Modifier
@@ -65,7 +66,7 @@ fun HomeScreen(
             ) {
                 Column {
                     Text(
-                        text = stringResource(R.string.home_greeting),
+                        text = stringResource(R.string.home_greeting, userProfile?.displayName ?: "User"),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -81,12 +82,12 @@ fun HomeScreen(
                     onClick = { navController.navigate(Screen.Settings.route) },
                     modifier = Modifier
                         .size(40.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = stringResource(R.string.settings_title),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = Color.White
                     )
                 }
             }
@@ -188,7 +189,7 @@ fun MemoryCard(memory: Memory, onClick: () -> Unit, onProfileClick: () -> Unit) 
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Profile Header Row

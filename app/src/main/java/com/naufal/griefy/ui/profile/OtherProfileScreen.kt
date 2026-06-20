@@ -9,7 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -52,7 +52,7 @@ fun OtherProfileScreen(
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.profile_desc_back)
                         )
                     }
                 },
@@ -80,10 +80,10 @@ fun OtherProfileScreen(
                 is Resource.Success -> {
                     val profile = profileState.data
                     if (profile != null) {
-                        OtherProfileContent(profile = profile)
+                        OtherProfileContent(profile = profile, memoryCount = viewModel.memoryCount)
                     } else {
                         Text(
-                            text = "Profil tidak ditemukan",
+                            text = stringResource(R.string.profile_not_found),
                             modifier = Modifier.align(Alignment.Center),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -95,12 +95,12 @@ fun OtherProfileScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = profileState.message ?: "Gagal memuat profil",
+                            text = profileState.message ?: stringResource(R.string.profile_load_failed),
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
                         Button(onClick = { viewModel.loadUserProfile() }) {
-                            Text("Coba Lagi")
+                            Text(stringResource(R.string.profile_try_again))
                         }
                     }
                 }
@@ -110,7 +110,7 @@ fun OtherProfileScreen(
 }
 
 @Composable
-private fun OtherProfileContent(profile: UserProfile) {
+private fun OtherProfileContent(profile: UserProfile, memoryCount: Int) {
     val profileImageModel = profile.avatarBase64?.toImageModel()
 
     Column(
@@ -134,7 +134,7 @@ private fun OtherProfileContent(profile: UserProfile) {
                 if (profileImageModel != null) {
                     AsyncImage(
                         model = profileImageModel,
-                        contentDescription = "Profile Photo",
+                        contentDescription = stringResource(R.string.profile_desc_photo),
                         modifier = Modifier.fillMaxSize().clip(CircleShape),
                         contentScale = ContentScale.Crop
                     )
@@ -146,37 +146,63 @@ private fun OtherProfileContent(profile: UserProfile) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Text(
-                text = "Informasi Pengguna",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+        if (profile.email == "deleted") {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.profile_deleted_account_msg),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = stringResource(R.string.profile_other_user_info),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OtherProfileInfoItem(
+                icon = Icons.Default.Person,
+                label = stringResource(R.string.profile_username_label),
+                value = profile.displayName
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            OtherProfileInfoItem(
+                icon = Icons.Default.Face,
+                label = stringResource(R.string.profile_gender_label),
+                value = when (profile.gender) {
+                    "Male", "Laki-laki" -> stringResource(R.string.profile_gender_male)
+                    "Female", "Perempuan" -> stringResource(R.string.profile_gender_female)
+                    else -> profile.gender ?: stringResource(R.string.profile_gender_unspecified)
+                }
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            OtherProfileInfoItem(
+                icon = Icons.Default.Book,
+                label = stringResource(R.string.profile_other_total_memories),
+                value = stringResource(R.string.profile_memories_count, memoryCount)
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OtherProfileInfoItem(
-            icon = Icons.Default.Person,
-            label = "Username",
-            value = profile.displayName
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        OtherProfileInfoItem(
-            icon = Icons.Default.Email,
-            label = "Email address",
-            value = profile.email
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        OtherProfileInfoItem(
-            icon = Icons.Default.Face,
-            label = "Gender",
-            value = profile.gender ?: "Tidak ditentukan"
-        )
     }
 }
 
@@ -190,7 +216,7 @@ private fun OtherProfileInfoItem(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier

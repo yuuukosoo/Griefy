@@ -44,8 +44,8 @@ fun FloatingNavigationDock(
                     .padding(end = 16.dp)
                     .height(56.dp),
                 shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -109,7 +109,7 @@ fun FloatingNavigationDock(
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White,
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp),
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(

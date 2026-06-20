@@ -1,6 +1,7 @@
 package com.naufal.griefy.ui.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -39,11 +41,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.naufal.griefy.domain.util.Resource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -67,6 +71,30 @@ fun SettingsScreen(
     val isDarkMode by viewModel.isDarkMode.collectAsState()
     val currentLangCode by viewModel.currentLanguageCode.collectAsState()
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
+    var showDeleteLoading by remember { mutableStateOf(false) }
+    var deleteErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.deleteAccountResult.collect { result ->
+            when (result) {
+                is Resource.Loading -> {
+                    showDeleteLoading = true
+                    deleteErrorMessage = null
+                }
+                is Resource.Success -> {
+                    showDeleteLoading = false
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0)
+                    }
+                }
+                is Resource.Error -> {
+                    showDeleteLoading = false
+                    deleteErrorMessage = result.message ?: "Gagal menghapus akun"
+                }
+            }
+        }
+    }
 
     val currentLanguageName = if (currentLangCode == "in" || currentLangCode == "id") {
         stringResource(R.string.settings_language_indonesian)
@@ -202,7 +230,7 @@ fun SettingsScreen(
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column {
                     SettingsItem(
@@ -230,7 +258,7 @@ fun SettingsScreen(
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column {
                     SettingsItem(
@@ -258,16 +286,27 @@ fun SettingsScreen(
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
-                SettingsItem(
-                    icon = Icons.AutoMirrored.Filled.ExitToApp,
-                    title = stringResource(R.string.settings_logout),
-                    titleColor = MaterialTheme.colorScheme.error,
-                    onClick = {
-                        showLogoutDialog = true
-                    }
-                )
+                Column {
+                    SettingsItem(
+                        icon = Icons.AutoMirrored.Filled.ExitToApp,
+                        title = stringResource(R.string.settings_logout),
+                        titleColor = MaterialTheme.colorScheme.error,
+                        onClick = {
+                            showLogoutDialog = true
+                        }
+                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+                    SettingsItem(
+                        icon = Icons.Default.Delete,
+                        title = stringResource(R.string.settings_delete_account),
+                        titleColor = MaterialTheme.colorScheme.error,
+                        onClick = {
+                            showDeleteAccountDialog = true
+                        }
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(100.dp))
         }
@@ -314,6 +353,90 @@ fun SettingsScreen(
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showDeleteAccountDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteAccountDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 48.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(
+                    text = stringResource(R.string.dialog_delete_account_title),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.dialog_delete_account_text),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteAccountDialog = false
+                        viewModel.deleteAccount()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.settings_delete_account), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteAccountDialog = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    if (showDeleteLoading) {
+        AlertDialog(
+            onDismissRequest = { },
+            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(text = "Menghapus Akun...", fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            confirmButton = { }
+        )
+    }
+
+    if (deleteErrorMessage != null) {
+        AlertDialog(
+            onDismissRequest = { deleteErrorMessage = null },
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(text = "Gagal Menghapus Akun", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+            },
+            text = {
+                Text(text = deleteErrorMessage ?: "", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { deleteErrorMessage = null },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("OK")
                 }
             }
         )

@@ -70,7 +70,7 @@ fun ProfileScreen(
 
     LaunchedEffect(saveSuccess) {
         if (saveSuccess) {
-            Toast.makeText(context, "Profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.profile_success_toast), Toast.LENGTH_SHORT).show()
             viewModel.clearSaveSuccess()
         }
     }
@@ -145,7 +145,7 @@ fun ProfileScreen(
                             if (profileImageModel != null) {
                                 AsyncImage(
                                     model = profileImageModel,
-                                    contentDescription = "Profile Photo",
+                                    contentDescription = stringResource(R.string.profile_desc_photo),
                                     modifier = Modifier.fillMaxSize().clip(CircleShape),
                                     contentScale = ContentScale.Crop
                                 )
@@ -166,7 +166,7 @@ fun ProfileScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit Profile Picture",
+                                    contentDescription = stringResource(R.string.profile_desc_edit_photo),
                                     tint = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -182,7 +182,7 @@ fun ProfileScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Informasi Pribadi",
+                            text = stringResource(R.string.profile_personal_info),
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
@@ -190,7 +190,7 @@ fun ProfileScreen(
                         IconButton(onClick = { viewModel.setIsEditing(!isEditing) }) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Profile",
+                                contentDescription = stringResource(R.string.profile_desc_edit_profile),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -200,7 +200,7 @@ fun ProfileScreen(
 
                     ProfileInfoItem(
                         icon = Icons.Default.Person,
-                        label = "Username",
+                        label = stringResource(R.string.profile_username_label),
                         value = username,
                         isEditing = isEditing,
                         onValueChange = { viewModel.onUsernameChange(it) }
@@ -208,19 +208,23 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                     ProfileInfoItem(
                         icon = Icons.Default.Email,
-                        label = "Email address",
+                        label = stringResource(R.string.profile_email_label),
                         value = email,
-                        isEditing = isEditing,
+                        isEditing = false,
                         onValueChange = { viewModel.onEmailChange(it) }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     ProfileInfoItem(
                         icon = Icons.Default.Face,
-                        label = "Gender",
-                        value = gender,
+                        label = stringResource(R.string.profile_gender_label),
+                        value = when (gender) {
+                            "Male", "Laki-laki" -> stringResource(R.string.profile_gender_male)
+                            "Female", "Perempuan" -> stringResource(R.string.profile_gender_female)
+                            else -> gender
+                        },
                         isEditing = isEditing,
                         onValueChange = { viewModel.onGenderChange(it) },
-                        options = listOf("Laki-laki", "Perempuan")
+                        options = listOf(stringResource(R.string.profile_gender_male), stringResource(R.string.profile_gender_female))
                     )
 
                     if (isEditing) {
@@ -232,7 +236,7 @@ fun ProfileScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
                             Text(
-                                text = "Konfirmasi",
+                                text = stringResource(R.string.profile_confirm_button),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimary,
@@ -284,7 +288,7 @@ private fun ProfileInfoItem(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier

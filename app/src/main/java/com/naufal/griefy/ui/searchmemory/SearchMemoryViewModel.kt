@@ -52,10 +52,11 @@ class SearchMemoryViewModel @Inject constructor(
                 memory
             }
         }
+        val sortedList = processedList.sortedByDescending { it.createdAt }
         if (query.isBlank()) {
-            processedList
+            sortedList
         } else {
-            processedList.filter {
+            sortedList.filter {
                 it.title.contains(query, ignoreCase = true) ||
                 it.content.contains(query, ignoreCase = true) ||
                 it.tags.any { tag -> tag.contains(query, ignoreCase = true) }
