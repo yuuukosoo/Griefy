@@ -154,9 +154,10 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (!memory.userAvatar.isNullOrEmpty()) {
+                    val avatar = memory.userAvatar
+                    if (!avatar.isNullOrEmpty()) {
                         AsyncImage(
-                            model = memory.userAvatar,
+                            model = avatar.toImageModel(),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize().clip(CircleShape),
                             contentScale = ContentScale.Crop

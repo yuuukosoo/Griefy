@@ -297,9 +297,10 @@ fun DetailScreen(
                             .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center
                     ) {
-                        if (!mem.userAvatar.isNullOrEmpty()) {
+                        val avatar = mem.userAvatar
+                        if (!avatar.isNullOrEmpty()) {
                             AsyncImage(
-                                model = mem.userAvatar,
+                                model = avatar.toImageModel(),
                                 contentDescription = null,
                                 modifier = Modifier.fillMaxSize().clip(CircleShape),
                                 contentScale = ContentScale.Crop

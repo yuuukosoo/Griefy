@@ -154,4 +154,19 @@
     <string name="dialog_delete_permanent_text">Are you sure you want to permanently delete this memory? This action cannot be undone.</string>
     <string name="dialog_logout_title">Logout?</string>
     <string name="dialog_logout_text">Are you sure you want to log out of your account?</string>
+
+    <!-- Error / Validation Strings -->
+    <string name="error_dialog_title">Form Error</string>
+    <string name="error_dialog_dismiss">Understood</string>
+    <string name="error_email_password_empty">Email and password cannot be empty.</string>
+    <string name="error_all_fields_required">All fields are required.</string>
+    <string name="error_password_mismatch">Confirm password does not match.</string>
+    <string name="error_password_too_short">Password must be at least 6 characters.</string>
+    <string name="error_user_not_found">User not found.</string>
+    <string name="error_registration_failed">Registration failed.</string>
+    <string name="error_login_failed">An error occurred while signing in.</string>
+    <string name="error_register_failed">An error occurred while registering.</string>
+    <string name="login_success_toast">Welcome back!</string>
+    <string name="register_success_toast">Registration successful! Please sign in.</string>
 </resources>
+
