@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.naufal.griefy.domain.util.Resource
 
+import com.naufal.griefy.ui.components.ErrorBanner
+
 @Composable
 fun LoginScreen(
     navController: NavController,
@@ -35,21 +37,35 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+    var showErrorResId by remember { mutableStateOf<Int?>(null) }
+    var showErrorRawMsg by remember { mutableStateOf<String?>(null) }
 
     val loginState by viewModel.loginState.collectAsState()
     val context = LocalContext.current
 
+    val successMessage = stringResource(id = R.string.login_success_toast)
+
     LaunchedEffect(loginState) {
         when (loginState) {
             is Resource.Success -> {
-                Toast.makeText(context, "Selamat datang kembali!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, successMessage, Toast.LENGTH_SHORT).show()
                 navController.navigate(Screen.Home.route) {
                     popUpTo(Screen.Login.route) { inclusive = true }
                 }
                 viewModel.resetState()
             }
             is Resource.Error -> {
-                Toast.makeText(context, loginState?.message ?: "Gagal masuk", Toast.LENGTH_LONG).show()
+                val msg = loginState?.message
+                if (msg != null) {
+                    when (msg) {
+                        "Email dan password tidak boleh kosong" -> showErrorResId = R.string.error_email_password_empty
+                        "User tidak ditemukan" -> showErrorResId = R.string.error_user_not_found
+                        "Terjadi kesalahan saat masuk" -> showErrorResId = R.string.error_login_failed
+                        else -> showErrorRawMsg = msg
+                    }
+                } else {
+                    showErrorResId = R.string.error_login_failed
+                }
                 viewModel.resetState()
             }
             else -> {}
@@ -188,5 +204,19 @@ fun LoginScreen(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
+
+        val displayErrorMsg = if (showErrorResId != null || showErrorRawMsg != null) {
+            showErrorResId?.let { stringResource(id = it) } ?: showErrorRawMsg ?: ""
+        } else ""
+
+        ErrorBanner(
+            message = displayErrorMsg,
+            visible = displayErrorMsg.isNotEmpty(),
+            onDismiss = {
+                showErrorResId = null
+                showErrorRawMsg = null
+            },
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }
