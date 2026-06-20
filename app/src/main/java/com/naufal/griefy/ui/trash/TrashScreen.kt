@@ -1,8 +1,10 @@
 package com.naufal.griefy.ui.trash
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import com.naufal.griefy.ui.navigation.Screen
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -193,6 +195,19 @@ fun TrashScreen(
                             onDelete = {
                                 memoryToDeleteId = memory.id
                                 showDeleteSingleDialog = true
+                            },
+                            onProfileClick = {
+                                val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                                val authorId = memory.userId
+                                if (authorId.isNullOrEmpty() || authorId == currentUserId) {
+                                    navController.navigate(Screen.Profile.route) {
+                                        popUpTo(Screen.Home.route) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                } else {
+                                    navController.navigate(Screen.OtherProfile.createRoute(authorId))
+                                }
                             }
                         )
                     }
@@ -203,7 +218,7 @@ fun TrashScreen(
 }
 
 @Composable
-fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Unit) {
+fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Unit, onProfileClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -215,6 +230,7 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable { onProfileClick() }
                     .padding(bottom = 12.dp)
             ) {
                 Box(
