@@ -12,5 +12,6 @@ data class Memory(
     val songTitle: String? = null,
     val isTrashed: Boolean = false,
     val userName: String? = null,
-    val userAvatar: String? = null
+    val userAvatar: String? = null,
+    val userId: String? = null
 )

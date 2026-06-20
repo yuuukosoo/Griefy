@@ -141,7 +141,8 @@ class EditMemoryViewModel @Inject constructor(
                     songTrackId = selectedSongTrackId,
                     songTitle = selectedSongTitle,
                     userName = profileName,
-                    userAvatar = profileAvatar
+                    userAvatar = profileAvatar,
+                    userId = oldMemory.userId ?: currentUser?.uid
                 )
                 repository.updateMemory(updatedMemory)
                 onUpdateSuccess()
