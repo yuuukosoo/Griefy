@@ -1,6 +1,7 @@
 package com.naufal.griefy.ui.profile
 
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -27,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,11 +38,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
+import com.naufal.griefy.util.toImageModel
 
 @Composable
 fun ProfileScreen(
@@ -52,13 +56,37 @@ fun ProfileScreen(
     val email = viewModel.email
     val gender = viewModel.gender
     val profileImageUriString = viewModel.profileImageUriString
-    val profileImageUri = profileImageUriString?.let { Uri.parse(it) }
+    val profileImageModel = profileImageUriString?.toImageModel()
+
+    val context = LocalContext.current
+    val isLoading = viewModel.isLoading
+    val isSaving = viewModel.isSaving
+    val errorMessage = viewModel.errorMessage
+    val saveSuccess = viewModel.saveSuccess
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUserProfile()
+    }
+
+    LaunchedEffect(saveSuccess) {
+        if (saveSuccess) {
+            Toast.makeText(context, "Profil berhasil diperbarui", Toast.LENGTH_SHORT).show()
+            viewModel.clearSaveSuccess()
+        }
+    }
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.clearErrorMessage()
+        }
+    }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            viewModel.setProfileImageUri(uri.toString())
+            viewModel.onProfileImagePicked(uri.toString())
         }
     }
 
@@ -68,143 +96,164 @@ fun ProfileScreen(
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-        ) {
-            // Header Row (Left: Screen Title)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 48.dp, end = 48.dp, top = 48.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.profile_title),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.primary
+            )
+        } else {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 48.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
-                Box(
-                    modifier = Modifier.size(100.dp)
-                ) {
-                    // Profile Avatar
-                    Box(
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (profileImageUri != null) {
-                            AsyncImage(
-                                model = profileImageUri,
-                                contentDescription = "Profile Photo",
-                                modifier = Modifier.fillMaxSize().clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Text("👤", fontSize = 48.sp)
-                        }
-                    }
-
-                    // Edit Pen Icon Button on the bottom-right
-                    IconButton(
-                        onClick = { photoPickerLauncher.launch("image/*") },
-                        modifier = Modifier
-                            .size(32.dp)
-                            .align(Alignment.BottomEnd)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape)
-                            .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Profile Picture",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
+                // Header Row (Left: Screen Title)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 48.dp, end = 48.dp, top = 48.dp, bottom = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Informasi Pribadi",
-                        fontSize = 18.sp,
+                        text = stringResource(R.string.profile_title),
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    IconButton(onClick = { viewModel.setIsEditing(!isEditing) }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Profile",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
-                ProfileInfoItem(
-                    icon = Icons.Default.Person,
-                    label = "Username",
-                    value = username,
-                    isEditing = isEditing,
-                    onValueChange = { viewModel.onUsernameChange(it) }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                ProfileInfoItem(
-                    icon = Icons.Default.Email,
-                    label = "Email address",
-                    value = email,
-                    isEditing = isEditing,
-                    onValueChange = { viewModel.onEmailChange(it) }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                ProfileInfoItem(
-                    icon = Icons.Default.Face,
-                    label = "Gender",
-                    value = gender,
-                    isEditing = isEditing,
-                    onValueChange = { viewModel.onGenderChange(it) },
-                    options = listOf("Laki-laki", "Perempuan")
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 48.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier.size(100.dp)
+                    ) {
+                        // Profile Avatar
+                        Box(
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (profileImageModel != null) {
+                                AsyncImage(
+                                    model = profileImageModel,
+                                    contentDescription = "Profile Photo",
+                                    modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Text("👤", fontSize = 48.sp)
+                            }
+                        }
 
-                if (isEditing) {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Button(
-                        onClick = { viewModel.setIsEditing(false) },
+                        // Edit Pen Icon Button on the bottom-right
+                        if (isEditing) {
+                            IconButton(
+                                onClick = { photoPickerLauncher.launch("image/*") },
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .align(Alignment.BottomEnd)
+                                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                    .border(2.dp, MaterialTheme.colorScheme.background, CircleShape)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit Profile Picture",
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Konfirmasi",
-                            fontSize = 16.sp,
+                            text = "Informasi Pribadi",
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            color = MaterialTheme.colorScheme.onBackground
                         )
+                        IconButton(onClick = { viewModel.setIsEditing(!isEditing) }) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Profile",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ProfileInfoItem(
+                        icon = Icons.Default.Person,
+                        label = "Username",
+                        value = username,
+                        isEditing = isEditing,
+                        onValueChange = { viewModel.onUsernameChange(it) }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ProfileInfoItem(
+                        icon = Icons.Default.Email,
+                        label = "Email address",
+                        value = email,
+                        isEditing = isEditing,
+                        onValueChange = { viewModel.onEmailChange(it) }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ProfileInfoItem(
+                        icon = Icons.Default.Face,
+                        label = "Gender",
+                        value = gender,
+                        isEditing = isEditing,
+                        onValueChange = { viewModel.onGenderChange(it) },
+                        options = listOf("Laki-laki", "Perempuan")
+                    )
+
+                    if (isEditing) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(
+                            onClick = { viewModel.saveUserProfile() },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Text(
+                                text = "Konfirmasi",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(100.dp))
                 }
-                Spacer(modifier = Modifier.height(100.dp))
+            }
+        }
+
+        if (isSaving) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f))
+                    .clickable(enabled = false) {}, // consume clicks
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         }
 
