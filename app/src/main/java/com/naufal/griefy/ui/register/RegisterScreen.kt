@@ -28,6 +28,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.naufal.griefy.domain.util.Resource
 
+import com.naufal.griefy.ui.components.ErrorBanner
+
 @Composable
 fun RegisterScreen(
     navController: NavController,
@@ -40,24 +42,41 @@ fun RegisterScreen(
 
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var showErrorResId by remember { mutableStateOf<Int?>(null) }
+    var showErrorRawMsg by remember { mutableStateOf<String?>(null) }
 
     val registerState by viewModel.registerState.collectAsState()
     val context = LocalContext.current
 
+    val successMessage = stringResource(id = R.string.register_success_toast)
+
     LaunchedEffect(registerState) {
         when (registerState) {
             is Resource.Success -> {
-                Toast.makeText(context, "Registrasi sukses! Silakan masuk.", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, successMessage, Toast.LENGTH_LONG).show()
                 navController.navigateUp()
                 viewModel.resetState()
             }
             is Resource.Error -> {
-                Toast.makeText(context, registerState?.message ?: "Registrasi gagal", Toast.LENGTH_LONG).show()
+                val msg = registerState?.message
+                if (msg != null) {
+                    when (msg) {
+                        "Semua form wajib diisi" -> showErrorResId = R.string.error_all_fields_required
+                        "Konfirmasi password tidak cocok" -> showErrorResId = R.string.error_password_mismatch
+                        "Password harus minimal 6 karakter" -> showErrorResId = R.string.error_password_too_short
+                        "Registrasi gagal" -> showErrorResId = R.string.error_registration_failed
+                        "Terjadi kesalahan saat mendaftar" -> showErrorResId = R.string.error_register_failed
+                        else -> showErrorRawMsg = msg
+                    }
+                } else {
+                    showErrorResId = R.string.error_register_failed
+                }
                 viewModel.resetState()
             }
             else -> {}
         }
     }
+
 
     Box(
         modifier = Modifier
@@ -262,5 +281,19 @@ fun RegisterScreen(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
+
+        val displayErrorMsg = if (showErrorResId != null || showErrorRawMsg != null) {
+            showErrorResId?.let { stringResource(id = it) } ?: showErrorRawMsg ?: ""
+        } else ""
+
+        ErrorBanner(
+            message = displayErrorMsg,
+            visible = displayErrorMsg.isNotEmpty(),
+            onDismiss = {
+                showErrorResId = null
+                showErrorRawMsg = null
+            },
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }
