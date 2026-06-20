@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -166,7 +167,7 @@ fun DetailScreen(
                         .padding(horizontal = 48.dp, vertical = 16.dp)
                         .navigationBarsPadding(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFC4D8BF)),
+                    colors = CardDefaults.cardColors(containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else Color(0xFFC4D8BF)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     val context = LocalContext.current

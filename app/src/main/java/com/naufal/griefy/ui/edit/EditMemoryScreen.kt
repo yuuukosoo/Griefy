@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -126,7 +127,7 @@ fun EditMemoryScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Photo Picker Box
-            val boxBgColor = Color(0xFFC4D8BF)
+            val boxBgColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else Color(0xFFC4D8BF)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
