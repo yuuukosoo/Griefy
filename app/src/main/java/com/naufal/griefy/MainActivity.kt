@@ -21,6 +21,7 @@ import com.naufal.griefy.ui.home.HomeScreen
 import com.naufal.griefy.ui.login.LoginScreen
 import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.ui.profile.ProfileScreen
+import com.naufal.griefy.ui.profile.OtherProfileScreen
 import com.naufal.griefy.ui.register.RegisterScreen
 import com.naufal.griefy.ui.splash.SplashScreen
 import com.naufal.griefy.ui.search.SearchSongScreen
@@ -90,6 +91,13 @@ class MainActivity : AppCompatActivity() {
 
                         composable(Screen.Profile.route) {
                             ProfileScreen(navController = navController)
+                        }
+
+                        composable(
+                            route = Screen.OtherProfile.route,
+                            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+                        ) {
+                            OtherProfileScreen(navController = navController)
                         }
 
                         composable(Screen.Settings.route) {
