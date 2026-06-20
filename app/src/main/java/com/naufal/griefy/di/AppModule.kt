@@ -58,9 +58,10 @@ object AppModule {
         dao: MemoryDao,
         deezerApi: DeezerApi,
         app: Application,
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
+        firebaseAuth: FirebaseAuth
     ): MemoryRepository {
-        return MemoryRepositoryImpl(dao, deezerApi, app, firestore)
+        return MemoryRepositoryImpl(dao, deezerApi, app, firestore, firebaseAuth)
     }
 
     @Provides
