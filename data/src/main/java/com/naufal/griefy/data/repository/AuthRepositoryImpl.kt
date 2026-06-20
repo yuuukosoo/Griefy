@@ -3,7 +3,9 @@ package com.naufal.griefy.data.repository
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 import com.naufal.griefy.domain.model.User
+import com.naufal.griefy.domain.model.UserProfile
 import com.naufal.griefy.domain.repository.AuthRepository
 import com.naufal.griefy.domain.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +16,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class AuthRepositoryImpl @Inject constructor(
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
 ) : AuthRepository {
 
     override fun login(email: String, password: String): Flow<Resource<User>> = flow {
@@ -76,6 +79,66 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun logout() {
         firebaseAuth.signOut()
+    }
+
+    override fun getUserProfile(uid: String): Flow<Resource<UserProfile>> = flow {
+        emit(Resource.Loading())
+        try {
+            val doc = firestore.collection("users").document(uid).get().await()
+            if (doc.exists()) {
+                val email = doc.getString("email") ?: ""
+                val displayName = doc.getString("displayName") ?: ""
+                val gender = doc.getString("gender")
+                val avatarBase64 = doc.getString("avatarBase64")
+                
+                emit(Resource.Success(UserProfile(uid, email, displayName, gender, avatarBase64)))
+            } else {
+                // Fallback to FirebaseAuth details
+                val firebaseUser = firebaseAuth.currentUser
+                if (firebaseUser != null && firebaseUser.uid == uid) {
+                    emit(Resource.Success(
+                        UserProfile(
+                            uid = uid,
+                            email = firebaseUser.email ?: "",
+                            displayName = firebaseUser.displayName ?: "",
+                            gender = null,
+                            avatarBase64 = null
+                        )
+                    ))
+                } else {
+                    emit(Resource.Error("Profil pengguna tidak ditemukan"))
+                }
+            }
+        } catch (e: Exception) {
+            emit(Resource.Error(e.localizedMessage ?: "Gagal memuat profil"))
+        }
+    }
+
+    override suspend fun saveUserProfile(profile: UserProfile): Resource<Unit> {
+        return try {
+            // 1. Update display name in FirebaseAuth
+            val firebaseUser = firebaseAuth.currentUser
+            if (firebaseUser != null) {
+                val profileUpdates = UserProfileChangeRequest.Builder()
+                    .setDisplayName(profile.displayName)
+                    .build()
+                firebaseUser.updateProfile(profileUpdates).await()
+            }
+            
+            // 2. Save profile details to Firestore
+            val userMap = mapOf(
+                "uid" to profile.uid,
+                "email" to profile.email,
+                "displayName" to profile.displayName,
+                "gender" to profile.gender,
+                "avatarBase64" to profile.avatarBase64
+            )
+            firestore.collection("users").document(profile.uid).set(userMap).await()
+            
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.localizedMessage ?: "Gagal menyimpan profil")
+        }
     }
 }
 
