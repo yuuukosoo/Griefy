@@ -7,14 +7,17 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.Memory
+import com.naufal.griefy.domain.repository.AuthRepository
 import com.naufal.griefy.domain.repository.MemoryRepository
+import com.naufal.griefy.domain.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateMemoryViewModel @Inject constructor(
-    private val repository: MemoryRepository
+    private val repository: MemoryRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     var titleText by mutableStateOf("")
@@ -85,6 +88,21 @@ class CreateMemoryViewModel @Inject constructor(
 
     fun saveMemory(onSaveSuccess: () -> Unit) {
         viewModelScope.launch {
+            val currentUser = authRepository.getCurrentUser()
+            var profileName = currentUser?.displayName ?: "Khalish"
+            var profileAvatar: String? = null
+
+            if (currentUser != null) {
+                authRepository.getUserProfile(currentUser.uid).collect { resource ->
+                    if (resource is Resource.Success) {
+                        resource.data?.let {
+                            profileName = it.displayName
+                            profileAvatar = it.avatarBase64
+                        }
+                    }
+                }
+            }
+
             val newMemory = Memory(
                 title = titleText,
                 content = contentText,
@@ -95,8 +113,8 @@ class CreateMemoryViewModel @Inject constructor(
                 songTrackId = selectedSongTrackId,
                 songTitle = selectedSongTitle,
                 isTrashed = false,
-                userName = "Khalish",
-                userAvatar = null
+                userName = profileName,
+                userAvatar = profileAvatar
             )
 
             repository.addMemory(newMemory)
