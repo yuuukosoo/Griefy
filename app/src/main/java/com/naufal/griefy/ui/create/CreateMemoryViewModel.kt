@@ -114,7 +114,8 @@ class CreateMemoryViewModel @Inject constructor(
                 songTitle = selectedSongTitle,
                 isTrashed = false,
                 userName = profileName,
-                userAvatar = profileAvatar
+                userAvatar = profileAvatar,
+                userId = authRepository.getCurrentUser()?.uid
             )
 
             repository.addMemory(newMemory)
