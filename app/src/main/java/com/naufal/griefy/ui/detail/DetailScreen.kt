@@ -139,7 +139,7 @@ fun DetailScreen(
                         onClick = {
                             showDeleteDialog = true
                         },
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier.padding(end = 40.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
