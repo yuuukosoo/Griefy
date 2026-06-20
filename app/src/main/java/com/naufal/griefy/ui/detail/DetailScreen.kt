@@ -288,6 +288,19 @@ fun DetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 48.dp)
+                        .clickable {
+                            val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                            val authorId = mem.userId
+                            if (authorId.isNullOrEmpty() || authorId == currentUserId) {
+                                navController.navigate(Screen.Profile.route) {
+                                    popUpTo(Screen.Home.route) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            } else {
+                                navController.navigate(Screen.OtherProfile.createRoute(authorId))
+                            }
+                        }
                         .padding(bottom = 12.dp)
                 ) {
                     Box(
