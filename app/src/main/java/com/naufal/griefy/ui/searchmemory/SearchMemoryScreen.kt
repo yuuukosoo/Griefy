@@ -107,6 +107,19 @@ fun SearchMemoryScreen(
                             memory = memory,
                             onClick = {
                                 navController.navigate(Screen.DetailMemory.createRoute(memory.id))
+                            },
+                            onProfileClick = {
+                                val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                                val authorId = memory.userId
+                                if (authorId.isNullOrEmpty() || authorId == currentUserId) {
+                                    navController.navigate(Screen.Profile.route) {
+                                        popUpTo(Screen.Home.route) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                } else {
+                                    navController.navigate(Screen.OtherProfile.createRoute(authorId))
+                                }
                             }
                         )
                     }
@@ -127,7 +140,7 @@ fun SearchMemoryScreen(
 }
 
 @Composable
-fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
+fun PublicMemoryCard(memory: Memory, onClick: () -> Unit, onProfileClick: () -> Unit) {
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
     val dateString = formatter.format(Date(memory.createdAt))
 
@@ -145,6 +158,7 @@ fun PublicMemoryCard(memory: Memory, onClick: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable { onProfileClick() }
                     .padding(bottom = 12.dp)
             ) {
                 Box(
