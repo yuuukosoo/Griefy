@@ -234,7 +234,7 @@ fun EditMemoryScreen(
                 ) {
                     Icon(
                         imageVector = if (viewModel.isPublic) Icons.Default.Language else Icons.Default.Lock,
-                        contentDescription = if (viewModel.isPublic) "Publik" else "Privat",
+                        contentDescription = if (viewModel.isPublic) stringResource(R.string.public_text) else stringResource(R.string.private_text),
                         tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                         modifier = Modifier.size(20.dp.scaled())
                     )
@@ -280,14 +280,14 @@ fun EditMemoryScreen(
                         onDismissRequest = { showMusicMenu = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Ubah Musik") },
+                            text = { Text(stringResource(R.string.create_change_song)) },
                             onClick = {
                                 showMusicMenu = false
                                 navController.navigate(Screen.SearchPublic.route)
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Hapus Musik") },
+                            text = { Text(stringResource(R.string.create_delete_song_desc)) },
                             onClick = {
                                 showMusicMenu = false
                                 viewModel.setSelectedSong(null, null, null, null)

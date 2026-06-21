@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.app.Application
+import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.repository.AuthRepository
 import com.naufal.griefy.domain.repository.MemoryRepository
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateMemoryViewModel @Inject constructor(
     private val repository: MemoryRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val application: Application
 ) : ViewModel() {
 
     var titleText by mutableStateOf("")
@@ -108,7 +111,7 @@ class CreateMemoryViewModel @Inject constructor(
                 content = contentText,
                 imageUris = selectedImageUris.map { it.toString() },
                 createdAt = System.currentTimeMillis(),
-                tags = tagsList.ifEmpty { listOf("Kenangan Baru") },
+                tags = tagsList.ifEmpty { listOf(application.getString(R.string.default_memory_tag)) },
                 isPublic = isPublic,
                 songTrackId = selectedSongTrackId,
                 songTitle = selectedSongTitle,

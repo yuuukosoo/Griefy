@@ -43,6 +43,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun logout(onComplete: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                memoryRepository.clearAllLocalMemories()
+            } catch (_: Exception) {
+                // Ignore Room delete failure
+            }
+            authRepository.logout()
+            onComplete()
+        }
+    }
+
     private val sharedPreferences = context.getSharedPreferences("settings_pref", Context.MODE_PRIVATE)
 
     private val _isDarkMode = MutableStateFlow(sharedPreferences.getBoolean("dark_mode", false))

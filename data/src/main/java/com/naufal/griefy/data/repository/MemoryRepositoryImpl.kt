@@ -6,7 +6,10 @@ import android.graphics.BitmapFactory
 import android.util.Base64
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import com.google.firebase.firestore.FirebaseFirestore
 import com.naufal.griefy.data.local.MemoryDao
 import com.naufal.griefy.data.remote.DeezerApi
@@ -19,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
@@ -33,10 +37,15 @@ class MemoryRepositoryImpl @Inject constructor(
     private val repositoryScope = CoroutineScope(Dispatchers.IO)
 
     override fun getAllMemories(): Flow<List<Memory>> {
+        val currentUserId = firebaseAuth.currentUser?.uid
+        if (currentUserId != null) {
+            repositoryScope.launch {
+                syncUserMemoriesFromFirestore(currentUserId)
+            }
+        }
         return dao.getAllMemories().map { entities ->
-            val currentUserId = firebaseAuth.currentUser?.uid
             entities.filter {
-                !it.isPublic ||
+                it.isPublic ||
                 it.isSaved ||
                 (currentUserId != null && it.userId == currentUserId) ||
                 it.userName == Memory.DEFAULT_USERNAME ||
@@ -122,8 +131,8 @@ class MemoryRepositoryImpl @Inject constructor(
     override suspend fun addMemory(memory: Memory) {
         val currentUid = firebaseAuth.currentUser?.uid
         var processedMemory = memory.copy(userId = memory.userId ?: currentUid)
-        if (memory.isPublic && memory.imageUris.isNotEmpty()) {
-            val base64Uris = memory.imageUris.mapNotNull { getBase64FromUri(context, it) }
+        if (processedMemory.imageUris.isNotEmpty()) {
+            val base64Uris = processedMemory.imageUris.mapNotNull { getBase64FromUri(context, it) }
             processedMemory = processedMemory.copy(imageUris = base64Uris)
         }
 
@@ -131,8 +140,8 @@ class MemoryRepositoryImpl @Inject constructor(
         val localId = dao.insertMemory(processedMemory.toEntity()).toInt()
         val finalMemory = processedMemory.copy(id = localId)
 
-        // Upload to Firestore if public AND it belongs to the current user
-        if (finalMemory.isPublic && finalMemory.userId == currentUid) {
+        // Upload to Firestore if it belongs to the current user
+        if (finalMemory.userId == currentUid) {
             uploadToFirestore(finalMemory)
         }
     }
@@ -140,30 +149,16 @@ class MemoryRepositoryImpl @Inject constructor(
     override suspend fun updateMemory(memory: Memory) {
         val currentUid = firebaseAuth.currentUser?.uid
         var processedMemory = memory.copy(userId = memory.userId ?: currentUid)
-        if (memory.isPublic && memory.imageUris.isNotEmpty()) {
-            val base64Uris = memory.imageUris.mapNotNull { getBase64FromUri(context, it) }
+        if (processedMemory.imageUris.isNotEmpty()) {
+            val base64Uris = processedMemory.imageUris.mapNotNull { getBase64FromUri(context, it) }
             processedMemory = processedMemory.copy(imageUris = base64Uris)
         }
 
         dao.updateMemory(processedMemory.toEntity())
 
-        // Sync with Firestore only if it belongs to the current user
+        // Sync with Firestore if it belongs to the current user
         if (processedMemory.userId == currentUid) {
-            if (processedMemory.isPublic) {
-                uploadToFirestore(processedMemory)
-            } else {
-                val uid = processedMemory.userId ?: FALLBACK_USER_ID
-                val docId = "${uid}_${processedMemory.id}"
-                firestore.collection(COLLECTION_PUBLIC_MEMORIES)
-                    .document(docId)
-                    .delete()
-                    .addOnSuccessListener {
-                        android.util.Log.d(TAG_FIRESTORE_SYNC, "Memory made private: deleted from Firestore")
-                    }
-                    .addOnFailureListener { e ->
-                        android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to delete private memory from Firestore: ${e.message}")
-                    }
-            }
+            uploadToFirestore(processedMemory)
         }
     }
 
@@ -171,17 +166,17 @@ class MemoryRepositoryImpl @Inject constructor(
         val currentUid = firebaseAuth.currentUser?.uid
         val memory = dao.getMemoryById(id)?.toDomain()
         dao.moveToTrash(id)
-        if (memory != null && memory.isPublic && (memory.userId == null || memory.userId == currentUid)) {
+        if (memory != null && (memory.isPublic || memory.userId == currentUid)) {
             val uid = memory.userId ?: currentUid ?: FALLBACK_USER_ID
             val docId = "${uid}_${memory.id}"
             firestore.collection(COLLECTION_PUBLIC_MEMORIES)
                 .document(docId)
                 .delete()
                 .addOnSuccessListener {
-                    android.util.Log.d(TAG_FIRESTORE_SYNC, "Public memory deleted from Firestore (moved to trash)")
+                    android.util.Log.d(TAG_FIRESTORE_SYNC, "Memory deleted from Firestore (moved to trash)")
                 }
                 .addOnFailureListener { e ->
-                    android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to delete public memory from Firestore: ${e.message}")
+                    android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to delete memory from Firestore: ${e.message}")
                 }
         }
     }
@@ -196,7 +191,7 @@ class MemoryRepositoryImpl @Inject constructor(
         val currentUid = firebaseAuth.currentUser?.uid
         dao.restoreFromTrash(id)
         val memory = dao.getMemoryById(id)?.toDomain()
-        if (memory != null && memory.isPublic && (memory.userId == null || memory.userId == currentUid)) {
+        if (memory != null && (memory.isPublic || memory.userId == currentUid)) {
             uploadToFirestore(memory)
         }
     }
@@ -205,17 +200,17 @@ class MemoryRepositoryImpl @Inject constructor(
         val currentUid = firebaseAuth.currentUser?.uid
         val memory = dao.getMemoryById(id)?.toDomain()
         dao.deletePermanently(id)
-        if (memory != null && memory.isPublic && (memory.userId == null || memory.userId == currentUid)) {
+        if (memory != null && (memory.isPublic || memory.userId == currentUid)) {
             val uid = memory.userId ?: currentUid ?: FALLBACK_USER_ID
             val docId = "${uid}_${memory.id}"
             firestore.collection(COLLECTION_PUBLIC_MEMORIES)
                 .document(docId)
                 .delete()
                 .addOnSuccessListener {
-                    android.util.Log.d(TAG_FIRESTORE_SYNC, "Public memory deleted from Firestore permanently")
+                    android.util.Log.d(TAG_FIRESTORE_SYNC, "Memory deleted from Firestore permanently")
                 }
                 .addOnFailureListener { e ->
-                    android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to delete public memory from Firestore: ${e.message}")
+                    android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to delete memory from Firestore: ${e.message}")
                 }
         }
     }
@@ -311,7 +306,7 @@ class MemoryRepositoryImpl @Inject constructor(
             "createdAt" to memory.createdAt,
             "imageUris" to memory.imageUris,
             "tags" to memory.tags,
-            "isPublic" to true,
+            "isPublic" to memory.isPublic,
             "songTrackId" to memory.songTrackId,
             "songTitle" to memory.songTitle,
             "userName" to (memory.userName ?: FALLBACK_USERNAME),
@@ -331,6 +326,99 @@ class MemoryRepositoryImpl @Inject constructor(
 
     override suspend fun clearAllLocalMemories() {
         dao.clearAllLocalMemories()
+    }
+
+    private suspend fun syncUserMemoriesFromFirestore(userId: String) {
+        try {
+            val snapshot = firestore.collection(COLLECTION_PUBLIC_MEMORIES)
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            val remoteMemories = snapshot.documents.mapNotNull { doc ->
+                try {
+                    val title = doc.getString("title") ?: ""
+                    val content = doc.getString("content") ?: ""
+                    val createdAt = doc.getLong("createdAt") ?: 0L
+                    val tags = (doc.get("tags") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
+                    val songTrackId = doc.getString("songTrackId")
+                    val songTitle = doc.getString("songTitle")
+                    val userName = doc.getString("userName")
+                    val userAvatar = doc.getString("userAvatar")
+                    val imageUris = (doc.get("imageUris") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
+                    val isPublicVal = doc.getBoolean("isPublic") ?: false
+
+                    Memory(
+                        id = doc.getLong("localId")?.toInt() ?: 0,
+                        title = title,
+                        content = content,
+                        imageUris = imageUris,
+                        createdAt = createdAt,
+                        tags = tags,
+                        isPublic = isPublicVal,
+                        songTrackId = songTrackId,
+                        songTitle = songTitle,
+                        isTrashed = false,
+                        userName = userName,
+                        userAvatar = userAvatar,
+                        userId = userId
+                    )
+                } catch (_: Exception) {
+                    null
+                }
+            }
+
+            val localMemories = dao.getAllLocalMemoriesIncludingTrashed()
+            for (remote in remoteMemories) {
+                val local = if (remote.id != 0) {
+                    localMemories.find { it.id == remote.id }
+                } else {
+                    localMemories.find { it.createdAt == remote.createdAt && it.title == remote.title }
+                }
+
+                if (local == null) {
+                    dao.insertMemory(remote.toEntity())
+                } else {
+                    dao.updateMemory(remote.copy(
+                        id = local.id,
+                        isSaved = local.isSaved,
+                        isTrashed = local.isTrashed
+                    ).toEntity())
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e(TAG_FIRESTORE_ERROR, "Gagal sinkronisasi data user dari Firestore: ${e.message}", e)
+        }
+    }
+
+    private suspend fun <T> Task<T>.await(): T {
+        if (isComplete) {
+            val e = exception
+            return if (e == null) {
+                if (isCanceled) {
+                    throw java.util.concurrent.CancellationException("Task was cancelled.")
+                } else {
+                    result as T
+                }
+            } else {
+                throw e
+            }
+        }
+
+        return suspendCancellableCoroutine { cont ->
+            addOnCompleteListener { task ->
+                val e = task.exception
+                if (e == null) {
+                    if (task.isCanceled) {
+                        cont.cancel()
+                    } else {
+                        cont.resume(task.result as T)
+                    }
+                } else {
+                    cont.resumeWithException(e)
+                }
+            }
+        }
     }
 
     companion object {

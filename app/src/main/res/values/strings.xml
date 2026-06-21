@@ -68,6 +68,7 @@
     <string name="create_content_placeholder">Write your story here...</string>
     <string name="create_memory_song">Memory Song</string>
     <string name="create_artist">Artist</string>
+    <string name="create_change_song">Change Song</string>
     <string name="create_delete_song_desc">Delete Song</string>
     <string name="create_add_song">Add Song</string>
     <string name="create_add_label">Add Label</string>
@@ -75,6 +76,7 @@
     <string name="edit_save_button">Update Memory</string>
     <string name="create_dialog_title">Add Label / Category</string>
     <string name="create_dialog_placeholder">Label name...</string>
+    <string name="default_memory_tag">New Memory</string>
 
     <!-- Detail Screen -->
     <string name="detail_title">Memory Detail</string>

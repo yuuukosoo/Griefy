@@ -68,13 +68,15 @@
     <string name="create_content_placeholder">Tuliskan ceritamu di sini...</string>
     <string name="create_memory_song">Lagu Kenangan</string>
     <string name="create_artist">Artis</string>
+    <string name="create_change_song">Ubah Lagu</string>
     <string name="create_delete_song_desc">Hapus Lagu</string>
-    <string name="create_add_song">Add Song</string>
-    <string name="create_add_label">Add Label</string>
+    <string name="create_add_song">Tambah Lagu</string>
+    <string name="create_add_label">Tambah Label</string>
     <string name="create_save_button">Simpan Kenangan Indah</string>
     <string name="edit_save_button">Perbarui Kenangan </string>
     <string name="create_dialog_title">Tambah Label / Kategori</string>
     <string name="create_dialog_placeholder">Nama label...</string>
+    <string name="default_memory_tag">Kenangan Baru</string>
 
     <!-- Detail Screen -->
     <string name="detail_title">Detail Kenangan</string>
