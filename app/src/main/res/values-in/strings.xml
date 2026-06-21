@@ -3,6 +3,7 @@
     <string name="app_name">Griefy</string>
     <string name="back">Kembali</string>
     <string name="cancel">Batal</string>
+    <string name="close">Tutup</string>
     <string name="save">Simpan</string>
     <string name="delete">Hapus</string>
     <string name="edit">Edit</string>
@@ -68,13 +69,15 @@
     <string name="create_content_placeholder">Tuliskan ceritamu di sini...</string>
     <string name="create_memory_song">Lagu Kenangan</string>
     <string name="create_artist">Artis</string>
+    <string name="create_change_song">Ubah Lagu</string>
     <string name="create_delete_song_desc">Hapus Lagu</string>
-    <string name="create_add_song">Add Song</string>
-    <string name="create_add_label">Add Label</string>
+    <string name="create_add_song">Tambah Lagu</string>
+    <string name="create_add_label">Tambah Label</string>
     <string name="create_save_button">Simpan Kenangan Indah</string>
     <string name="edit_save_button">Perbarui Kenangan </string>
     <string name="create_dialog_title">Tambah Label / Kategori</string>
     <string name="create_dialog_placeholder">Nama label...</string>
+    <string name="default_memory_tag">Kenangan Baru</string>
 
     <!-- Detail Screen -->
     <string name="detail_title">Detail Kenangan</string>
@@ -126,6 +129,10 @@
     <string name="reminder_battery_warning_title">Notifikasi Tidak Masuk Saat Ditutup?</string>
     <string name="reminder_battery_warning_desc">Beberapa perangkat membatasi aplikasi di latar belakang. Silakan matikan pengoptimalan baterai (atur ke Tanpa Batasan) untuk Griefy agar notifikasi tetap masuk meskipun aplikasi ditutup.</string>
     <string name="reminder_battery_warning_btn">Abaikan Batasan</string>
+
+    <string name="reminder_memory_label">Hubungkan dengan Kenangan (Opsional)</string>
+    <string name="reminder_no_memory_selected">Tidak Ada Hubungan Kenangan</string>
+    <string name="reminder_linked_memory">Kenangan Terhubung: %s</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Pengaturan</string>

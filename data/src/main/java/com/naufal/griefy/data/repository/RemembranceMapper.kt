@@ -8,7 +8,8 @@ fun RemembranceDayEntity.toDomain(): RemembranceDay {
         id = id,
         title = title,
         description = description,
-        dateTime = dateTime
+        dateTime = dateTime,
+        memoryId = memoryId
     )
 }
 
@@ -17,6 +18,7 @@ fun RemembranceDay.toEntity(): RemembranceDayEntity {
         id = id,
         title = title,
         description = description,
-        dateTime = dateTime
+        dateTime = dateTime,
+        memoryId = memoryId
     )
 }

@@ -399,9 +399,10 @@ fun SettingsScreen(
                         TextButton(
                             onClick = {
                                 showLogoutDialog.value = false
-                                com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
-                                navController.navigate(Screen.Login.route) {
-                                    popUpTo(0)
+                                viewModel.logout {
+                                    navController.navigate(Screen.Login.route) {
+                                        popUpTo(0)
+                                    }
                                 }
                             },
                             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)

@@ -53,7 +53,7 @@ class AuthRepositoryImpl @Inject constructor(
                     .build()
                 firebaseUser.updateProfile(profileUpdates).await()
                 
-                // Create user document in Firestore users collection
+
                 val userMap = mapOf(
                     "uid" to firebaseUser.uid,
                     "email" to (firebaseUser.email ?: ""),
