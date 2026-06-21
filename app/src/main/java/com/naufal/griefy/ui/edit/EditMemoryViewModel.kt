@@ -1,6 +1,7 @@
 package com.naufal.griefy.ui.edit
 
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -59,7 +60,7 @@ class EditMemoryViewModel @Inject constructor(
                 contentText = memory.content
                 isPublic = memory.isPublic
                 tagsList = memory.tags
-                selectedImageUris = memory.imageUris.map { uriString -> Uri.parse(uriString) }
+                selectedImageUris = memory.imageUris.map { uriString -> uriString.toUri() }
                 selectedSongTrackId = memory.songTrackId
                 selectedSongTitle = memory.songTitle
 
@@ -117,7 +118,7 @@ class EditMemoryViewModel @Inject constructor(
     fun updateMemory(onUpdateSuccess: () -> Unit) {
         viewModelScope.launch {
             val currentUser = authRepository.getCurrentUser()
-            var profileName = currentUser?.displayName ?: "Khalish"
+            var profileName = currentUser?.displayName ?: Memory.DEFAULT_USERNAME
             var profileAvatar: String? = null
 
             if (currentUser != null) {

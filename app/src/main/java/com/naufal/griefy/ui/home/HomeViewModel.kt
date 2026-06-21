@@ -9,6 +9,7 @@ import com.naufal.griefy.domain.repository.MemoryRepository
 import com.naufal.griefy.domain.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -42,8 +43,15 @@ class HomeViewModel @Inject constructor(
         _searchQuery,
         userProfile
     ) { memoriesList, query, profile ->
-        val processedList = memoriesList.map { memory ->
-            if (profile != null && (memory.userName == "Khalish" || memory.userName.isNullOrEmpty() || memory.userName == profile.displayName)) {
+        val currentUserId = authRepository.getCurrentUser()?.uid
+        val filteredList = memoriesList.filter { memory ->
+            !memory.isPublic || 
+            (currentUserId != null && memory.userId == currentUserId) || 
+            memory.userName == Memory.DEFAULT_USERNAME || 
+            memory.userName.isNullOrEmpty()
+        }
+        val processedList = filteredList.map { memory ->
+            if (profile != null && (memory.userName == Memory.DEFAULT_USERNAME || memory.userName.isNullOrEmpty() || memory.userName == profile.displayName)) {
                 memory.copy(
                     userName = profile.displayName,
                     userAvatar = profile.avatarBase64
@@ -72,7 +80,9 @@ class HomeViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
-    fun moveToTrash(memoryId: Int) {
-
+    fun toggleSaveMemory(memory: Memory) {
+        viewModelScope.launch {
+            repository.updateMemory(memory.copy(isSaved = !memory.isSaved))
+        }
     }
 }

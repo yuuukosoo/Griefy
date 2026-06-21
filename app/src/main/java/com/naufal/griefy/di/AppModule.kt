@@ -18,8 +18,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -74,9 +76,22 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDeezerApi(): DeezerApi {
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .protocols(listOf(okhttp3.Protocol.HTTP_1_1))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeezerApi(okHttpClient: OkHttpClient): DeezerApi {
         return Retrofit.Builder()
             .baseUrl("https://api.deezer.com/")
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(DeezerApi::class.java)

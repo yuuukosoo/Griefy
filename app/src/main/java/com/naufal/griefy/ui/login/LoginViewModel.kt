@@ -22,7 +22,7 @@ class LoginViewModel @Inject constructor(
 
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
-            _loginState.value = Resource.Error("Email dan password tidak boleh kosong")
+            _loginState.value = Resource.Error("ERROR_EMAIL_PASSWORD_EMPTY")
             return
         }
         viewModelScope.launch {

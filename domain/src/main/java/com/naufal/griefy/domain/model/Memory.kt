@@ -13,5 +13,10 @@ data class Memory(
     val isTrashed: Boolean = false,
     val userName: String? = null,
     val userAvatar: String? = null,
-    val userId: String? = null
-)
+    val userId: String? = null,
+    val isSaved: Boolean = false
+) {
+    companion object {
+        const val DEFAULT_USERNAME = "Khalish"
+    }
+}

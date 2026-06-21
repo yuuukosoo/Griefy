@@ -28,7 +28,7 @@ class ProfileViewModel @Inject constructor(
     var email by mutableStateOf("")
         private set
 
-    var gender by mutableStateOf("Laki-laki")
+    var gender by mutableStateOf(com.naufal.griefy.util.ProfileUtils.GENDER_MALE_KEY)
         private set
 
     var profileImageUriString by mutableStateOf<String?>(null)
@@ -55,7 +55,7 @@ class ProfileViewModel @Inject constructor(
     fun loadUserProfile() {
         val currentUser = authRepository.getCurrentUser()
         if (currentUser == null) {
-            errorMessage = "User tidak terautentikasi"
+            errorMessage = "ERROR_UNAUTHENTICATED"
             return
         }
         viewModelScope.launch {
@@ -72,7 +72,7 @@ class ProfileViewModel @Inject constructor(
                             originalProfile = profile
                             username = profile.displayName
                             email = profile.email
-                            gender = profile.gender ?: "Laki-laki"
+                            gender = profile.gender ?: com.naufal.griefy.util.ProfileUtils.GENDER_MALE_KEY
                             profileImageUriString = profile.avatarBase64
                         }
                     }
@@ -91,7 +91,7 @@ class ProfileViewModel @Inject constructor(
             originalProfile?.let { profile ->
                 username = profile.displayName
                 email = profile.email
-                gender = profile.gender ?: "Laki-laki"
+                gender = profile.gender ?: com.naufal.griefy.util.ProfileUtils.GENDER_MALE_KEY
                 profileImageUriString = profile.avatarBase64
             }
         }
@@ -116,7 +116,7 @@ class ProfileViewModel @Inject constructor(
             if (base64 != null) {
                 profileImageUriString = base64
             } else {
-                errorMessage = "Gagal memproses gambar"
+                errorMessage = "ERROR_PROCESS_IMAGE_FAILED"
             }
         }
     }
@@ -132,7 +132,7 @@ class ProfileViewModel @Inject constructor(
     fun saveUserProfile() {
         val currentUser = authRepository.getCurrentUser()
         if (currentUser == null) {
-            errorMessage = "User tidak terautentikasi"
+            errorMessage = "ERROR_UNAUTHENTICATED"
             return
         }
 
@@ -149,8 +149,7 @@ class ProfileViewModel @Inject constructor(
                 avatarBase64 = profileImageUriString
             )
 
-            val result = authRepository.saveUserProfile(updatedProfile)
-            when (result) {
+            when (val result = authRepository.saveUserProfile(updatedProfile)) {
                 is Resource.Success -> {
                     isSaving = false
                     saveSuccess = true
@@ -159,7 +158,7 @@ class ProfileViewModel @Inject constructor(
                 }
                 is Resource.Error -> {
                     isSaving = false
-                    errorMessage = result.message ?: "Gagal menyimpan profil"
+                    errorMessage = result.message ?: "ERROR_SAVE_PROFILE_FAILED"
                 }
                 is Resource.Loading -> {
                     // Safe fallback

@@ -17,7 +17,8 @@ fun MemoryEntity.toDomain(): Memory {
         isTrashed = isTrashed,
         userName = userName,
         userAvatar = userAvatar,
-        userId = userId
+        userId = userId,
+        isSaved = isSaved
     )
 }
 
@@ -35,6 +36,7 @@ fun Memory.toEntity(): MemoryEntity {
         isTrashed = isTrashed,
         userName = userName,
         userAvatar = userAvatar,
-        userId = userId
+        userId = userId,
+        isSaved = isSaved
     )
 }

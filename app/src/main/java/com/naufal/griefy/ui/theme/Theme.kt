@@ -1,6 +1,6 @@
 package com.naufal.griefy.ui.theme
 
-import android.app.Activity
+
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -16,7 +16,7 @@ import com.naufal.griefy.R
 @Composable
 fun GriefyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Set dynamicColor to false by default to enforce our custom theme
+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {

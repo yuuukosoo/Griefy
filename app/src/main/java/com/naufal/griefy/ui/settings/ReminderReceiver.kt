@@ -18,18 +18,18 @@ class ReminderReceiver : BroadcastReceiver() {
         wakeLock.acquire(3000)
 
         val reminderId = intent?.getIntExtra("REMINDER_ID", 101) ?: 101
-        val title = intent?.getStringExtra("REMINDER_TITLE") ?: "Hari Peringatan Penting ✨"
-        val desc = intent?.getStringExtra("REMINDER_DESC") ?: "Mari luangkan waktu sejenak untuk mengingat kenangan indah."
+        val title = intent?.getStringExtra("REMINDER_TITLE") ?: context.getString(R.string.reminder_noti_default_title)
+        val desc = intent?.getStringExtra("REMINDER_DESC") ?: context.getString(R.string.reminder_noti_default_desc)
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId = "griefy_reminder_channel"
 
         val channel = NotificationChannel(
             channelId,
-            "Pengingat Hari Peringatan",
+            context.getString(R.string.reminder_noti_channel_name),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "Channel untuk notifikasi pengingat Griefy"
+            description = context.getString(R.string.reminder_noti_channel_desc)
         }
         notificationManager.createNotificationChannel(channel)
 

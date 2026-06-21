@@ -44,7 +44,7 @@ class DetailViewModel @Inject constructor(
         repository.getMemoryByIdAsFlow(memoryId),
         userProfile
     ) { mem, profile ->
-        if (mem != null && profile != null && (mem.userName == "Khalish" || mem.userName.isNullOrEmpty() || mem.userName == profile.displayName)) {
+        if (mem != null && profile != null && (mem.userName == Memory.DEFAULT_USERNAME || mem.userName.isNullOrEmpty() || mem.userName == profile.displayName)) {
             mem.copy(
                 userName = profile.displayName,
                 userAvatar = profile.avatarBase64

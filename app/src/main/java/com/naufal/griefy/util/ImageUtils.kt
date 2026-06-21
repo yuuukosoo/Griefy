@@ -3,7 +3,8 @@ package com.naufal.griefy.util
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
+import androidx.core.net.toUri
+import androidx.core.graphics.scale
 import android.util.Base64
 import java.io.ByteArrayOutputStream
 
@@ -12,13 +13,13 @@ fun String.toImageModel(): Any {
         try {
             val base64Data = this.substringAfter("base64:")
             Base64.decode(base64Data, Base64.DEFAULT)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             this
         }
     } else {
         try {
-            Uri.parse(this)
-        } catch (e: Exception) {
+            this.toUri()
+        } catch (_: Exception) {
             this
         }
     }
@@ -27,7 +28,7 @@ fun String.toImageModel(): Any {
 fun getBase64FromUri(context: Context, uriString: String): String? {
     if (uriString.startsWith("base64:") || uriString.isBlank()) return uriString
     return try {
-        val uri = Uri.parse(uriString)
+        val uri = uriString.toUri()
         val inputStream = context.contentResolver.openInputStream(uri)
         val originalBitmap = BitmapFactory.decodeStream(inputStream)
         inputStream?.close()
@@ -48,7 +49,7 @@ fun getBase64FromUri(context: Context, uriString: String): String? {
                 newHeight = maxDimension
                 newWidth = (maxDimension * ratio).toInt()
             }
-            Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true)
+            originalBitmap.scale(newWidth, newHeight, true)
         } else {
             originalBitmap
         }

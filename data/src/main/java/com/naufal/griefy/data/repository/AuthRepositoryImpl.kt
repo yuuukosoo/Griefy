@@ -15,6 +15,7 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+@Suppress("SpellCheckingInspection")
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore
@@ -33,10 +34,10 @@ class AuthRepositoryImpl @Inject constructor(
                 )
                 emit(Resource.Success(user))
             } else {
-                emit(Resource.Error("User tidak ditemukan"))
+                emit(Resource.Error("ERROR_USER_NOT_FOUND"))
             }
         } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "Terjadi kesalahan saat masuk"))
+            emit(Resource.Error(e.localizedMessage ?: "ERROR_LOGIN_FAILED"))
         }
     }
 
@@ -69,10 +70,10 @@ class AuthRepositoryImpl @Inject constructor(
                 )
                 emit(Resource.Success(user))
             } else {
-                emit(Resource.Error("Registrasi gagal"))
+                emit(Resource.Error("ERROR_REGISTRATION_FAILED"))
             }
         } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "Terjadi kesalahan saat mendaftar"))
+            emit(Resource.Error(e.localizedMessage ?: "ERROR_REGISTER_FAILED"))
         }
     }
 
@@ -128,7 +129,7 @@ class AuthRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            emit(Resource.Error(e.localizedMessage ?: "Gagal memuat profil"))
+            emit(Resource.Error(e.localizedMessage ?: "ERROR_LOAD_PROFILE_FAILED"))
         }
     }
 
@@ -155,7 +156,7 @@ class AuthRepositoryImpl @Inject constructor(
             
             Resource.Success(Unit)
         } catch (e: Exception) {
-            Resource.Error(e.localizedMessage ?: "Gagal menyimpan profil")
+            Resource.Error(e.localizedMessage ?: "ERROR_SAVE_PROFILE_FAILED")
         }
     }
 
@@ -172,10 +173,10 @@ class AuthRepositoryImpl @Inject constructor(
                 
                 Resource.Success(Unit)
             } else {
-                Resource.Error("User tidak terautentikasi")
+                Resource.Error("ERROR_UNAUTHENTICATED")
             }
         } catch (e: Exception) {
-            Resource.Error(e.localizedMessage ?: "Gagal menghapus akun")
+            Resource.Error(e.localizedMessage ?: "ERROR_DELETE_ACCOUNT_FAILED")
         }
     }
 }

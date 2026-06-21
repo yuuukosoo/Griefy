@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,7 +21,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SplashScreen(navController: NavController) {
     LaunchedEffect(Unit) {
-        delay(3000) // Display splash screen for 3 seconds
+        delay(3000)
         val isLoggedIn = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser != null
         val startRoute = if (isLoggedIn) Screen.Home.route else Screen.Login.route
         navController.navigate(startRoute) {
@@ -33,7 +32,7 @@ fun SplashScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Cozy warm paper background (Mymory style)
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .navigationBarsPadding(),
         contentAlignment = Alignment.Center
