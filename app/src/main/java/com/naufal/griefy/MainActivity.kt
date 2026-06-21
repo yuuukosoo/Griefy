@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.naufal.griefy.ui.create.CreateMemoryScreen
@@ -29,11 +30,9 @@ import com.naufal.griefy.ui.searchmemory.SearchMemoryScreen
 import com.naufal.griefy.ui.reminders.ReminderScreen
 import com.naufal.griefy.ui.settings.SettingsScreen
 import androidx.appcompat.app.AppCompatDelegate
-import android.content.Context
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.*
 import com.naufal.griefy.ui.theme.GriefyTheme
 import com.naufal.griefy.ui.trash.TrashScreen
+import com.naufal.griefy.ui.saved.SavedScreen
 import com.naufal.griefy.worker.TrashCleanupWorker
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
@@ -41,7 +40,7 @@ import java.util.concurrent.TimeUnit
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        val sharedPreferences = getSharedPreferences("settings_pref", Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences("settings_pref", MODE_PRIVATE)
         if (sharedPreferences.contains("dark_mode")) {
             val isDark = sharedPreferences.getBoolean("dark_mode", false)
             AppCompatDelegate.setDefaultNightMode(
@@ -56,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "TrashCleanupWork",
-            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.KEEP,
             trashCleanupWorkRequest
         )
         setContent {
@@ -136,6 +135,10 @@ class MainActivity : AppCompatActivity() {
 
                         composable(Screen.Reminders.route) {
                             ReminderScreen(navController = navController)
+                        }
+
+                        composable(Screen.Saved.route) {
+                            SavedScreen(navController = navController)
                         }
 
 

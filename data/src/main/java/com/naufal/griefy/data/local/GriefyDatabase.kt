@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [MemoryEntity::class, RemembranceDayEntity::class],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

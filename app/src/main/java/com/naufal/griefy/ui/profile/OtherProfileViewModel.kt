@@ -2,6 +2,7 @@ package com.naufal.griefy.ui.profile
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -26,7 +27,7 @@ class OtherProfileViewModel @Inject constructor(
     var profileState by mutableStateOf<Resource<UserProfile>>(Resource.Loading())
         private set
 
-    var memoryCount by mutableStateOf(0)
+    var memoryCount by mutableIntStateOf(0)
         private set
 
     init {
@@ -46,7 +47,7 @@ class OtherProfileViewModel @Inject constructor(
     private fun loadMemoryCount() {
         firestore.collection("public_memories")
             .whereEqualTo("userId", userId)
-            .addSnapshotListener { snapshot, error ->
+            .addSnapshotListener { snapshot, _ ->
                 if (snapshot != null) {
                     memoryCount = snapshot.size()
                 }

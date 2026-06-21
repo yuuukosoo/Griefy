@@ -9,6 +9,7 @@ import com.naufal.griefy.domain.repository.MemoryRepository
 import com.naufal.griefy.domain.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,11 +40,21 @@ class SearchMemoryViewModel @Inject constructor(
 
     val publicMemories: StateFlow<List<Memory>> = combine(
         repository.getPublicMemories(),
+        repository.getAllMemories(),
         _searchQuery,
         userProfile
-    ) { memories, query, profile ->
-        val processedList = memories.map { memory ->
-            if (profile != null && (memory.userName == "Khalish" || memory.userName.isNullOrEmpty() || memory.userName == profile.displayName)) {
+    ) { remoteMemories, localMemories, query, profile ->
+        val processedList = remoteMemories.map { remote ->
+            val localMatch = localMemories.find { it.createdAt == remote.createdAt && it.title == remote.title }
+            val isSaved = localMatch?.isSaved ?: false
+            val id = localMatch?.id ?: remote.id
+
+            val memory = remote.copy(
+                id = id,
+                isSaved = isSaved
+            )
+
+            if (profile != null && (memory.userName == Memory.DEFAULT_USERNAME || memory.userName.isNullOrEmpty() || memory.userName == profile.displayName)) {
                 memory.copy(
                     userName = profile.displayName,
                     userAvatar = profile.avatarBase64
@@ -70,5 +81,17 @@ class SearchMemoryViewModel @Inject constructor(
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
+    }
+
+    fun toggleSaveMemory(memory: Memory) {
+        viewModelScope.launch {
+            val localMemories = repository.getAllMemories().first()
+            val localMatch = localMemories.find { it.createdAt == memory.createdAt && it.title == memory.title }
+            if (localMatch != null) {
+                repository.updateMemory(localMatch.copy(isSaved = !localMatch.isSaved))
+            } else {
+                repository.addMemory(memory.copy(isSaved = true))
+            }
+        }
     }
 }

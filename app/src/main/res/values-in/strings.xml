@@ -46,6 +46,11 @@
     <string name="nav_search_memory">Search Memory</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_write_memory_desc">Tulis Kenangan</string>
+    <string name="nav_reminders">Pengingat</string>
+    <string name="nav_search">Cari</string>
+    <string name="nav_saved">Simpan</string>
+    <string name="saved_title">Kenangan Tersimpan</string>
+    <string name="saved_empty">Belum ada kenangan yang disimpan.</string>
 
     <!-- Profile Screen -->
     <string name="profile_title">Profil Anda</string>
@@ -67,7 +72,7 @@
     <string name="create_add_song">Add Song</string>
     <string name="create_add_label">Add Label</string>
     <string name="create_save_button">Simpan Kenangan Indah</string>
-    <string name="edit_save_button">Perbarui Kenangan Indah</string>
+    <string name="edit_save_button">Perbarui Kenangan </string>
     <string name="create_dialog_title">Tambah Label / Kategori</string>
     <string name="create_dialog_placeholder">Nama label...</string>
 
@@ -196,6 +201,20 @@
     <string name="profile_desc_photo">Foto Profil</string>
     <string name="profile_desc_edit_photo">Ubah Foto Profil</string>
     <string name="profile_desc_edit_profile">Ubah Profil</string>
+
+    <!-- Reminder placeholders & Settings -->
+    <string name="reminder_title_placeholder">Masukkan nama...</string>
+    <string name="reminder_note_placeholder">Masukkan catatan...</string>
+    <string name="reminder_time_settings_title">Pengaturan Waktu Notifikasi</string>
+    <string name="settings_deleting_account">Menghapus Akun...</string>
+    <string name="settings_delete_account_error">Gagal Menghapus Akun</string>
+    <string name="ok">OK</string>
+
+    <!-- Notification Strings -->
+    <string name="reminder_noti_default_title">Hari Peringatan Penting ✨</string>
+    <string name="reminder_noti_default_desc">Mari luangkan waktu sejenak untuk mengingat kenangan indah.</string>
+    <string name="reminder_noti_channel_name">Pengingat Hari Peringatan</string>
+    <string name="reminder_noti_channel_desc">Channel untuk notifikasi pengingat Griefy</string>
 </resources>
 
 

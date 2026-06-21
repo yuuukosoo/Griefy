@@ -1,4 +1,4 @@
-package com.naufal.griefy.ui.trash
+package com.naufal.griefy.ui.saved
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TrashViewModel @Inject constructor(
+class SavedViewModel @Inject constructor(
     private val repository: MemoryRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
@@ -35,11 +35,11 @@ class TrashViewModel @Inject constructor(
         initialValue = null
     )
 
-    val trashedMemories: StateFlow<List<Memory>> = combine(
-        repository.getTrashedMemories(),
+    val savedMemories: StateFlow<List<Memory>> = combine(
+        repository.getAllMemories(),
         userProfile
     ) { memoriesList, profile ->
-        val processedList = memoriesList.map { memory ->
+        memoriesList.filter { it.isSaved }.map { memory ->
             if (profile != null && (memory.userName == Memory.DEFAULT_USERNAME || memory.userName.isNullOrEmpty() || memory.userName == profile.displayName)) {
                 memory.copy(
                     userName = profile.displayName,
@@ -48,31 +48,16 @@ class TrashViewModel @Inject constructor(
             } else {
                 memory
             }
-        }
-        processedList.sortedByDescending { it.createdAt }
+        }.sortedByDescending { it.createdAt }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
 
-    fun restoreMemory(id: Int) {
+    fun toggleSaveMemory(memory: Memory) {
         viewModelScope.launch {
-            repository.restoreFromTrash(id)
-        }
-    }
-
-    fun deletePermanently(id: Int) {
-        viewModelScope.launch {
-            repository.deletePermanently(id)
-        }
-    }
-
-    fun emptyTrash() {
-        viewModelScope.launch {
-            trashedMemories.value.forEach { memory ->
-                repository.deletePermanently(memory.id)
-            }
+            repository.updateMemory(memory.copy(isSaved = !memory.isSaved))
         }
     }
 }

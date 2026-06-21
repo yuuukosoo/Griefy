@@ -35,7 +35,7 @@ class SettingsViewModel @Inject constructor(
             _deleteAccountResult.emit(Resource.Loading())
             try {
                 memoryRepository.clearAllLocalMemories()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Ignore Room delete failure
             }
             val result = authRepository.deleteAccount()

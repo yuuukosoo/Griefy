@@ -89,7 +89,7 @@ class CreateMemoryViewModel @Inject constructor(
     fun saveMemory(onSaveSuccess: () -> Unit) {
         viewModelScope.launch {
             val currentUser = authRepository.getCurrentUser()
-            var profileName = currentUser?.displayName ?: "Khalish"
+            var profileName = currentUser?.displayName ?: Memory.DEFAULT_USERNAME
             var profileAvatar: String? = null
 
             if (currentUser != null) {
@@ -108,7 +108,7 @@ class CreateMemoryViewModel @Inject constructor(
                 content = contentText,
                 imageUris = selectedImageUris.map { it.toString() },
                 createdAt = System.currentTimeMillis(),
-                tags = if (tagsList.isEmpty()) listOf("Kenangan Baru") else tagsList,
+                tags = tagsList.ifEmpty { listOf("Kenangan Baru") },
                 isPublic = isPublic,
                 songTrackId = selectedSongTrackId,
                 songTitle = selectedSongTitle,

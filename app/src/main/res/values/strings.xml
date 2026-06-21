@@ -46,6 +46,11 @@
     <string name="nav_search_memory">Search Memory</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_write_memory_desc">Write Memory</string>
+    <string name="nav_reminders">Reminders</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_saved">Saved</string>
+    <string name="saved_title">Saved Memories</string>
+    <string name="saved_empty">No saved memories yet.</string>
 
     <!-- Profile Screen -->
     <string name="profile_title">Your Profile</string>
@@ -67,7 +72,7 @@
     <string name="create_add_song">Add Song</string>
     <string name="create_add_label">Add Label</string>
     <string name="create_save_button">Save Beautiful Memory</string>
-    <string name="edit_save_button">Update Beautiful Memory</string>
+    <string name="edit_save_button">Update Memory</string>
     <string name="create_dialog_title">Add Label / Category</string>
     <string name="create_dialog_placeholder">Label name...</string>
 
@@ -196,5 +201,19 @@
     <string name="profile_desc_photo">Profile Photo</string>
     <string name="profile_desc_edit_photo">Edit Profile Picture</string>
     <string name="profile_desc_edit_profile">Edit Profile</string>
+
+    <!-- Reminder placeholders & Settings -->
+    <string name="reminder_title_placeholder">Enter name...</string>
+    <string name="reminder_note_placeholder">Enter note...</string>
+    <string name="reminder_time_settings_title">Notification Time Settings</string>
+    <string name="settings_deleting_account">Deleting Account...</string>
+    <string name="settings_delete_account_error">Failed to Delete Account</string>
+    <string name="ok">OK</string>
+
+    <!-- Notification Strings -->
+    <string name="reminder_noti_default_title">Important Remembrance Day ✨</string>
+    <string name="reminder_noti_default_desc">Let\'s take a moment to remember beautiful memories.</string>
+    <string name="reminder_noti_channel_name">Remembrance Day Reminder</string>
+    <string name="reminder_noti_channel_desc">Channel for Griefy reminder notifications</string>
 </resources>
 

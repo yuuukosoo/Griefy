@@ -22,15 +22,15 @@ class RegisterViewModel @Inject constructor(
 
     fun register(name: String, email: String, password: String, confirmPass: String) {
         if (name.isBlank() || email.isBlank() || password.isBlank() || confirmPass.isBlank()) {
-            _registerState.value = Resource.Error("Semua form wajib diisi")
+            _registerState.value = Resource.Error("ERROR_ALL_FIELDS_REQUIRED")
             return
         }
         if (password != confirmPass) {
-            _registerState.value = Resource.Error("Konfirmasi password tidak cocok")
+            _registerState.value = Resource.Error("ERROR_PASSWORD_MISMATCH")
             return
         }
         if (password.length < 6) {
-            _registerState.value = Resource.Error("Password harus minimal 6 karakter")
+            _registerState.value = Resource.Error("ERROR_PASSWORD_TOO_SHORT")
             return
         }
         viewModelScope.launch {
