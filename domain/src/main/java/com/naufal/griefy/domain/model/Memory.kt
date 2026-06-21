@@ -17,6 +17,6 @@ data class Memory(
     val isSaved: Boolean = false
 ) {
     companion object {
-        const val DEFAULT_USERNAME = "Khalish"
+        const val DEFAULT_USERNAME = "Guest"
     }
 }

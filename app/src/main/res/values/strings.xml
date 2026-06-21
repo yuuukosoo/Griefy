@@ -3,6 +3,7 @@
     <string name="app_name">Griefy</string>
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
@@ -128,6 +129,10 @@
     <string name="reminder_battery_warning_title">Notifications Not Working When Closed?</string>
     <string name="reminder_battery_warning_desc">Some devices limit background apps. Please disable battery optimization (set to Unrestricted) for Griefy so notifications arrive even if the app is closed.</string>
     <string name="reminder_battery_warning_btn">Ignore Restrictions</string>
+
+    <string name="reminder_memory_label">Associate with Memory (Optional)</string>
+    <string name="reminder_no_memory_selected">No Memory Associated</string>
+    <string name="reminder_linked_memory">Linked Memory: %s</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>

@@ -45,6 +45,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -73,6 +75,7 @@ fun ReminderScreen(
 ) {
     val context = LocalContext.current
     val remembranceDays by viewModel.remembranceDays.collectAsState()
+    val memories by viewModel.memories.collectAsState()
 
     val alarmManager = remember { context.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
     val powerManager = remember { context.getSystemService(Context.POWER_SERVICE) as PowerManager }
@@ -129,6 +132,7 @@ fun ReminderScreen(
     var titleText by remember { mutableStateOf("") }
     var descText by remember { mutableStateOf("") }
     var selectedDateTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var selectedMemoryId by remember { mutableStateOf<Int?>(null) }
     var activePicker by remember { mutableStateOf("date") }
 
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
@@ -141,10 +145,12 @@ fun ReminderScreen(
             titleText = reminder.title
             descText = reminder.description
             selectedDateTime = reminder.dateTime
+            selectedMemoryId = reminder.memoryId
         } else {
             titleText = ""
             descText = ""
             selectedDateTime = System.currentTimeMillis() + 60000
+            selectedMemoryId = null
         }
         activePicker = "date"
         showDialog.value = true
@@ -233,9 +239,11 @@ fun ReminderScreen(
                                 verticalArrangement = Arrangement.spacedBy(12.dp.scaled())
                             ) {
                                 items(remembranceDays, key = { it.id }) { reminder ->
+                                    val linkedMemory = memories.find { it.id == reminder.memoryId }
                                     ReminderCard(
                                         reminder = reminder,
                                         dateTimeString = formatter.format(Date(reminder.dateTime)),
+                                        linkedMemoryTitle = linkedMemory?.title,
                                         onEdit = { openDialog(reminder) },
                                         onDelete = {
                                             reminderToDelete.value = reminder
@@ -377,14 +385,16 @@ fun ReminderScreen(
                                             editingReminder.value!!.copy(
                                                 title = titleText,
                                                 description = descText,
-                                                dateTime = selectedDateTime
+                                                dateTime = selectedDateTime,
+                                                memoryId = selectedMemoryId
                                             )
                                         )
                                     } else {
                                         viewModel.addReminder(
                                             title = titleText,
                                             description = descText,
-                                            dateTime = selectedDateTime
+                                            dateTime = selectedDateTime,
+                                            memoryId = selectedMemoryId
                                         )
                                     }
                                     showDialog.value = false
@@ -656,6 +666,89 @@ fun ReminderScreen(
                         }
                     }
 
+                    var dropdownExpanded by remember { mutableStateOf(false) }
+                    var anchorWidth by remember { mutableIntStateOf(0) }
+                    val density = LocalDensity.current
+
+                    val memoryInput = @Composable {
+                        val isMemoryActive = activePicker == "memory"
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onGloballyPositioned { coordinates ->
+                                    anchorWidth = coordinates.size.width
+                                }
+                                .border(
+                                    width = if (isMemoryActive) 2.dp.scaled() else 1.dp.scaled(),
+                                    color = if (isMemoryActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .background(
+                                    color = if (isMemoryActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.02f) else MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .clickable {
+                                    activePicker = "memory"
+                                    dropdownExpanded = true
+                                }
+                                .padding(horizontal = 16.dp.scaled(), vertical = 14.dp.scaled())
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.reminder_memory_label),
+                                    fontSize = 12.sp.scaled(),
+                                    color = if (isMemoryActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(2.dp.scaled()))
+                                val selectedMemoryTitle = memories.find { it.id == selectedMemoryId }?.title 
+                                    ?: stringResource(R.string.reminder_no_memory_selected)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = selectedMemoryTitle,
+                                        fontSize = 16.sp.scaled(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = dropdownExpanded,
+                                    onDismissRequest = { dropdownExpanded = false },
+                                    modifier = Modifier
+                                        .width(with(density) { anchorWidth.toDp() })
+                                        .background(MaterialTheme.colorScheme.surface)
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.reminder_no_memory_selected)) },
+                                        onClick = {
+                                            selectedMemoryId = null
+                                            dropdownExpanded = false
+                                        }
+                                    )
+                                    memories.forEach { memory ->
+                                        DropdownMenuItem(
+                                            text = { Text(memory.title) },
+                                            onClick = {
+                                                selectedMemoryId = memory.id
+                                                dropdownExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -687,6 +780,7 @@ fun ReminderScreen(
                                 ) {
                                     titleInput()
                                     descInput()
+                                    memoryInput()
                                 }
                                 Column(
                                     modifier = Modifier.weight(1f),
@@ -711,6 +805,7 @@ fun ReminderScreen(
                             ) {
                                 titleInput()
                                 descInput()
+                                memoryInput()
                                 Column(
                                     verticalArrangement = Arrangement.spacedBy(8.dp.scaled())
                                 ) {
@@ -738,6 +833,7 @@ fun ReminderScreen(
 fun ReminderCard(
     reminder: RemembranceDay,
     dateTimeString: String,
+    linkedMemoryTitle: String?,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -773,6 +869,24 @@ fun ReminderCard(
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+                    if (!linkedMemoryTitle.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(6.dp.scaled()))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Link,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(14.dp.scaled())
+                            )
+                            Spacer(modifier = Modifier.width(4.dp.scaled()))
+                            Text(
+                                text = stringResource(R.string.reminder_linked_memory, linkedMemoryTitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
 
