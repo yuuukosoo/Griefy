@@ -3,7 +3,9 @@ package com.naufal.griefy.ui.reminders
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.model.RemembranceDay
+import com.naufal.griefy.domain.repository.MemoryRepository
 import com.naufal.griefy.domain.repository.RemembranceRepository
 import com.naufal.griefy.ui.settings.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ReminderViewModel @Inject constructor(
     private val repository: RemembranceRepository,
-    @ApplicationContext private val context: Context
+    memoryRepository: MemoryRepository,
+    @ApplicationContext context: Context
 ) : ViewModel() {
 
     private val scheduler = ReminderScheduler(context)
@@ -29,9 +32,21 @@ class ReminderViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    fun addReminder(title: String, description: String, dateTime: Long) {
+    val memories: StateFlow<List<Memory>> = memoryRepository.getAllMemories()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    fun addReminder(title: String, description: String, dateTime: Long, memoryId: Int?) {
         viewModelScope.launch {
-            val newDay = RemembranceDay(title = title, description = description, dateTime = dateTime)
+            val newDay = RemembranceDay(
+                title = title,
+                description = description,
+                dateTime = dateTime,
+                memoryId = memoryId
+            )
             val generatedId = repository.addRemembranceDay(newDay)
             scheduler.schedule(newDay.copy(id = generatedId.toInt()))
         }

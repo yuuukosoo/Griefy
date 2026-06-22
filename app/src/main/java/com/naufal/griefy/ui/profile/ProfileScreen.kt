@@ -1,128 +1,290 @@
 package com.naufal.griefy.ui.profile
 
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material3.*
+import coil.compose.AsyncImage
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
+import com.naufal.griefy.util.toImageModel
+import com.naufal.griefy.util.scaled
+import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ProfileScreen(
+    navController: NavController,
+    viewModel: ProfileViewModel = hiltViewModel()
+) {
+    val isEditing = viewModel.isEditing
+    val username = viewModel.username
+    val email = viewModel.email
+    val gender = viewModel.gender
+    val profileImageUriString = viewModel.profileImageUriString
+    val profileImageModel = profileImageUriString?.toImageModel()
+
+    val context = LocalContext.current
+    val isLoading = viewModel.isLoading
+    val isSaving = viewModel.isSaving
+    val errorMessage = viewModel.errorMessage
+    val saveSuccess = viewModel.saveSuccess
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUserProfile()
+    }
+
+    LaunchedEffect(saveSuccess) {
+        if (saveSuccess) {
+            Toast.makeText(context, context.getString(R.string.profile_success_toast), Toast.LENGTH_SHORT).show()
+            viewModel.clearSaveSuccess()
+        }
+    }
+
+    val errorTextAuth = stringResource(R.string.profile_error_auth)
+    val errorTextProcessImage = stringResource(R.string.profile_error_image)
+    val errorTextSaveProfile = stringResource(R.string.profile_error_save)
+    val errorTextLoadProfile = stringResource(R.string.profile_load_failed)
+
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { msg ->
+            val displayMsg = when (msg) {
+                "ERROR_UNAUTHENTICATED" -> errorTextAuth
+                "ERROR_PROCESS_IMAGE_FAILED" -> errorTextProcessImage
+                "ERROR_SAVE_PROFILE_FAILED" -> errorTextSaveProfile
+                "ERROR_LOAD_PROFILE_FAILED" -> errorTextLoadProfile
+                else -> msg
+            }
+            Toast.makeText(context, displayMsg, Toast.LENGTH_LONG).show()
+            viewModel.clearErrorMessage()
+        }
+    }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            viewModel.onProfileImagePicked(uri.toString())
+        }
+    }
+
+    val horizontalPadding = getAdaptiveHorizontalPadding()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF7F2))
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            // Header Row (Left: Screen Title, Right: Settings Gear)
-            Row(
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.primary
+            )
+        } else {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                contentAlignment = Alignment.TopCenter
             ) {
-                Text(
-                    text = "Profil Anda",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640)
-                )
-
-                IconButton(
-                    onClick = { navController.navigate(Screen.Settings.route) },
+                Column(
                     modifier = Modifier
-                        .size(40.dp)
-                        .background(Color(0xFFEDE8E0), CircleShape)
+                        .fillMaxWidth()
+                        .widthIn(max = 500.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Pengaturan",
-                        tint = Color(0xFF5C524A)
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFEDE8E0)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("👤", fontSize = 48.sp)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Khalish",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640)
-                )
-                Text(
-                    text = "khalish@example.com",
-                    color = Color(0xFF8C8075),
-                    fontSize = 14.sp
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    // Header Row (Left: Screen Title)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = horizontalPadding, end = horizontalPadding, top = 48.dp.scaled(), bottom = 16.dp.scaled()),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "✨ Statistik Kenangan",
+                            text = stringResource(R.string.profile_title),
+                            fontSize = 24.sp.scaled(),
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF4E4640)
+                            color = MaterialTheme.colorScheme.onBackground
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceAround
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp.scaled()))
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = horizontalPadding, vertical = 16.dp.scaled()),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier.size(100.dp.scaled())
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("24", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF75685F))
-                                Text("Total Memori", fontSize = 12.sp, color = Color(0xFF8C8075))
+                            // Profile Avatar
+                            Box(
+                                modifier = Modifier
+                                    .size(100.dp.scaled())
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (profileImageModel != null) {
+                                    AsyncImage(
+                                        model = profileImageModel,
+                                        contentDescription = stringResource(R.string.profile_desc_photo),
+                                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
+                                    Text("👤", fontSize = 48.sp.scaled())
+                                }
                             }
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("5", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF75685F))
-                                Text("Album Publik", fontSize = 12.sp, color = Color(0xFF8C8075))
+
+                            // Edit Pen Icon Button on the bottom-right
+                            if (isEditing) {
+                                IconButton(
+                                    onClick = { photoPickerLauncher.launch("image/*") },
+                                    modifier = Modifier
+                                        .size(32.dp.scaled())
+                                        .align(Alignment.BottomEnd)
+                                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                        .border(2.dp.scaled(), MaterialTheme.colorScheme.background, CircleShape)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = stringResource(R.string.profile_desc_edit_photo),
+                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                        modifier = Modifier.size(16.dp.scaled())
+                                    )
+                                }
                             }
                         }
+
+                        Spacer(modifier = Modifier.height(32.dp.scaled()))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(R.string.profile_personal_info),
+                                fontSize = 18.sp.scaled(),
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            IconButton(onClick = { viewModel.setIsEditing(!isEditing) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = stringResource(R.string.profile_desc_edit_profile),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp.scaled()))
+
+                        ProfileInfoItem(
+                            icon = Icons.Default.Person,
+                            label = stringResource(R.string.profile_username_label),
+                            value = username,
+                            isEditing = isEditing,
+                            onValueChange = { viewModel.onUsernameChange(it) }
+                        )
+                        Spacer(modifier = Modifier.height(12.dp.scaled()))
+                        ProfileInfoItem(
+                            icon = Icons.Default.Email,
+                            label = stringResource(R.string.profile_email_label),
+                            value = email,
+                            isEditing = false,
+                            onValueChange = { viewModel.onEmailChange(it) }
+                        )
+                        Spacer(modifier = Modifier.height(12.dp.scaled()))
+                        val maleLabel = stringResource(R.string.profile_gender_male)
+                        val femaleLabel = stringResource(R.string.profile_gender_female)
+                        ProfileInfoItem(
+                            icon = Icons.Default.Face,
+                            label = stringResource(R.string.profile_gender_label),
+                            value = com.naufal.griefy.util.ProfileUtils.getLocalizedGender(gender),
+                            isEditing = isEditing,
+                            onValueChange = { selectedLabel ->
+                                val stableValue = when (selectedLabel) {
+                                    maleLabel -> com.naufal.griefy.util.ProfileUtils.GENDER_MALE_KEY
+                                    femaleLabel -> com.naufal.griefy.util.ProfileUtils.GENDER_FEMALE_KEY
+                                    else -> selectedLabel
+                                }
+                                viewModel.onGenderChange(stableValue)
+                            },
+                            options = listOf(maleLabel, femaleLabel)
+                        )
+
+                        if (isEditing) {
+                            Spacer(modifier = Modifier.height(24.dp.scaled()))
+                            Button(
+                                onClick = { viewModel.saveUserProfile() },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp.scaled()),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.profile_confirm_button),
+                                    fontSize = 16.sp.scaled(),
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.padding(vertical = 8.dp.scaled())
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(100.dp.scaled()))
                     }
                 }
+            }
+        }
+
+        if (isSaving) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f))
+                    .clickable(enabled = false) {}, // consume clicks
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         }
 
@@ -134,6 +296,105 @@ fun ProfileScreen(navController: NavController) {
                 navController = navController,
                 currentRoute = Screen.Profile.route
             )
+        }
+    }
+}
+
+@Composable
+private fun ProfileInfoItem(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    isEditing: Boolean,
+    onValueChange: (String) -> Unit,
+    options: List<String>? = null
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp.scaled()),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp.scaled()),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp.scaled())
+                    .clip(RoundedCornerShape(12.dp.scaled()))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp.scaled())
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp.scaled()))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    fontSize = 12.sp.scaled(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(2.dp.scaled()))
+                if (isEditing) {
+                    if (options != null) {
+                        Box {
+                            Text(
+                                text = value,
+                                fontSize = 16.sp.scaled(),
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { expanded = true }
+                            )
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                options.forEach { option ->
+                                    DropdownMenuItem(
+                                        text = { Text(option, fontSize = 16.sp.scaled()) },
+                                        onClick = {
+                                            onValueChange(option)
+                                            expanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        BasicTextField(
+                            value = value,
+                            onValueChange = onValueChange,
+                            textStyle = LocalTextStyle.current.copy(
+                                fontSize = 16.sp.scaled(),
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
+                } else {
+                    Text(
+                        text = value,
+                        fontSize = 16.sp.scaled(),
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
         }
     }
 }

@@ -1,0 +1,227 @@
+<resources>
+    <!-- Common / General -->
+    <string name="app_name">Griefy</string>
+    <string name="back">Kembali</string>
+    <string name="cancel">Batal</string>
+    <string name="close">Tutup</string>
+    <string name="save">Simpan</string>
+    <string name="delete">Hapus</string>
+    <string name="edit">Edit</string>
+    <string name="add">Tambah</string>
+    <string name="clear">Hapus</string>
+    <string name="private_text">Privat</string>
+    <string name="public_text">Publik</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_welcome">Selamat datang di ruang amanmu.</string>
+
+    <!-- Login Screen -->
+    <string name="login_sign_in">Sign In</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Login</string>
+    <string name="login_no_account">Don\'t have an account?</string>
+    <string name="login_sign_up">Sign Up</string>
+
+    <!-- Register Screen -->
+    <string name="register_sign_up">Sign Up</string>
+    <string name="register_username">Username</string>
+    <string name="register_email">Email</string>
+    <string name="register_password">Password</string>
+    <string name="register_confirm_password">Confirm Password</string>
+    <string name="register_button">Register</string>
+    <string name="register_already_have_account">If you already have an account register</string>
+    <string name="register_login_here">Login here !</string>
+
+    <!-- Home Screen -->
+    <string name="home_greeting">Halo, %1$s</string>
+    <string name="home_subtitle">Mari refleksikan kenanganmu.</string>
+    <string name="home_search_placeholder">Cari kenangan...</string>
+    <string name="home_empty_memories">Belum ada kenangan. Tekan + untuk menambah.</string>
+    <string name="home_no_search_results">Tidak ditemukan kenangan dengan kata kunci \"%1$s\".</string>
+    <string name="home_memory_photo_desc">Foto Kenangan</string>
+    <string name="home_pinned_song">Lagu Tersemat</string>
+
+    <!-- Navigation Dock -->
+    <string name="nav_home">Home</string>
+    <string name="nav_search_memory">Search Memory</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_write_memory_desc">Tulis Kenangan</string>
+    <string name="nav_reminders">Pengingat</string>
+    <string name="nav_search">Cari</string>
+    <string name="nav_saved">Simpan</string>
+    <string name="saved_title">Kenangan Tersimpan</string>
+    <string name="saved_empty">Belum ada kenangan yang disimpan.</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_title">Profil Anda</string>
+    <string name="profile_statistics">✨ Statistik Kenangan</string>
+    <string name="profile_total_memories">Total Memori</string>
+    <string name="profile_public_albums">Album Publik</string>
+
+    <!-- Create & Edit Memory Screen -->
+    <string name="create_title">Tulis Kenangan</string>
+    <string name="edit_title">Edit Kenangan</string>
+    <string name="create_select_photo_desc">Pilih Foto</string>
+    <string name="create_select_photo_text">Pilih Foto Kenangan</string>
+    <string name="create_selected_photo_desc">Foto Pilihan</string>
+    <string name="create_title_placeholder">Judul kenangan...</string>
+    <string name="create_content_placeholder">Tuliskan ceritamu di sini...</string>
+    <string name="create_memory_song">Lagu Kenangan</string>
+    <string name="create_artist">Artis</string>
+    <string name="create_change_song">Ubah Lagu</string>
+    <string name="create_delete_song_desc">Hapus Lagu</string>
+    <string name="create_add_song">Tambah Lagu</string>
+    <string name="create_add_label">Tambah Label</string>
+    <string name="create_save_button">Simpan Kenangan Indah</string>
+    <string name="edit_save_button">Perbarui Kenangan </string>
+    <string name="create_dialog_title">Tambah Label / Kategori</string>
+    <string name="create_dialog_placeholder">Nama label...</string>
+    <string name="default_memory_tag">Kenangan Baru</string>
+
+    <!-- Detail Screen -->
+    <string name="detail_title">Detail Kenangan</string>
+    <string name="detail_open_deezer_desc">Buka di Deezer</string>
+    <string name="detail_play_desc">Play</string>
+    <string name="detail_pause_desc">Pause</string>
+    <string name="detail_preview_unavailable">Preview audio tidak tersedia.</string>
+
+    <!-- Search Song Screen -->
+    <string name="search_song_title">Pilih Lagu Kenangan</string>
+    <string name="search_song_placeholder">Cari judul lagu atau artis...</string>
+    <string name="search_song_empty_hint">Ketik judul lagu dan tekan tombol cari.</string>
+    <string name="search_song_play_preview_desc">Play Preview</string>
+    <string name="search_song_pause_preview_desc">Pause Preview</string>
+    <string name="search_song_add_button">Tambah</string>
+    <string name="search_song_album_cover_desc">Cover Album</string>
+
+    <!-- Search Memory Screen -->
+    <string name="search_memory_placeholder">Cari album publik...</string>
+    <string name="search_memory_empty">Belum ada album publik.</string>
+    <string name="search_memory_empty_search">Tidak ada album publik yang cocok.</string>
+    <string name="search_memory_by_other_user">Oleh Pengguna Lain • %1$s</string>
+
+    <!-- Trash Screen -->
+    <string name="trash_dialog_title">Kosongkan Tempat Sampah?</string>
+    <string name="trash_dialog_text">Semua kenangan di sini akan dihapus secara permanen dan tidak dapat dikembalikan lagi.</string>
+    <string name="trash_dialog_confirm">Ya, Hapus Semua</string>
+    <string name="trash_title">Baru Saja Dihapus</string>
+    <string name="trash_subtitle">Kenangan di bawah ini akan dihapus permanen oleh sistem setelah 30 hari.</string>
+    <string name="trash_empty">Tempat sampah kosong.</string>
+    <string name="trash_restore">Pulihkan</string>
+    <string name="trash_thumbnail_desc">Thumbnail</string>
+
+    <!-- Reminder / Remembrance Screen -->
+    <string name="reminder_title">Pengingat Hari Peringatan</string>
+    <string name="reminder_empty_title">Belum ada pengingat hari penting.</string>
+    <string name="reminder_empty_subtitle">Tekan tombol + untuk menambahkan peringatan hari khusus.</string>
+    <string name="reminder_dialog_add">Tambah Pengingat</string>
+    <string name="reminder_dialog_edit">Edit Pengingat</string>
+    <string name="reminder_name_label">Nama Peringatan / Hari Penting</string>
+    <string name="reminder_note_label">Catatan / Deskripsi (Opsional)</string>
+    <string name="reminder_time_label">Waktu Peringatan:</string>
+    <string name="reminder_date_btn">Tanggal</string>
+    <string name="reminder_time_btn">Waktu</string>
+    <string name="reminder_passed">Sudah lewat</string>
+    <string name="reminder_exact_alarm_warning_title">Pengingat Tidak Tepat Waktu?</string>
+    <string name="reminder_exact_alarm_warning_desc">Griefy memerlukan izin \'Alarm &amp; Pengingat\' agar dapat mengirimkan notifikasi tepat pada waktunya.</string>
+    <string name="reminder_exact_alarm_warning_btn">Buka Pengaturan</string>
+    <string name="reminder_battery_warning_title">Notifikasi Tidak Masuk Saat Ditutup?</string>
+    <string name="reminder_battery_warning_desc">Beberapa perangkat membatasi aplikasi di latar belakang. Silakan matikan pengoptimalan baterai (atur ke Tanpa Batasan) untuk Griefy agar notifikasi tetap masuk meskipun aplikasi ditutup.</string>
+    <string name="reminder_battery_warning_btn">Abaikan Batasan</string>
+
+    <string name="reminder_memory_label">Hubungkan dengan Kenangan (Opsional)</string>
+    <string name="reminder_no_memory_selected">Tidak Ada Hubungan Kenangan</string>
+    <string name="reminder_linked_memory">Kenangan Terhubung: %s</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Pengaturan</string>
+    <string name="settings_back_description">Kembali</string>
+    <string name="settings_pref_display">PREFERENSI TAMPILAN</string>
+    <string name="settings_change_language">Ubah Bahasa</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_indonesian">Bahasa Indonesia</string>
+    <string name="settings_select_language_title">Pilih Bahasa</string>
+    <string name="settings_dark_mode">Mode Gelap</string>
+    <string name="settings_pref_memory">MANAJEMEN MEMORI</string>
+    <string name="settings_reminders_title">Pengingat Hari Peringatan</string>
+    <string name="settings_reminders_subtitle">Atur pengingat hari penting kenangan</string>
+    <string name="settings_trash_title">Baru Saja Dihapus (Trash)</string>
+    <string name="settings_trash_subtitle">Pulihkan kenangan dalam 30 hari</string>
+    <string name="settings_pref_account">AKUN</string>
+    <string name="settings_logout">Keluar (Logout)</string>
+    <string name="settings_permission_granted">Izin diberikan! Coba klik lagi.</string>
+    <string name="settings_permission_denied">Izin notifikasi ditolak :(</string>
+    <string name="settings_alarm_set">Alarm diatur! Tutup aplikasi sekarang &amp; tunggu 10 dtk.</string>
+    <string name="settings_alarm_error">Error Alarm: Izinkan Alarms &amp; Reminders di Settings HP</string>
+    <string name="settings_detail_description">Detail</string>
+
+    <!-- Dialog Confirmation Strings -->
+    <string name="dialog_delete_memory_title">Hapus Memori?</string>
+    <string name="dialog_delete_memory_text">Apakah Anda yakin ingin menghapus memori ini ke tempat sampah?</string>
+    <string name="dialog_delete_reminder_title">Hapus Pengingat?</string>
+    <string name="dialog_delete_reminder_text">Apakah Anda yakin ingin menghapus pengingat ini?</string>
+    <string name="dialog_delete_permanent_title">Hapus Permanen?</string>
+    <string name="dialog_delete_permanent_text">Apakah Anda yakin ingin menghapus memori ini secara permanen? Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="dialog_logout_title">Keluar Akun?</string>
+    <string name="dialog_logout_text">Apakah Anda yakin ingin keluar dari akun Anda?</string>
+    <string name="settings_delete_account">Hapus Akun</string>
+    <string name="dialog_delete_account_title">Hapus Akun?</string>
+    <string name="dialog_delete_account_text">Apakah Anda yakin ingin menghapus akun Anda secara permanen? Tindakan ini tidak dapat dibatalkan dan semua data Anda akan dihapus secara permanen.</string>
+
+    <!-- Error / Validation Strings -->
+    <string name="error_dialog_title">Gagal Mengisi Form</string>
+    <string name="error_dialog_dismiss">Mengerti</string>
+    <string name="error_email_password_empty">Email dan password tidak boleh kosong.</string>
+    <string name="error_all_fields_required">Semua form wajib diisi.</string>
+    <string name="error_password_mismatch">Konfirmasi password tidak cocok.</string>
+    <string name="error_password_too_short">Password harus minimal 6 karakter.</string>
+    <string name="error_user_not_found">User tidak ditemukan.</string>
+    <string name="error_registration_failed">Registrasi gagal.</string>
+    <string name="error_login_failed">Terjadi kesalahan saat masuk.</string>
+    <string name="error_register_failed">Terjadi kesalahan saat mendaftar.</string>
+    <string name="login_success_toast">Selamat datang kembali!</string>
+    <string name="register_success_toast">Registrasi sukses! Silakan masuk.</string>
+
+    <!-- Profile & User Details Strings -->
+    <string name="profile_personal_info">Informasi Pribadi</string>
+    <string name="profile_username_label">Username</string>
+    <string name="profile_email_label">Alamat Email</string>
+    <string name="profile_gender_label">Gender</string>
+    <string name="profile_confirm_button">Konfirmasi</string>
+    <string name="profile_success_toast">Profil berhasil diperbarui</string>
+    <string name="profile_error_image">Gagal memproses gambar</string>
+    <string name="profile_error_auth">User tidak terautentikasi</string>
+    <string name="profile_error_save">Gagal menyimpan profil</string>
+
+    <string name="profile_other_user_info">Informasi Pengguna</string>
+    <string name="profile_other_total_memories">Total Memori</string>
+    <string name="profile_not_found">Profil tidak ditemukan</string>
+    <string name="profile_load_failed">Gagal memuat profil</string>
+    <string name="profile_try_again">Coba Lagi</string>
+    <string name="profile_deleted_account_msg">Akun telah dihapus oleh pengguna</string>
+    <string name="profile_gender_male">Laki-laki</string>
+    <string name="profile_gender_female">Perempuan</string>
+    <string name="profile_gender_unspecified">Tidak ditentukan</string>
+    <string name="profile_memories_count">%1$d Memori</string>
+    <string name="profile_desc_back">Kembali</string>
+    <string name="profile_desc_photo">Foto Profil</string>
+    <string name="profile_desc_edit_photo">Ubah Foto Profil</string>
+    <string name="profile_desc_edit_profile">Ubah Profil</string>
+
+    <!-- Reminder placeholders & Settings -->
+    <string name="reminder_title_placeholder">Masukkan nama...</string>
+    <string name="reminder_note_placeholder">Masukkan catatan...</string>
+    <string name="reminder_time_settings_title">Pengaturan Waktu Notifikasi</string>
+    <string name="settings_deleting_account">Menghapus Akun...</string>
+    <string name="settings_delete_account_error">Gagal Menghapus Akun</string>
+    <string name="ok">OK</string>
+
+    <!-- Notification Strings -->
+    <string name="reminder_noti_default_title">Hari Peringatan Penting ✨</string>
+    <string name="reminder_noti_default_desc">Mari luangkan waktu sejenak untuk mengingat kenangan indah.</string>
+    <string name="reminder_noti_channel_name">Pengingat Hari Peringatan</string>
+    <string name="reminder_noti_channel_desc">Channel untuk notifikasi pengingat Griefy</string>
+</resources>
+
+
