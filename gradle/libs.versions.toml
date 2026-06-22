@@ -20,6 +20,8 @@ coil = "2.6.0"
 ksp = "2.1.0-1.0.29"
 googleServicesPlugin = "4.4.2"
 firebaseBom = "33.7.0"
+firebaseCrashlyticsPlugin = "3.0.2"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -56,6 +58,9 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -66,4 +71,6 @@ jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrai
 dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServicesPlugin" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
+
 
