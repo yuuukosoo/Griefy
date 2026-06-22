@@ -160,6 +160,8 @@
     <string name="settings_alarm_set">Alarm set! Close the app now &amp; wait 10 seconds.</string>
     <string name="settings_alarm_error">Alarm Error: Allow Alarms &amp; Reminders in Device Settings</string>
     <string name="settings_detail_description">Details</string>
+    <string name="settings_test_crash_title">Trigger Test Crash (UAS)</string>
+    <string name="settings_test_crash_subtitle">Generate a mock crash for Firebase Crashlytics</string>
 
     <!-- Dialog Confirmation Strings -->
     <string name="dialog_delete_memory_title">Delete Memory?</string>

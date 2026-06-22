@@ -319,8 +319,8 @@ fun SettingsScreen(
                         HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp.scaled()))
                         SettingsItem(
                             icon = Icons.Default.Notifications,
-                            title = "Picu Test Crash (UAS)",
-                            subtitle = "Menghasilkan crash buatan untuk Firebase Crashlytics",
+                            title = stringResource(R.string.settings_test_crash_title),
+                            subtitle = stringResource(R.string.settings_test_crash_subtitle),
                             titleColor = MaterialTheme.colorScheme.error,
                             onClick = {
                                 throw RuntimeException("Uji Coba Crash UAS - Griefy")

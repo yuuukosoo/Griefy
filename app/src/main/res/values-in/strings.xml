@@ -160,6 +160,8 @@
     <string name="settings_alarm_set">Alarm diatur! Tutup aplikasi sekarang &amp; tunggu 10 dtk.</string>
     <string name="settings_alarm_error">Error Alarm: Izinkan Alarms &amp; Reminders di Settings HP</string>
     <string name="settings_detail_description">Detail</string>
+    <string name="settings_test_crash_title">Picu Test Crash (UAS)</string>
+    <string name="settings_test_crash_subtitle">Menghasilkan crash buatan untuk Firebase Crashlytics</string>
 
     <!-- Dialog Confirmation Strings -->
     <string name="dialog_delete_memory_title">Hapus Memori?</string>
