@@ -42,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
+import com.airbnb.lottie.compose.*
 import com.naufal.griefy.util.toImageModel
 import com.naufal.griefy.util.scaled
 import com.naufal.griefy.util.getAdaptiveHorizontalPadding
@@ -63,6 +64,12 @@ fun ProfileScreen(
     val isSaving = viewModel.isSaving
     val errorMessage = viewModel.errorMessage
     val saveSuccess = viewModel.saveSuccess
+
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.logo_animation))
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever
+    )
 
     LaunchedEffect(Unit) {
         viewModel.loadUserProfile()
@@ -111,10 +118,16 @@ fun ProfileScreen(
             .statusBarsPadding()
     ) {
         if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = MaterialTheme.colorScheme.primary
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                LottieAnimation(
+                    composition = composition,
+                    progress = { progress },
+                    modifier = Modifier.size(120.dp.scaled())
+                )
+            }
         } else {
             Box(
                 modifier = Modifier
@@ -279,11 +292,15 @@ fun ProfileScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
+                    .background(Color.Black.copy(alpha = 0.4f))
                     .clickable(enabled = false) {}, // consume clicks
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                LottieAnimation(
+                    composition = composition,
+                    progress = { progress },
+                    modifier = Modifier.size(120.dp.scaled())
+                )
             }
         }
 
