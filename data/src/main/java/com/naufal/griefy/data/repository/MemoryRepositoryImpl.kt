@@ -160,7 +160,46 @@ class MemoryRepositoryImpl @Inject constructor(
         if (processedMemory.userId == currentUid) {
             uploadToFirestore(processedMemory)
         }
+
+        // Sync bookmark/saved status to Firestore
+        if (currentUid != null) {
+            syncSavedStatusToFirestore(processedMemory, currentUid)
+        }
     }
+
+    private fun syncSavedStatusToFirestore(memory: Memory, currentUid: String) {
+        val originalUserId = memory.userId ?: currentUid
+        val originalDocId = "${originalUserId}_${memory.id}"
+        val savedDocId = "${currentUid}_${originalDocId}"
+
+        if (memory.isSaved) {
+            val data = mapOf(
+                "userId" to currentUid,
+                "originalMemoryDocId" to originalDocId,
+                "savedAt" to System.currentTimeMillis()
+            )
+            firestore.collection(COLLECTION_SAVED_MEMORIES)
+                .document(savedDocId)
+                .set(data)
+                .addOnSuccessListener {
+                    android.util.Log.d(TAG_FIRESTORE_SYNC, "Bookmark saved to Firestore")
+                }
+                .addOnFailureListener { e ->
+                    android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to save bookmark to Firestore: ${e.message}")
+                }
+        } else {
+            firestore.collection(COLLECTION_SAVED_MEMORIES)
+                .document(savedDocId)
+                .delete()
+                .addOnSuccessListener {
+                    android.util.Log.d(TAG_FIRESTORE_SYNC, "Bookmark deleted from Firestore")
+                }
+                .addOnFailureListener { e ->
+                    android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to delete bookmark from Firestore: ${e.message}")
+                }
+        }
+    }
+
 
     override suspend fun moveToTrash(id: Int) {
         val currentUid = firebaseAuth.currentUser?.uid
@@ -330,6 +369,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
     private suspend fun syncUserMemoriesFromFirestore(userId: String) {
         try {
+            // 1. Sinkronisasi Memori Milik Pengguna Sendiri
             val snapshot = firestore.collection(COLLECTION_PUBLIC_MEMORIES)
                 .whereEqualTo("userId", userId)
                 .get()
@@ -386,6 +426,90 @@ class MemoryRepositoryImpl @Inject constructor(
                     ).toEntity())
                 }
             }
+
+            // 2. Sinkronisasi Memori yang Disimpan/Bookmark
+            val savedSnapshot = firestore.collection(COLLECTION_SAVED_MEMORIES)
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            val savedDocIds = savedSnapshot.documents.mapNotNull { it.getString("originalMemoryDocId") }
+            val savedMemories = mutableListOf<Memory>()
+
+            for (docId in savedDocIds) {
+                try {
+                    val memDoc = firestore.collection(COLLECTION_PUBLIC_MEMORIES)
+                        .document(docId)
+                        .get()
+                        .await()
+
+                    if (memDoc.exists()) {
+                        val title = memDoc.getString("title") ?: ""
+                        val content = memDoc.getString("content") ?: ""
+                        val createdAt = memDoc.getLong("createdAt") ?: 0L
+                        val tags = (memDoc.get("tags") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
+                        val songTrackId = memDoc.getString("songTrackId")
+                        val songTitle = memDoc.getString("songTitle")
+                        val userName = memDoc.getString("userName")
+                        val userAvatar = memDoc.getString("userAvatar")
+                        val originalUserId = memDoc.getString("userId")
+                        val imageUris = (memDoc.get("imageUris") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
+                        val isPublicVal = memDoc.getBoolean("isPublic") ?: false
+                        val localId = memDoc.getLong("localId")?.toInt() ?: 0
+
+                        savedMemories.add(
+                            Memory(
+                                id = localId,
+                                title = title,
+                                content = content,
+                                imageUris = imageUris,
+                                createdAt = createdAt,
+                                tags = tags,
+                                isPublic = isPublicVal,
+                                songTrackId = songTrackId,
+                                songTitle = songTitle,
+                                isTrashed = false,
+                                isSaved = true,
+                                userName = userName,
+                                userAvatar = userAvatar,
+                                userId = originalUserId
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e(TAG_FIRESTORE_ERROR, "Gagal ambil detail memori yang di-save: ${e.message}")
+                }
+            }
+
+            // Masukkan data memori yang disimpan ke Room local cache
+            val updatedLocalMemories = dao.getAllLocalMemoriesIncludingTrashed()
+            for (savedMem in savedMemories) {
+                val local = updatedLocalMemories.find {
+                    (savedMem.id != 0 && it.id == savedMem.id) ||
+                    (it.createdAt == savedMem.createdAt && it.title == savedMem.title)
+                }
+
+                if (local == null) {
+                    dao.insertMemory(savedMem.toEntity())
+                } else {
+                    dao.updateMemory(savedMem.copy(
+                        id = local.id,
+                        isSaved = true,
+                        isTrashed = local.isTrashed
+                    ).toEntity())
+                }
+            }
+
+            // Bersihkan data lokal jika bookmark telah dihapus dari server
+            val localSavedMemories = updatedLocalMemories.filter { it.isSaved }
+            for (localSaved in localSavedMemories) {
+                val originalUserId = localSaved.userId ?: userId
+                val originalDocId = "${originalUserId}_${localSaved.id}"
+                if (!savedDocIds.contains(originalDocId)) {
+                    dao.updateMemory(localSaved.copy(isSaved = false))
+                }
+            }
+
         } catch (e: Exception) {
             android.util.Log.e(TAG_FIRESTORE_ERROR, "Gagal sinkronisasi data user dari Firestore: ${e.message}", e)
         }
@@ -423,6 +547,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
     companion object {
         private const val COLLECTION_PUBLIC_MEMORIES = "public_memories"
+        private const val COLLECTION_SAVED_MEMORIES = "saved_memories"
         private const val FALLBACK_USER_ID = "anonymous"
         private const val FALLBACK_USERNAME = "Anonim"
         private const val PREFIX_BASE64 = "base64:"
