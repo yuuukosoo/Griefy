@@ -70,6 +70,7 @@ fun DetailScreen(
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
 
     var isPlaying by remember { mutableStateOf(false) }
+    var isPrepared by remember { mutableStateOf(false) }
     val mediaPlayer = remember(songDetails) { android.media.MediaPlayer() }
 
     var currentPosition by remember { mutableFloatStateOf(0f) }
@@ -83,8 +84,14 @@ fun DetailScreen(
                 mediaPlayer.isLooping = true
                 mediaPlayer.prepareAsync()
                 mediaPlayer.setOnPreparedListener {
-                    mediaPlayer.start()
-                    isPlaying = true
+                    isPrepared = true
+                    try {
+                        mediaPlayer.start()
+                        isPlaying = true
+                    } catch (e: Exception) {
+                        android.util.Log.e("MEDIA_PLAYER", "Gagal memutar lagu setelah disiapkan", e)
+                        isPlaying = false
+                    }
                 }
                 mediaPlayer.setOnCompletionListener {
                     try {
@@ -93,6 +100,7 @@ fun DetailScreen(
                         isPlaying = true
                     } catch (_: Exception) {
                         try {
+                            isPrepared = false
                             mediaPlayer.reset()
                             mediaPlayer.setDataSource(previewUrl)
                             mediaPlayer.isLooping = true
@@ -104,6 +112,7 @@ fun DetailScreen(
                 }
                 mediaPlayer.setOnErrorListener { _, what, extra ->
                     android.util.Log.e("MEDIA_PLAYER", "MediaPlayer error: what=$what, extra=$extra. Menginisialisasi ulang...")
+                    isPrepared = false
                     try {
                         mediaPlayer.reset()
                         mediaPlayer.setDataSource(previewUrl)
@@ -119,7 +128,15 @@ fun DetailScreen(
             }
         }
         onDispose {
-            mediaPlayer.release()
+            isPrepared = false
+            try {
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.stop()
+                }
+            } catch (_: Exception) {}
+            try {
+                mediaPlayer.release()
+            } catch (_: Exception) {}
             isPlaying = false
             currentPosition = 0f
             duration = 0f
@@ -306,12 +323,19 @@ fun DetailScreen(
                                 if (!song.previewUrl.isNullOrEmpty()) {
                                     IconButton(
                                         onClick = {
-                                            if (isPlaying) {
-                                                mediaPlayer.pause()
-                                                isPlaying = false
-                                            } else {
-                                                mediaPlayer.start()
-                                                isPlaying = true
+                                            if (isPrepared) {
+                                                try {
+                                                    if (isPlaying) {
+                                                        mediaPlayer.pause()
+                                                        isPlaying = false
+                                                    } else {
+                                                        mediaPlayer.start()
+                                                        isPlaying = true
+                                                    }
+                                                } catch (e: Exception) {
+                                                    android.util.Log.e("MEDIA_PLAYER", "Gagal memutar/menjeda lagu", e)
+                                                    isPlaying = false
+                                                }
                                             }
                                         },
                                         modifier = Modifier.size(36.dp.scaled())
@@ -557,12 +581,19 @@ fun DetailScreen(
                     if (!song.previewUrl.isNullOrEmpty()) {
                         IconButton(
                             onClick = {
-                                if (isPlaying) {
-                                    mediaPlayer.pause()
-                                    isPlaying = false
-                                } else {
-                                    mediaPlayer.start()
-                                    isPlaying = true
+                                if (isPrepared) {
+                                    try {
+                                        if (isPlaying) {
+                                            mediaPlayer.pause()
+                                            isPlaying = false
+                                        } else {
+                                            mediaPlayer.start()
+                                            isPlaying = true
+                                        }
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("MEDIA_PLAYER", "Gagal memutar/menjeda lagu (Landscape)", e)
+                                        isPlaying = false
+                                    }
                                 }
                             },
                             modifier = Modifier
