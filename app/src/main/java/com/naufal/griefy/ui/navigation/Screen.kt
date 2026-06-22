@@ -18,7 +18,11 @@ sealed class Screen(val route: String) {
     object SearchPublic : Screen("search_public")
     object SearchMemory : Screen("search_memory")
     object Profile : Screen("profile")
+    object OtherProfile : Screen("other_profile/{userId}") {
+        fun createRoute(userId: String) = "other_profile/$userId"
+    }
     object Settings : Screen("settings")
     object Trash : Screen("trash")
     object Reminders : Screen("reminders")
+    object Saved : Screen("saved")
 }

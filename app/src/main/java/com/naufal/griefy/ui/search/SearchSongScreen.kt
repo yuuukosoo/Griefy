@@ -1,18 +1,25 @@
 package com.naufal.griefy.ui.search
 
-import androidx.compose.foundation.BorderStroke
+
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -27,7 +35,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Song
+import com.naufal.griefy.util.getAdaptiveHorizontalPadding
+import com.naufal.griefy.util.scaled
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.PlatformTextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,8 +81,34 @@ fun SearchSongScreen(
                         isMediaPlaying = true
                     }
                     mediaPlayer.setOnCompletionListener {
-                        playingTrackId = null
-                        isMediaPlaying = false
+                        try {
+                            mediaPlayer.seekTo(0)
+                            mediaPlayer.start()
+                            isMediaPlaying = true
+                        } catch (_: Exception) {
+                            try {
+                                mediaPlayer.reset()
+                                mediaPlayer.setDataSource(previewUrl)
+                                mediaPlayer.isLooping = true
+                                mediaPlayer.prepareAsync()
+                            } catch (_: Exception) {
+                                playingTrackId = null
+                                isMediaPlaying = false
+                            }
+                        }
+                    }
+                    mediaPlayer.setOnErrorListener { _, what, extra ->
+                        android.util.Log.e("SEARCH_PREVIEW", "MediaPlayer error: what=$what, extra=$extra. Menginisialisasi ulang...")
+                        try {
+                            mediaPlayer.reset()
+                            mediaPlayer.setDataSource(previewUrl)
+                            mediaPlayer.isLooping = true
+                            mediaPlayer.prepareAsync()
+                        } catch (_: Exception) {
+                            playingTrackId = null
+                            isMediaPlaying = false
+                        }
+                        true
                     }
                 } catch (e: Exception) {
                     android.util.Log.e("SEARCH_PREVIEW", "Gagal memutar lagu pratinjau", e)
@@ -78,39 +117,105 @@ fun SearchSongScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Pilih Lagu Kenangan") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
+    val horizontalPadding = getAdaptiveHorizontalPadding()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .navigationBarsPadding(),
+        contentAlignment = Alignment.TopCenter
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
+                .padding(start = horizontalPadding, end = horizontalPadding, bottom = 16.dp.scaled(), top = 48.dp.scaled())
         ) {
-
-            OutlinedTextField(
-                value = viewModel.searchQuery,
-                onValueChange = { viewModel.onQueryChange(it) },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Cari judul lagu atau artis...") },
-                trailingIcon = {
-                    IconButton(onClick = { viewModel.searchSongs() }) {
-                        Icon(Icons.Default.Search, contentDescription = "Cari")
-                    }
-                },
-                singleLine = true
-            )
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = { navController.navigateUp() },
+                    modifier = Modifier.size(36.dp.scaled())
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(24.dp.scaled())
+                    )
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.width(16.dp.scaled()))
+
+                Text(
+                    text = stringResource(R.string.search_song_title),
+                    fontSize = 20.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp.scaled()))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp.scaled())
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp.scaled()))
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp.scaled()))
+                    .padding(horizontal = 12.dp.scaled()),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp.scaled())
+                    )
+                    Spacer(modifier = Modifier.width(8.dp.scaled()))
+                    
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                        if (viewModel.searchQuery.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.search_song_placeholder),
+                                color = MaterialTheme.colorScheme.outline,
+                                fontSize = 14.sp.scaled()
+                            )
+                        }
+                        BasicTextField(
+                            value = viewModel.searchQuery,
+                            onValueChange = { viewModel.onQueryChange(it) },
+                            textStyle = TextStyle(fontSize = 14.sp.scaled(), color = MaterialTheme.colorScheme.onBackground),
+                            singleLine = true,
+                            cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = { viewModel.searchSongs() }),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    
+                    if (viewModel.searchQuery.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(8.dp.scaled()))
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = stringResource(R.string.clear),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .size(20.dp.scaled())
+                                .clickable { viewModel.onQueryChange("") }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp.scaled()))
 
             if (viewModel.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -119,11 +224,15 @@ fun SearchSongScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp.scaled())
                 ) {
                     if (viewModel.searchResults.isEmpty() && viewModel.searchQuery.isNotEmpty()) {
                         item {
-                            Text("Ketik judul lagu dan tekan tombol cari.", color = MaterialTheme.colorScheme.outline)
+                            Text(
+                                text = stringResource(R.string.search_song_empty_hint), 
+                                color = MaterialTheme.colorScheme.outline,
+                                fontSize = 14.sp.scaled()
+                            )
                         }
                     }
 
@@ -160,81 +269,88 @@ fun SongCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCardClick() },
+        shape = RoundedCornerShape(16.dp.scaled()),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) 
-                MaterialTheme.colorScheme.primaryContainer 
-            else 
-                MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = if (isSelected) 
-            BorderStroke(2.dp, MaterialTheme.colorScheme.primary) 
-        else 
-            null
+        border = null,
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(12.dp.scaled()),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(contentAlignment = Alignment.Center) {
                 AsyncImage(
                     model = song.imageUrl,
-                    contentDescription = "Cover Album",
+                    contentDescription = stringResource(R.string.search_song_album_cover_desc),
                     modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .size(56.dp.scaled())
+                        .clip(RoundedCornerShape(8.dp.scaled())),
                     contentScale = ContentScale.Crop
                 )
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(56.dp.scaled())
+                        .clip(RoundedCornerShape(8.dp.scaled()))
                         .background(Color.Black.copy(alpha = if (isPlaying) 0.4f else 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause Preview" else "Play Preview",
+                        contentDescription = if (isPlaying) 
+                            stringResource(R.string.search_song_pause_preview_desc) 
+                        else 
+                            stringResource(R.string.search_song_play_preview_desc),
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp.scaled())
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp.scaled()))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = song.title, 
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 16.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    style = LocalTextStyle.current.copy(
+                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                    )
                 )
+                Spacer(modifier = Modifier.height(2.dp.scaled()))
                 Text(
                     text = song.artistName, 
-                    style = MaterialTheme.typography.bodyMedium, 
-                    color = MaterialTheme.colorScheme.outline,
+                    fontSize = 12.sp.scaled(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    style = LocalTextStyle.current.copy(
+                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                    )
                 )
             }
 
             if (isSelected) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = onAddClick,
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+                Spacer(modifier = Modifier.width(8.dp.scaled()))
+                Box(
+                    modifier = Modifier
+                        .size(36.dp.scaled())
+                        .clip(CircleShape)
+                        .background(Color(0xFF4CAF50))
+                        .clickable { onAddClick() },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Tambah Lagu",
-                        modifier = Modifier.size(16.dp)
+                        contentDescription = stringResource(R.string.create_add_song),
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp.scaled())
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Tambah", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

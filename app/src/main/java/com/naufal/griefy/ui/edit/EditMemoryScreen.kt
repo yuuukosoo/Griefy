@@ -1,7 +1,6 @@
 package com.naufal.griefy.ui.edit
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +20,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +30,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import com.naufal.griefy.util.toImageModel
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,6 +39,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.naufal.griefy.util.adaptiveWidth
+import com.naufal.griefy.util.getAdaptiveHorizontalPadding
+import com.naufal.griefy.util.scaled
+import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,11 +52,9 @@ fun EditMemoryScreen(
     viewModel: EditMemoryViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-
-    var showAddLabelDialog by remember { mutableStateOf(false) }
+    val showAddLabelDialog = remember { mutableStateOf(false) }
     var newLabelText by remember { mutableStateOf("") }
 
-    // Listen for song from SearchSongScreen
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val returnedTrackId by savedStateHandle?.getStateFlow<String?>("selected_song_track_id", null)?.collectAsState() ?: remember { mutableStateOf(null) }
     val returnedTitle by savedStateHandle?.getStateFlow<String?>("selected_song_title", null)?.collectAsState() ?: remember { mutableStateOf(null) }
@@ -63,7 +69,6 @@ fun EditMemoryScreen(
                 artist = returnedArtist,
                 imageUrl = returnedImageUrl
             )
-            // Reset state values
             savedStateHandle?.set("selected_song_track_id", null)
             savedStateHandle?.set("selected_song_title", null)
             savedStateHandle?.set("selected_song_artist", null)
@@ -76,64 +81,70 @@ fun EditMemoryScreen(
     ) { uris ->
         if (uris.isNotEmpty()) {
             uris.forEach { uri ->
-                val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                context.contentResolver.takePersistableUriPermission(uri, flag)
+                try {
+                    val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    context.contentResolver.takePersistableUriPermission(uri, flag)
+                } catch (e: SecurityException) {
+                    android.util.Log.e("PHOTO_PICKER", "Gagal mengambil izin persisten untuk $uri", e)
+                }
             }
             viewModel.addImages(uris)
         }
     }
 
+    val horizontalPadding = getAdaptiveHorizontalPadding()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFAF7F2)) // Cozy warm paper background (Mymory style)
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
-            .navigationBarsPadding()
+            .navigationBarsPadding(),
+        contentAlignment = Alignment.TopCenter
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .adaptiveWidth()
+                .padding(start = horizontalPadding, end = horizontalPadding, bottom = 16.dp.scaled(), top = 48.dp.scaled())
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header Row (Cozy minimal back button & title)
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
                     onClick = { navController.navigateUp() },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(Color(0xFFEDE8E0), CircleShape)
+                    modifier = Modifier.size(36.dp.scaled())
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Kembali",
-                        tint = Color(0xFF5C524A),
-                        modifier = Modifier.size(20.dp)
+                        contentDescription = stringResource(R.string.back),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(24.dp.scaled())
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(16.dp.scaled()))
 
                 Text(
-                    text = "Edit Kenangan",
-                    fontSize = 20.sp,
+                    text = stringResource(R.string.edit_title),
+                    fontSize = 20.sp.scaled(),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640)
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp.scaled()))
 
             // Photo Picker Box
+            val boxBgColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else Color(0xFFC4D8BF)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f) // 1:1 Square ratio
-                    .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(16.dp))
-                    .background(Color(0xFFEDE8E0), RoundedCornerShape(16.dp))
+                    .aspectRatio(1f)
+                    .background(boxBgColor, RoundedCornerShape(16.dp.scaled()))
                     .clickable {
                         multiplePhotoPickerLauncher.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -145,45 +156,45 @@ fun EditMemoryScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Pilih Foto",
-                            tint = Color(0xFF8C8075),
-                            modifier = Modifier.size(36.dp) // Larger plus icon for square box
+                            contentDescription = stringResource(R.string.create_select_photo_desc),
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(36.dp.scaled())
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp.scaled()))
                         Text(
-                            text = "Pilih Foto Kenangan",
-                            fontSize = 14.sp,
+                            text = stringResource(R.string.create_select_photo_text),
+                            fontSize = 14.sp.scaled(),
                             fontWeight = FontWeight.Medium,
-                            color = Color(0xFF8C8075)
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 } else {
                     LazyRow(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            .padding(8.dp.scaled()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp.scaled()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         items(viewModel.selectedImageUris) { uri ->
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .aspectRatio(1f) // Square image item
+                                    .aspectRatio(1f)
                             ) {
                                 AsyncImage(
-                                    model = uri,
-                                    contentDescription = "Foto Pilihan",
+                                    model = uri.toString().toImageModel(),
+                                    contentDescription = stringResource(R.string.create_selected_photo_desc),
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .clip(RoundedCornerShape(12.dp)),
+                                        .clip(RoundedCornerShape(12.dp.scaled())),
                                     contentScale = ContentScale.Crop
                                 )
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .padding(6.dp)
-                                        .size(24.dp)
+                                        .padding(6.dp.scaled())
+                                        .size(24.dp.scaled())
                                         .clip(CircleShape)
                                         .background(Color.Black.copy(alpha = 0.6f))
                                         .clickable { viewModel.removeImage(uri) },
@@ -191,9 +202,9 @@ fun EditMemoryScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Close,
-                                        contentDescription = "Hapus",
+                                        contentDescription = stringResource(R.string.delete),
                                         tint = Color.White,
-                                        modifier = Modifier.size(14.dp)
+                                        modifier = Modifier.size(14.dp.scaled())
                                     )
                                 }
                             }
@@ -202,7 +213,91 @@ fun EditMemoryScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp.scaled()))
+
+            // Privacy & Music Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp.scaled()),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Privacy Toggle Button (Internet/Language icon if public, Lock icon if private)
+                Box(
+                    modifier = Modifier
+                        .size(36.dp.scaled())
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+                        .clickable { viewModel.onPrivacyChange(!viewModel.isPublic) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (viewModel.isPublic) Icons.Default.Language else Icons.Default.Lock,
+                        contentDescription = if (viewModel.isPublic) stringResource(R.string.public_text) else stringResource(R.string.private_text),
+                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        modifier = Modifier.size(20.dp.scaled())
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp.scaled()))
+
+                var showMusicMenu by remember { mutableStateOf(false) }
+
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp.scaled())
+                            .clip(CircleShape)
+                            .background(
+                                if (viewModel.selectedSongTrackId != null)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                            )
+                            .clickable {
+                                if (viewModel.selectedSongTrackId != null) {
+                                    showMusicMenu = true
+                                } else {
+                                    navController.navigate(Screen.SearchPublic.route)
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MusicNote,
+                            contentDescription = stringResource(R.string.create_memory_song),
+                            tint = if (viewModel.selectedSongTrackId != null)
+                                Color.White
+                            else
+                                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                            modifier = Modifier.size(20.dp.scaled())
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMusicMenu,
+                        onDismissRequest = { showMusicMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.create_change_song)) },
+                            onClick = {
+                                showMusicMenu = false
+                                navController.navigate(Screen.SearchPublic.route)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.create_delete_song_desc)) },
+                            onClick = {
+                                showMusicMenu = false
+                                viewModel.setSelectedSong(null, null, null, null)
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp.scaled()))
 
             // Title Input Field
             TextField(
@@ -211,17 +306,17 @@ fun EditMemoryScreen(
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = "Judul kenangan...",
-                        color = Color(0xFFB0A59A),
-                        fontSize = 22.sp,
+                        text = stringResource(R.string.create_title_placeholder),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        fontSize = 22.sp.scaled(),
                         fontWeight = FontWeight.Bold
                     )
                 },
                 singleLine = true,
                 textStyle = TextStyle(
-                    fontSize = 22.sp,
+                    fontSize = 22.sp.scaled(),
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4E4640)
+                    color = MaterialTheme.colorScheme.onBackground
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -232,8 +327,8 @@ fun EditMemoryScreen(
             )
 
             HorizontalDivider(
-                modifier = Modifier.padding(vertical = 4.dp),
-                color = Color(0xFFEDE6DC)
+                modifier = Modifier.padding(vertical = 4.dp.scaled()),
+                color = MaterialTheme.colorScheme.outline
             )
 
             // Content Input Field - limited height and internally scrollable
@@ -242,17 +337,17 @@ fun EditMemoryScreen(
                 onValueChange = { viewModel.onContentChange(it) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
+                    .heightIn(min = 250.dp.scaled()),
                 placeholder = {
                     Text(
-                        text = "Tuliskan ceritamu di sini...",
-                        color = Color(0xFFB0A59A),
-                        fontSize = 16.sp
+                        text = stringResource(R.string.create_content_placeholder),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        fontSize = 16.sp.scaled()
                     )
                 },
                 textStyle = TextStyle(
-                    fontSize = 16.sp,
-                    color = Color(0xFF5C524A)
+                    fontSize = 16.sp.scaled(),
+                    color = MaterialTheme.colorScheme.onBackground
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -262,32 +357,32 @@ fun EditMemoryScreen(
                 )
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp.scaled()))
 
             // Tags Display (Chips) if any custom tags exist
             if (viewModel.tagsList.isNotEmpty()) {
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(bottom = 8.dp.scaled()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp.scaled())
                 ) {
                     items(viewModel.tagsList) { tag ->
                         Box(
                             modifier = Modifier
-                                .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(10.dp))
-                                .background(Color(0xFFEDE8E0), RoundedCornerShape(10.dp))
-                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp.scaled()))
+                                .background(boxBgColor, RoundedCornerShape(10.dp.scaled()))
+                                .padding(horizontal = 10.dp.scaled(), vertical = 6.dp.scaled())
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = tag, fontSize = 11.sp, color = Color(0xFF5C524A))
-                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = tag, fontSize = 11.sp.scaled(), color = MaterialTheme.colorScheme.onBackground)
+                                Spacer(modifier = Modifier.width(4.dp.scaled()))
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Hapus",
-                                    tint = Color(0xFF8C8075),
+                                    contentDescription = stringResource(R.string.delete),
+                                    tint = MaterialTheme.colorScheme.onBackground,
                                     modifier = Modifier
-                                        .size(12.dp)
+                                        .size(12.dp.scaled())
                                         .clickable { viewModel.removeTag(tag) }
                                 )
                             }
@@ -296,152 +391,22 @@ fun EditMemoryScreen(
                 }
             }
 
-            // Display Selected Song if any
-            viewModel.selectedSongTrackId?.let { trackId ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(12.dp)),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE8E0))
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (!viewModel.selectedSongImageUrl.isNullOrEmpty()) {
-                            AsyncImage(
-                                model = viewModel.selectedSongImageUrl,
-                                contentDescription = "Cover Album",
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .background(Color(0xFF8C8075), RoundedCornerShape(8.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.MusicNote,
-                                    contentDescription = null,
-                                    tint = Color.White
-                                )
-                            }
-                        }
 
-                        Spacer(modifier = Modifier.width(12.dp))
 
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = viewModel.selectedSongTitle ?: "Lagu Kenangan",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = Color(0xFF4E4640),
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = viewModel.selectedSongArtist ?: "Artis",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF8C8075)
-                            )
-                        }
 
-                        IconButton(onClick = { viewModel.setSelectedSong(null, null, null, null) }) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Hapus Lagu",
-                                tint = Color(0xFF8C8075)
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Flat Elegant Add Song & Add Label Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Add Song Button
-                Button(
-                    onClick = { navController.navigate(Screen.SearchPublic.route) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(38.dp)
-                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(10.dp)),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEDE8E0))
-                ) {
-                    Text(text = "Add Song", fontSize = 12.sp, color = Color(0xFF5C524A), fontWeight = FontWeight.Bold)
-                }
-
-                // Add Label Button
-                Button(
-                    onClick = { showAddLabelDialog = true },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(38.dp)
-                        .border(1.dp, Color(0xFFEDE6DC), RoundedCornerShape(10.dp)),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEDE8E0))
-                ) {
-                    Text(text = "Add Label", fontSize = 12.sp, color = Color(0xFF5C524A), fontWeight = FontWeight.Bold)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Minimal Privacy Toggle Tabs
-            Row(
+            // Flat Elegant Add Label Button
+            Button(
+                onClick = { showAddLabelDialog.value = true },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFEDE8E0))
-                    .padding(4.dp)
+                    .height(44.dp.scaled()),
+                shape = RoundedCornerShape(10.dp.scaled()),
+                colors = ButtonDefaults.buttonColors(containerColor = boxBgColor)
             ) {
-                // Privat Tab
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (!viewModel.isPublic) Color(0xFF8C7D73) else Color.Transparent)
-                        .clickable { viewModel.onPrivacyChange(false) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Privat",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (!viewModel.isPublic) Color.White else Color(0xFF5C524A)
-                    )
-                }
-
-                // Public Tab
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(32.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (viewModel.isPublic) Color(0xFF8C7D73) else Color.Transparent)
-                        .clickable { viewModel.onPrivacyChange(true) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Publik",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (viewModel.isPublic) Color.White else Color(0xFF5C524A)
-                    )
-                }
+                Text(text = stringResource(R.string.create_add_label), fontSize = 14.sp.scaled(), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp.scaled()))
 
             // Save Button
             Button(
@@ -454,14 +419,14 @@ fun EditMemoryScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(46.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF75685F)), // Cozy warm clay
+                    .height(56.dp.scaled()),
+                shape = RoundedCornerShape(12.dp.scaled()),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 enabled = viewModel.titleText.isNotBlank() || viewModel.contentText.isNotBlank() || viewModel.selectedImageUris.isNotEmpty()
             ) {
                 Text(
-                    text = "Perbarui Kenangan Indah",
-                    fontSize = 15.sp,
+                    text = stringResource(R.string.edit_save_button),
+                    fontSize = 15.sp.scaled(),
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -470,18 +435,18 @@ fun EditMemoryScreen(
     }
 
     // Add Label Dialog
-    if (showAddLabelDialog) {
+    if (showAddLabelDialog.value) {
         AlertDialog(
-            onDismissRequest = { showAddLabelDialog = false },
-            title = { Text("Tambah Label / Kategori", color = Color(0xFF4E4640)) },
+            onDismissRequest = { showAddLabelDialog.value = false },
+            title = { Text(stringResource(R.string.create_dialog_title), color = MaterialTheme.colorScheme.onBackground) },
             text = {
                 OutlinedTextField(
                     value = newLabelText,
                     onValueChange = { newLabelText = it },
-                    placeholder = { Text("Nama label...") },
+                    placeholder = { Text(stringResource(R.string.create_dialog_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp.scaled())
                 )
             },
             confirmButton = {
@@ -490,17 +455,17 @@ fun EditMemoryScreen(
                         if (newLabelText.isNotBlank()) {
                             viewModel.addTag(newLabelText)
                             newLabelText = ""
-                            showAddLabelDialog = false
+                            showAddLabelDialog.value = false
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF75685F))
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Tambah")
+                    Text(stringResource(R.string.add))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showAddLabelDialog = false }) {
-                    Text("Batal", color = Color(0xFF8C7D73))
+                TextButton(onClick = { showAddLabelDialog.value = false }) {
+                    Text(stringResource(R.string.cancel), color = Color(0xFF8C7D73))
                 }
             }
         )

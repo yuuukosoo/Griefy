@@ -10,16 +10,23 @@ import com.naufal.griefy.data.repository.MemoryRepositoryImpl
 import com.naufal.griefy.data.repository.RemembranceRepositoryImpl
 import com.naufal.griefy.domain.repository.MemoryRepository
 import com.naufal.griefy.domain.repository.RemembranceRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.naufal.griefy.data.repository.AuthRepositoryImpl
+import com.naufal.griefy.domain.repository.AuthRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
+@Suppress("unused")
 object AppModule {
 
 
@@ -52,9 +59,12 @@ object AppModule {
     @Singleton
     fun provideMemoryRepository(
         dao: MemoryDao,
-        deezerApi: DeezerApi
+        deezerApi: DeezerApi,
+        app: Application,
+        firestore: FirebaseFirestore,
+        firebaseAuth: FirebaseAuth
     ): MemoryRepository {
-        return MemoryRepositoryImpl(dao, deezerApi)
+        return MemoryRepositoryImpl(dao, deezerApi, app, firestore, firebaseAuth)
     }
 
     @Provides
@@ -67,11 +77,45 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDeezerApi(): DeezerApi {
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .protocols(listOf(okhttp3.Protocol.HTTP_1_1))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeezerApi(okHttpClient: OkHttpClient): DeezerApi {
         return Retrofit.Builder()
             .baseUrl("https://api.deezer.com/")
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(DeezerApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        firebaseAuth: FirebaseAuth,
+        firestore: FirebaseFirestore
+    ): AuthRepository {
+        return AuthRepositoryImpl(firebaseAuth, firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
     }
 }
