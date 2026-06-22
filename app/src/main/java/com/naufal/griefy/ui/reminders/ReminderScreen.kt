@@ -1,41 +1,69 @@
 package com.naufal.griefy.ui.reminders
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.RemembranceDay
+import com.naufal.griefy.util.adaptiveWidth
+import com.naufal.griefy.util.getAdaptiveHorizontalPadding
+import com.naufal.griefy.util.scaled
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,6 +75,7 @@ fun ReminderScreen(
 ) {
     val context = LocalContext.current
     val remembranceDays by viewModel.remembranceDays.collectAsState()
+    val memories by viewModel.memories.collectAsState()
 
     val alarmManager = remember { context.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
     val powerManager = remember { context.getSystemService(Context.POWER_SERVICE) as PowerManager }
@@ -62,13 +91,7 @@ fun ReminderScreen(
     }
 
     var isBatteryOptimized by remember {
-        mutableStateOf(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                !powerManager.isIgnoringBatteryOptimizations(context.packageName)
-            } else {
-                false
-            }
-        )
+        mutableStateOf(!powerManager.isIgnoringBatteryOptimizations(context.packageName))
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -84,11 +107,7 @@ fun ReminderScreen(
                 } else {
                     true
                 }
-                isBatteryOptimized = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    !powerManager.isIgnoringBatteryOptimizations(context.packageName)
-                } else {
-                    false
-                }
+                isBatteryOptimized = !powerManager.isIgnoringBatteryOptimizations(context.packageName)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -105,381 +124,716 @@ fun ReminderScreen(
         }
     }
 
-    var showDialog by remember { mutableStateOf(false) }
-    var editingReminder by remember { mutableStateOf<RemembranceDay?>(null) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var reminderToDelete by remember { mutableStateOf<RemembranceDay?>(null) }
+    val showDialog = remember { mutableStateOf(false) }
+    val editingReminder = remember { mutableStateOf<RemembranceDay?>(null) }
+    val showDeleteDialog = remember { mutableStateOf(false) }
+    val reminderToDelete = remember { mutableStateOf<RemembranceDay?>(null) }
 
     var titleText by remember { mutableStateOf("") }
     var descText by remember { mutableStateOf("") }
-    var selectedDateTime by remember { mutableStateOf(System.currentTimeMillis()) }
+    var selectedDateTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var selectedMemoryId by remember { mutableStateOf<Int?>(null) }
+    var activePicker by remember { mutableStateOf("date") }
 
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
+    val dialogDateFormatter = remember { SimpleDateFormat("MMMM d, yyyy", Locale("id", "ID")) }
+    val dialogTimeFormatter = remember { SimpleDateFormat("h:mm a", Locale.US) }
 
     fun openDialog(reminder: RemembranceDay? = null) {
-        editingReminder = reminder
+        editingReminder.value = reminder
         if (reminder != null) {
             titleText = reminder.title
             descText = reminder.description
             selectedDateTime = reminder.dateTime
+            selectedMemoryId = reminder.memoryId
         } else {
             titleText = ""
             descText = ""
             selectedDateTime = System.currentTimeMillis() + 60000
+            selectedMemoryId = null
         }
-        showDialog = true
+        activePicker = "date"
+        showDialog.value = true
     }
+
+    val horizontalPadding = getAdaptiveHorizontalPadding()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                modifier = Modifier.padding(top = 32.dp, start = 32.dp, end = 32.dp),
-                title = { Text(stringResource(R.string.reminder_title), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.back),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { openDialog() },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.padding(end = 32.dp, bottom = 16.dp)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add, 
-                    contentDescription = stringResource(R.string.reminder_dialog_add)
+                TopAppBar(
+                    modifier = Modifier
+                        .padding(top = 32.dp.scaled(), start = horizontalPadding - 12.dp.scaled(), end = horizontalPadding)
+                        .widthIn(max = 500.dp),
+                    title = {
+                        Text(
+                            text = stringResource(R.string.reminder_title),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp.scaled(),
+                            color = MaterialTheme.colorScheme.onBackground,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
+                                contentDescription = stringResource(R.string.back),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
             }
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(paddingValues),
+            contentAlignment = Alignment.TopCenter
         ) {
-            if (!hasExactAlarmPermission) {
-                ExactAlarmWarningCard(context)
-            } else if (isBatteryOptimized) {
-                BatteryOptimizationWarningCard(context)
-            }
-
             Box(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .adaptiveWidth()
             ) {
-                if (remembranceDays.isEmpty()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.NotificationsActive,
-                            contentDescription = null,
-                            modifier = Modifier.size(72.dp),
-                            tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(R.string.reminder_empty_title),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(R.string.reminder_empty_subtitle),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    if (!hasExactAlarmPermission) {
+                        ExactAlarmWarningCard(context)
+                    } else if (isBatteryOptimized) {
+                        BatteryOptimizationWarningCard(context)
                     }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 48.dp, vertical = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+
+                    Box(
+                        modifier = Modifier.weight(1f)
                     ) {
-                        items(remembranceDays, key = { it.id }) { reminder ->
-                            ReminderCard(
-                                reminder = reminder,
-                                dateTimeString = formatter.format(Date(reminder.dateTime)),
-                                onEdit = { openDialog(reminder) },
-                                onDelete = {
-                                    reminderToDelete = reminder
-                                    showDeleteDialog = true
+                        if (remembranceDays.isEmpty()) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(32.dp.scaled()),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.reminder_empty_title),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding, top = 16.dp.scaled(), bottom = 100.dp.scaled()),
+                                verticalArrangement = Arrangement.spacedBy(12.dp.scaled())
+                            ) {
+                                items(remembranceDays, key = { it.id }) { reminder ->
+                                    val linkedMemory = memories.find { it.id == reminder.memoryId }
+                                    ReminderCard(
+                                        reminder = reminder,
+                                        dateTimeString = formatter.format(Date(reminder.dateTime)),
+                                        linkedMemoryTitle = linkedMemory?.title,
+                                        onEdit = { openDialog(reminder) },
+                                        onDelete = {
+                                            reminderToDelete.value = reminder
+                                            showDeleteDialog.value = true
+                                        }
+                                    )
                                 }
-                            )
+                            }
+                        }
+                    }
+                }
+
+                IconButton(
+                    onClick = { openDialog() },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = horizontalPadding, bottom = 48.dp.scaled())
+                        .size(56.dp.scaled())
+                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.nav_write_memory_desc),
+                        tint = Color.White,
+                        modifier = Modifier.size(28.dp.scaled())
+                    )
+                }
+            }
+        }
+    }
+
+        if (showDeleteDialog.value) {
+            Dialog(
+                onDismissRequest = {
+                    showDeleteDialog.value = false
+                    reminderToDelete.value = null
+                },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .widthIn(max = 500.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = horizontalPadding),
+                    shape = RoundedCornerShape(16.dp.scaled()),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 6.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp.scaled())
+                    ) {
+                        Text(
+                            text = stringResource(R.string.dialog_delete_reminder_title),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 20.sp.scaled()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp.scaled()))
+                        Text(
+                            text = stringResource(R.string.dialog_delete_reminder_text),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 16.sp.scaled()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp.scaled()))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(
+                                onClick = {
+                                    showDeleteDialog.value = false
+                                    reminderToDelete.value = null
+                                },
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Text(stringResource(R.string.cancel), fontSize = 16.sp.scaled())
+                            }
+                            Spacer(modifier = Modifier.width(8.dp.scaled()))
+                            TextButton(
+                                onClick = {
+                                    reminderToDelete.value?.let {
+                                        viewModel.deleteReminder(it)
+                                    }
+                                    showDeleteDialog.value = false
+                                    reminderToDelete.value = null
+                                },
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                            ) {
+                                Text(stringResource(R.string.delete), fontSize = 16.sp.scaled(), fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
             }
         }
 
-        if (showDeleteDialog) {
+        if (showDialog.value) {
+            var isTitleFocused by remember { mutableStateOf(false) }
+            var isDescFocused by remember { mutableStateOf(false) }
+            val keyboardController = LocalSoftwareKeyboardController.current
+            val titleFocusRequester = remember { FocusRequester() }
+            val descFocusRequester = remember { FocusRequester() }
+            val dummyFocusRequester = remember { FocusRequester() }
+
             AlertDialog(
-                onDismissRequest = {
-                    showDeleteDialog = false
-                    reminderToDelete = null
-                },
+                onDismissRequest = { showDialog.value = false },
                 properties = DialogProperties(usePlatformDefaultWidth = false),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 48.dp),
+                    .padding(horizontal = horizontalPadding),
                 containerColor = MaterialTheme.colorScheme.surface,
                 title = {
-                    Text(
-                        text = stringResource(R.string.dialog_delete_reminder_title),
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                text = {
-                    Text(
-                        text = stringResource(R.string.dialog_delete_reminder_text),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            reminderToDelete?.let {
-                                viewModel.deleteReminder(it)
-                            }
-                            showDeleteDialog = false
-                            reminderToDelete = null
-                        },
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(stringResource(R.string.delete), fontWeight = FontWeight.Bold)
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteDialog = false
-                            reminderToDelete = null
-                        },
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                }
-            )
-        }
-
-        if (showDialog) {
-            AlertDialog(
-                onDismissRequest = { showDialog = false },
-                containerColor = MaterialTheme.colorScheme.surface,
-                title = {
-                    Text(
-                        text = if (editingReminder != null) 
-                            stringResource(R.string.reminder_dialog_edit) 
-                        else 
-                            stringResource(R.string.reminder_dialog_add),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                text = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = titleText,
-                            onValueChange = { titleText = it },
-                            label = { Text(stringResource(R.string.reminder_name_label)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        Text(
+                            text = if (editingReminder.value != null) 
+                                stringResource(R.string.reminder_dialog_edit) 
+                            else 
+                                stringResource(R.string.reminder_dialog_add),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp.scaled()
                         )
-
-                        OutlinedTextField(
-                            value = descText,
-                            onValueChange = { descText = it },
-                            label = { Text(stringResource(R.string.reminder_note_label)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            maxLines = 3,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        )
-
-                        val calendar = remember { Calendar.getInstance() }.apply {
-                            timeInMillis = selectedDateTime
-                        }
-
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.reminder_time_label),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Button(
-                                    onClick = {
-                                        DatePickerDialog(
-                                            context,
-                                            { _, year, month, dayOfMonth ->
-                                                calendar.set(Calendar.YEAR, year)
-                                                calendar.set(Calendar.MONTH, month)
-                                                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                                                selectedDateTime = calendar.timeInMillis
-                                            },
-                                            calendar.get(Calendar.YEAR),
-                                            calendar.get(Calendar.MONTH),
-                                            calendar.get(Calendar.DAY_OF_MONTH)
-                                        ).show()
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.filledTonalButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                ) {
-                                    Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(stringResource(R.string.reminder_date_btn))
-                                }
-
-                                Button(
-                                    onClick = {
-                                        TimePickerDialog(
-                                            context,
-                                            { _, hourOfDay, minute ->
-                                                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                                                calendar.set(Calendar.MINUTE, minute)
-                                                calendar.set(Calendar.SECOND, 0)
-                                                selectedDateTime = calendar.timeInMillis
-                                            },
-                                            calendar.get(Calendar.HOUR_OF_DAY),
-                                            calendar.get(Calendar.MINUTE),
-                                            true
-                                        ).show()
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.filledTonalButtonColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                ) {
-                                    Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(18.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(stringResource(R.string.reminder_time_btn))
-                                }
-                            }
-
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 4.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                        
+                        val canSave = titleText.isNotBlank()
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp.scaled())
+                                .clip(CircleShape)
+                                .background(
+                                    if (canSave) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
                                 )
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Event,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = formatter.format(Date(selectedDateTime)),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            if (titleText.isNotBlank()) {
-                                if (editingReminder != null) {
-                                    viewModel.updateReminder(
-                                        editingReminder!!.copy(
+                                .clickable(enabled = canSave) {
+                                    if (editingReminder.value != null) {
+                                        viewModel.updateReminder(
+                                            editingReminder.value!!.copy(
+                                                title = titleText,
+                                                description = descText,
+                                                dateTime = selectedDateTime,
+                                                memoryId = selectedMemoryId
+                                            )
+                                        )
+                                    } else {
+                                        viewModel.addReminder(
                                             title = titleText,
                                             description = descText,
-                                            dateTime = selectedDateTime
+                                            dateTime = selectedDateTime,
+                                            memoryId = selectedMemoryId
                                         )
-                                    )
-                                } else {
-                                    viewModel.addReminder(
-                                        title = titleText,
-                                        description = descText,
-                                        dateTime = selectedDateTime
-                                    )
-                                }
-                                showDialog = false
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        enabled = titleText.isNotBlank()
-                    ) {
-                        Text(stringResource(R.string.save), fontWeight = FontWeight.Bold)
+                                    }
+                                    showDialog.value = false
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = stringResource(R.string.save),
+                                tint = if (canSave) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                modifier = Modifier.size(16.dp.scaled())
+                            )
+                        }
                     }
                 },
-                dismissButton = {
-                    TextButton(
-                        onClick = { showDialog = false },
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text(stringResource(R.string.cancel))
+                text = {
+                    val configuration = LocalConfiguration.current
+                    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+                    val calendar = remember { Calendar.getInstance() }.apply {
+                        timeInMillis = selectedDateTime
                     }
-                }
+
+                    val titleInput = @Composable {
+                        val isTitleActive = isTitleFocused || activePicker == "title"
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(
+                                    width = if (isTitleActive) 2.dp.scaled() else 1.dp.scaled(),
+                                    color = if (isTitleActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .background(
+                                    color = if (isTitleActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.02f) else MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .pointerInput(Unit) {
+                                    detectTapGestures {
+                                        titleFocusRequester.requestFocus()
+                                    }
+                                }
+                                .padding(horizontal = 16.dp.scaled(), vertical = 14.dp.scaled())
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.reminder_name_label),
+                                    fontSize = 12.sp.scaled(),
+                                    color = if (isTitleActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(2.dp.scaled()))
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    if (titleText.isEmpty()) {
+                                        Text(
+                                            text = stringResource(R.string.reminder_title_placeholder),
+                                            fontSize = 16.sp.scaled(),
+                                            fontWeight = FontWeight.Normal,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                        )
+                                    }
+                                    BasicTextField(
+                                        value = titleText,
+                                        onValueChange = { titleText = it },
+                                        singleLine = true,
+                                        textStyle = TextStyle(
+                                            fontSize = 16.sp.scaled(),
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        ),
+                                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                        keyboardActions = KeyboardActions(onDone = { 
+                                            keyboardController?.hide()
+                                            dummyFocusRequester.requestFocus()
+                                        }),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .focusRequester(titleFocusRequester)
+                                            .onFocusChanged { 
+                                                isTitleFocused = it.isFocused 
+                                                if (it.isFocused) activePicker = "title"
+                                            }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    val descInput = @Composable {
+                        val isDescActive = isDescFocused || activePicker == "desc"
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(
+                                    width = if (isDescActive) 2.dp.scaled() else 1.dp.scaled(),
+                                    color = if (isDescActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .background(
+                                    color = if (isDescActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.02f) else MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .pointerInput(Unit) {
+                                    detectTapGestures {
+                                        descFocusRequester.requestFocus()
+                                    }
+                                }
+                                .padding(horizontal = 16.dp.scaled(), vertical = 14.dp.scaled())
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.reminder_note_label),
+                                    fontSize = 12.sp.scaled(),
+                                    color = if (isDescActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(2.dp.scaled()))
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    if (descText.isEmpty()) {
+                                        Text(
+                                            text = stringResource(R.string.reminder_note_placeholder),
+                                            fontSize = 16.sp.scaled(),
+                                            fontWeight = FontWeight.Normal,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                        )
+                                    }
+                                    BasicTextField(
+                                        value = descText,
+                                        onValueChange = { descText = it },
+                                        maxLines = 3,
+                                        textStyle = TextStyle(
+                                            fontSize = 16.sp.scaled(),
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        ),
+                                        cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                        keyboardActions = KeyboardActions(onDone = { 
+                                            keyboardController?.hide()
+                                            dummyFocusRequester.requestFocus()
+                                        }),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .focusRequester(descFocusRequester)
+                                            .onFocusChanged { 
+                                                isDescFocused = it.isFocused 
+                                                if (it.isFocused) activePicker = "desc"
+                                            }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    val dateInput = @Composable {
+                        val isDateActive = activePicker == "date"
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(
+                                    width = if (isDateActive) 2.dp.scaled() else 1.dp.scaled(),
+                                    color = if (isDateActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .background(
+                                    color = if (isDateActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.02f) else MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .clickable {
+                                    activePicker = "date"
+                                    DatePickerDialog(
+                                        context,
+                                        { _, year, month, dayOfMonth ->
+                                            calendar.set(Calendar.YEAR, year)
+                                            calendar.set(Calendar.MONTH, month)
+                                            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                                            selectedDateTime = calendar.timeInMillis
+                                        },
+                                        calendar.get(Calendar.YEAR),
+                                        calendar.get(Calendar.MONTH),
+                                        calendar.get(Calendar.DAY_OF_MONTH)
+                                    ).show()
+                                }
+                                .padding(horizontal = 16.dp.scaled(), vertical = 14.dp.scaled())
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.CalendarToday,
+                                    contentDescription = null,
+                                    tint = if (isDateActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(24.dp.scaled())
+                                )
+                                Spacer(modifier = Modifier.width(16.dp.scaled()))
+                                Column {
+                                    Text(
+                                        text = stringResource(R.string.reminder_date_btn),
+                                        fontSize = 12.sp.scaled(),
+                                        color = if (isDateActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp.scaled()))
+                                    Text(
+                                        text = dialogDateFormatter.format(Date(selectedDateTime)),
+                                        fontSize = 16.sp.scaled(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    val timeInput = @Composable {
+                        val isTimeActive = activePicker == "time"
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(
+                                    width = if (isTimeActive) 2.dp.scaled() else 1.dp.scaled(),
+                                    color = if (isTimeActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .background(
+                                    color = if (isTimeActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.02f) else MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .clickable {
+                                    activePicker = "time"
+                                    TimePickerDialog(
+                                        context,
+                                        { _, hourOfDay, minute ->
+                                            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                                            calendar.set(Calendar.MINUTE, minute)
+                                            calendar.set(Calendar.SECOND, 0)
+                                            selectedDateTime = calendar.timeInMillis
+                                        },
+                                        calendar.get(Calendar.HOUR_OF_DAY),
+                                        calendar.get(Calendar.MINUTE),
+                                        false
+                                    ).show()
+                                }
+                                .padding(horizontal = 16.dp.scaled(), vertical = 14.dp.scaled())
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.AccessTime,
+                                    contentDescription = null,
+                                    tint = if (isTimeActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(24.dp.scaled())
+                                )
+                                Spacer(modifier = Modifier.width(16.dp.scaled()))
+                                Column {
+                                    Text(
+                                        text = stringResource(R.string.reminder_time_btn),
+                                        fontSize = 12.sp.scaled(),
+                                        color = if (isTimeActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp.scaled()))
+                                    Text(
+                                        text = dialogTimeFormatter.format(Date(selectedDateTime)),
+                                        fontSize = 16.sp.scaled(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    var dropdownExpanded by remember { mutableStateOf(false) }
+                    var anchorWidth by remember { mutableIntStateOf(0) }
+                    val density = LocalDensity.current
+
+                    val memoryInput = @Composable {
+                        val isMemoryActive = activePicker == "memory"
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onGloballyPositioned { coordinates ->
+                                    anchorWidth = coordinates.size.width
+                                }
+                                .border(
+                                    width = if (isMemoryActive) 2.dp.scaled() else 1.dp.scaled(),
+                                    color = if (isMemoryActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .background(
+                                    color = if (isMemoryActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.02f) else MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp.scaled())
+                                )
+                                .clickable {
+                                    activePicker = "memory"
+                                    dropdownExpanded = true
+                                }
+                                .padding(horizontal = 16.dp.scaled(), vertical = 14.dp.scaled())
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.reminder_memory_label),
+                                    fontSize = 12.sp.scaled(),
+                                    color = if (isMemoryActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(2.dp.scaled()))
+                                val selectedMemoryTitle = memories.find { it.id == selectedMemoryId }?.title 
+                                    ?: stringResource(R.string.reminder_no_memory_selected)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = selectedMemoryTitle,
+                                        fontSize = 16.sp.scaled(),
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                DropdownMenu(
+                                    expanded = dropdownExpanded,
+                                    onDismissRequest = { dropdownExpanded = false },
+                                    modifier = Modifier
+                                        .width(with(density) { anchorWidth.toDp() })
+                                        .background(MaterialTheme.colorScheme.surface)
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.reminder_no_memory_selected)) },
+                                        onClick = {
+                                            selectedMemoryId = null
+                                            dropdownExpanded = false
+                                        }
+                                    )
+                                    memories.forEach { memory ->
+                                        DropdownMenuItem(
+                                            text = { Text(memory.title) },
+                                            onClick = {
+                                                selectedMemoryId = memory.id
+                                                dropdownExpanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .pointerInput(Unit) {
+                                detectTapGestures {
+                                    dummyFocusRequester.requestFocus()
+                                    keyboardController?.hide()
+                                }
+                            }
+                    ) {
+                        // Dummy focusable component
+                        Box(
+                            modifier = Modifier
+                                .size(1.dp)
+                                .focusRequester(dummyFocusRequester)
+                                .focusable()
+                        )
+
+                        if (isLandscape) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp.scaled()),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp.scaled())
+                            ) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp.scaled())
+                                ) {
+                                    titleInput()
+                                    descInput()
+                                    memoryInput()
+                                }
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp.scaled())
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.reminder_time_settings_title),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    dateInput()
+                                    timeInput()
+                                }
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp.scaled()),
+                                verticalArrangement = Arrangement.spacedBy(16.dp.scaled())
+                            ) {
+                                titleInput()
+                                descInput()
+                                memoryInput()
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp.scaled())
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.reminder_time_settings_title),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp.scaled()))
+                                    dateInput()
+                                    Spacer(modifier = Modifier.height(12.dp.scaled()))
+                                    timeInput()
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {}
             )
         }
     }
-}
 
 @Composable
 fun ReminderCard(
     reminder: RemembranceDay,
     dateTimeString: String,
+    linkedMemoryTitle: String?,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -487,12 +841,12 @@ fun ReminderCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(16.dp.scaled()),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
-            modifier = Modifier.padding(24.dp)
+            modifier = Modifier.padding(24.dp.scaled())
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -509,12 +863,30 @@ fun ReminderCard(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     if (reminder.description.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(4.dp.scaled()))
                         Text(
                             text = reminder.description,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+                    if (!linkedMemoryTitle.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(6.dp.scaled()))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Link,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(14.dp.scaled())
+                            )
+                            Spacer(modifier = Modifier.width(4.dp.scaled()))
+                            Text(
+                                text = stringResource(R.string.reminder_linked_memory, linkedMemoryTitle),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
 
@@ -538,7 +910,7 @@ fun ReminderCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp.scaled()))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -547,9 +919,9 @@ fun ReminderCard(
                     imageVector = if (isPast) Icons.Default.NotificationsNone else Icons.Default.NotificationsActive,
                     contentDescription = null,
                     tint = if (isPast) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp.scaled())
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(6.dp.scaled()))
                 Text(
                     text = dateTimeString,
                     style = MaterialTheme.typography.bodySmall,
@@ -558,17 +930,17 @@ fun ReminderCard(
                 )
 
                 if (isPast) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp.scaled()))
                     Surface(
                         color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        shape = RoundedCornerShape(4.dp.scaled()),
+                        modifier = Modifier.padding(horizontal = 4.dp.scaled())
                     ) {
                         Text(
                             text = stringResource(R.string.reminder_passed),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(horizontal = 6.dp.scaled(), vertical = 2.dp.scaled())
                         )
                     }
                 }
@@ -582,15 +954,15 @@ fun ExactAlarmWarningCard(context: Context) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 48.dp, vertical = 8.dp),
+            .padding(horizontal = getAdaptiveHorizontalPadding(), vertical = 8.dp.scaled()),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFFDF3E7) // warm light orange/peach
+            containerColor = Color(0xFFFDF3E7)
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(12.dp.scaled()),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp.scaled())
         ) {
             Row(
                 verticalAlignment = Alignment.Top
@@ -599,9 +971,9 @@ fun ExactAlarmWarningCard(context: Context) {
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
                     tint = Color(0xFFD97706),
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp.scaled())
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(12.dp.scaled()))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.reminder_exact_alarm_warning_title),
@@ -609,7 +981,7 @@ fun ExactAlarmWarningCard(context: Context) {
                         color = Color(0xFF78350F),
                         style = MaterialTheme.typography.titleSmall
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp.scaled()))
                     Text(
                         text = stringResource(R.string.reminder_exact_alarm_warning_desc),
                         color = Color(0xFF92400E),
@@ -617,17 +989,17 @@ fun ExactAlarmWarningCard(context: Context) {
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp.scaled()))
             Button(
                 onClick = {
                     try {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                                data = Uri.parse("package:${context.packageName}")
+                                data = "package:${context.packageName}".toUri()
                             }
                             context.startActivity(intent)
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         val intent = Intent(Settings.ACTION_SETTINGS)
                         context.startActivity(intent)
                     }
@@ -636,7 +1008,7 @@ fun ExactAlarmWarningCard(context: Context) {
                     containerColor = Color(0xFFD97706),
                     contentColor = Color.White
                 ),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(8.dp.scaled()),
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(stringResource(R.string.reminder_exact_alarm_warning_btn), fontWeight = FontWeight.Bold)
@@ -645,20 +1017,21 @@ fun ExactAlarmWarningCard(context: Context) {
     }
 }
 
+@SuppressLint("BatteryLife")
 @Composable
 fun BatteryOptimizationWarningCard(context: Context) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 48.dp, vertical = 8.dp),
+            .padding(horizontal = getAdaptiveHorizontalPadding(), vertical = 8.dp.scaled()),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF0FDF4) // light green/teal tint
+            containerColor = Color(0xFFF0FDF4)
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(12.dp.scaled()),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp.scaled())
         ) {
             Row(
                 verticalAlignment = Alignment.Top
@@ -667,9 +1040,9 @@ fun BatteryOptimizationWarningCard(context: Context) {
                     imageVector = Icons.Default.BatteryAlert,
                     contentDescription = null,
                     tint = Color(0xFF16A34A),
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp.scaled())
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(12.dp.scaled()))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.reminder_battery_warning_title),
@@ -677,7 +1050,7 @@ fun BatteryOptimizationWarningCard(context: Context) {
                         color = Color(0xFF14532D),
                         style = MaterialTheme.typography.titleSmall
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp.scaled()))
                     Text(
                         text = stringResource(R.string.reminder_battery_warning_desc),
                         color = Color(0xFF166534),
@@ -685,13 +1058,15 @@ fun BatteryOptimizationWarningCard(context: Context) {
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp.scaled()))
             Button(
                 onClick = {
                     try {
-                        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                            data = "package:${context.packageName}".toUri()
+                        }
                         context.startActivity(intent)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         val intent = Intent(Settings.ACTION_SETTINGS)
                         context.startActivity(intent)
                     }
@@ -700,7 +1075,7 @@ fun BatteryOptimizationWarningCard(context: Context) {
                     containerColor = Color(0xFF16A34A),
                     contentColor = Color.White
                 ),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(8.dp.scaled()),
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(stringResource(R.string.reminder_battery_warning_btn), fontWeight = FontWeight.Bold)

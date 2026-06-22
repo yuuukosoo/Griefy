@@ -17,5 +17,7 @@ data class MemoryEntity(
     val songTitle: String?,
     val isTrashed: Boolean,
     val userName: String? = null,
-    val userAvatar: String? = null
+    val userAvatar: String? = null,
+    val userId: String? = null,
+    val isSaved: Boolean = false
 )

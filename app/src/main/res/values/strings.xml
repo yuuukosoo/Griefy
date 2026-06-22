@@ -3,6 +3,7 @@
     <string name="app_name">Griefy</string>
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
@@ -30,11 +31,10 @@
     <string name="register_confirm_password">Confirm Password</string>
     <string name="register_button">Register</string>
     <string name="register_already_have_account">If you already have an account register</string>
-    <string name="register_you_can">You can </string>
     <string name="register_login_here">Login here !</string>
 
     <!-- Home Screen -->
-    <string name="home_greeting">Hello, Khalish</string>
+    <string name="home_greeting">Hello, %1$s</string>
     <string name="home_subtitle">Let\'s reflect on your memories.</string>
     <string name="home_search_placeholder">Search memories...</string>
     <string name="home_empty_memories">No memories yet. Press + to add.</string>
@@ -47,6 +47,11 @@
     <string name="nav_search_memory">Search Memory</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_write_memory_desc">Write Memory</string>
+    <string name="nav_reminders">Reminders</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_saved">Saved</string>
+    <string name="saved_title">Saved Memories</string>
+    <string name="saved_empty">No saved memories yet.</string>
 
     <!-- Profile Screen -->
     <string name="profile_title">Your Profile</string>
@@ -64,13 +69,15 @@
     <string name="create_content_placeholder">Write your story here...</string>
     <string name="create_memory_song">Memory Song</string>
     <string name="create_artist">Artist</string>
+    <string name="create_change_song">Change Song</string>
     <string name="create_delete_song_desc">Delete Song</string>
     <string name="create_add_song">Add Song</string>
     <string name="create_add_label">Add Label</string>
     <string name="create_save_button">Save Beautiful Memory</string>
-    <string name="edit_save_button">Update Beautiful Memory</string>
+    <string name="edit_save_button">Update Memory</string>
     <string name="create_dialog_title">Add Label / Category</string>
     <string name="create_dialog_placeholder">Label name...</string>
+    <string name="default_memory_tag">New Memory</string>
 
     <!-- Detail Screen -->
     <string name="detail_title">Memory Detail</string>
@@ -123,6 +130,10 @@
     <string name="reminder_battery_warning_desc">Some devices limit background apps. Please disable battery optimization (set to Unrestricted) for Griefy so notifications arrive even if the app is closed.</string>
     <string name="reminder_battery_warning_btn">Ignore Restrictions</string>
 
+    <string name="reminder_memory_label">Associate with Memory (Optional)</string>
+    <string name="reminder_no_memory_selected">No Memory Associated</string>
+    <string name="reminder_linked_memory">Linked Memory: %s</string>
+
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
     <string name="settings_back_description">Back</string>
@@ -154,4 +165,62 @@
     <string name="dialog_delete_permanent_text">Are you sure you want to permanently delete this memory? This action cannot be undone.</string>
     <string name="dialog_logout_title">Logout?</string>
     <string name="dialog_logout_text">Are you sure you want to log out of your account?</string>
+    <string name="settings_delete_account">Delete Account</string>
+    <string name="dialog_delete_account_title">Delete Account?</string>
+    <string name="dialog_delete_account_text">Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be permanently deleted.</string>
+
+    <!-- Error / Validation Strings -->
+    <string name="error_dialog_title">Form Error</string>
+    <string name="error_dialog_dismiss">Understood</string>
+    <string name="error_email_password_empty">Email and password cannot be empty.</string>
+    <string name="error_all_fields_required">All fields are required.</string>
+    <string name="error_password_mismatch">Confirm password does not match.</string>
+    <string name="error_password_too_short">Password must be at least 6 characters.</string>
+    <string name="error_user_not_found">User not found.</string>
+    <string name="error_registration_failed">Registration failed.</string>
+    <string name="error_login_failed">An error occurred while signing in.</string>
+    <string name="error_register_failed">An error occurred while registering.</string>
+    <string name="login_success_toast">Welcome back!</string>
+    <string name="register_success_toast">Registration successful! Please sign in.</string>
+
+    <!-- Profile & User Details Strings -->
+    <string name="profile_personal_info">Personal Information</string>
+    <string name="profile_username_label">Username</string>
+    <string name="profile_email_label">Email address</string>
+    <string name="profile_gender_label">Gender</string>
+    <string name="profile_confirm_button">Confirm</string>
+    <string name="profile_success_toast">Profile updated successfully</string>
+    <string name="profile_error_image">Failed to process image</string>
+    <string name="profile_error_auth">User not authenticated</string>
+    <string name="profile_error_save">Failed to save profile</string>
+
+    <string name="profile_other_user_info">User Information</string>
+    <string name="profile_other_total_memories">Total Memories</string>
+    <string name="profile_not_found">Profile not found</string>
+    <string name="profile_load_failed">Failed to load profile</string>
+    <string name="profile_try_again">Try Again</string>
+    <string name="profile_deleted_account_msg">Account has been deleted by user</string>
+    <string name="profile_gender_male">Male</string>
+    <string name="profile_gender_female">Female</string>
+    <string name="profile_gender_unspecified">Not specified</string>
+    <string name="profile_memories_count">%1$d Memories</string>
+    <string name="profile_desc_back">Back</string>
+    <string name="profile_desc_photo">Profile Photo</string>
+    <string name="profile_desc_edit_photo">Edit Profile Picture</string>
+    <string name="profile_desc_edit_profile">Edit Profile</string>
+
+    <!-- Reminder placeholders & Settings -->
+    <string name="reminder_title_placeholder">Enter name...</string>
+    <string name="reminder_note_placeholder">Enter note...</string>
+    <string name="reminder_time_settings_title">Notification Time Settings</string>
+    <string name="settings_deleting_account">Deleting Account...</string>
+    <string name="settings_delete_account_error">Failed to Delete Account</string>
+    <string name="ok">OK</string>
+
+    <!-- Notification Strings -->
+    <string name="reminder_noti_default_title">Important Remembrance Day ✨</string>
+    <string name="reminder_noti_default_desc">Let\'s take a moment to remember beautiful memories.</string>
+    <string name="reminder_noti_channel_name">Remembrance Day Reminder</string>
+    <string name="reminder_noti_channel_desc">Channel for Griefy reminder notifications</string>
 </resources>
+

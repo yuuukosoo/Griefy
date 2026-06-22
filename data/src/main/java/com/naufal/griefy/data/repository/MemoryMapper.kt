@@ -16,7 +16,9 @@ fun MemoryEntity.toDomain(): Memory {
         songTitle = songTitle,
         isTrashed = isTrashed,
         userName = userName,
-        userAvatar = userAvatar
+        userAvatar = userAvatar,
+        userId = userId,
+        isSaved = isSaved
     )
 }
 
@@ -33,6 +35,8 @@ fun Memory.toEntity(): MemoryEntity {
         songTitle = songTitle,
         isTrashed = isTrashed,
         userName = userName,
-        userAvatar = userAvatar
+        userAvatar = userAvatar,
+        userId = userId,
+        isSaved = isSaved
     )
 }

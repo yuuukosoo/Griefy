@@ -1,12 +1,15 @@
 package com.naufal.griefy.ui.search
 
-import androidx.compose.foundation.BorderStroke
+
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -34,6 +37,10 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Song
+import com.naufal.griefy.util.getAdaptiveHorizontalPadding
+import com.naufal.griefy.util.scaled
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.PlatformTextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,8 +81,34 @@ fun SearchSongScreen(
                         isMediaPlaying = true
                     }
                     mediaPlayer.setOnCompletionListener {
-                        playingTrackId = null
-                        isMediaPlaying = false
+                        try {
+                            mediaPlayer.seekTo(0)
+                            mediaPlayer.start()
+                            isMediaPlaying = true
+                        } catch (_: Exception) {
+                            try {
+                                mediaPlayer.reset()
+                                mediaPlayer.setDataSource(previewUrl)
+                                mediaPlayer.isLooping = true
+                                mediaPlayer.prepareAsync()
+                            } catch (_: Exception) {
+                                playingTrackId = null
+                                isMediaPlaying = false
+                            }
+                        }
+                    }
+                    mediaPlayer.setOnErrorListener { _, what, extra ->
+                        android.util.Log.e("SEARCH_PREVIEW", "MediaPlayer error: what=$what, extra=$extra. Menginisialisasi ulang...")
+                        try {
+                            mediaPlayer.reset()
+                            mediaPlayer.setDataSource(previewUrl)
+                            mediaPlayer.isLooping = true
+                            mediaPlayer.prepareAsync()
+                        } catch (_: Exception) {
+                            playingTrackId = null
+                            isMediaPlaying = false
+                        }
+                        true
                     }
                 } catch (e: Exception) {
                     android.util.Log.e("SEARCH_PREVIEW", "Gagal memutar lagu pratinjau", e)
@@ -84,70 +117,105 @@ fun SearchSongScreen(
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.padding(top = 32.dp),
-                title = { Text(stringResource(R.string.search_song_title), color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = stringResource(R.string.back),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        }
-    ) { paddingValues ->
+    val horizontalPadding = getAdaptiveHorizontalPadding()
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .navigationBarsPadding(),
+        contentAlignment = Alignment.TopCenter
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 48.dp, vertical = 16.dp)
+                .padding(start = horizontalPadding, end = horizontalPadding, bottom = 16.dp.scaled(), top = 48.dp.scaled())
         ) {
-
-            OutlinedTextField(
-                value = viewModel.searchQuery,
-                onValueChange = { viewModel.onQueryChange(it) },
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(stringResource(R.string.search_song_placeholder), color = MaterialTheme.colorScheme.outline) },
-                leadingIcon = {
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = { navController.navigateUp() },
+                    modifier = Modifier.size(36.dp.scaled())
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(24.dp.scaled())
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp.scaled()))
+
+                Text(
+                    text = stringResource(R.string.search_song_title),
+                    fontSize = 20.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp.scaled()))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp.scaled())
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp.scaled()))
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp.scaled()))
+                    .padding(horizontal = 12.dp.scaled()),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp.scaled())
                     )
-                },
-                trailingIcon = {
-                    if (viewModel.searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { 
-                            viewModel.onQueryChange("")
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = stringResource(R.string.clear),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    Spacer(modifier = Modifier.width(8.dp.scaled()))
+                    
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                        if (viewModel.searchQuery.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.search_song_placeholder),
+                                color = MaterialTheme.colorScheme.outline,
+                                fontSize = 14.sp.scaled()
                             )
                         }
+                        BasicTextField(
+                            value = viewModel.searchQuery,
+                            onValueChange = { viewModel.onQueryChange(it) },
+                            textStyle = TextStyle(fontSize = 14.sp.scaled(), color = MaterialTheme.colorScheme.onBackground),
+                            singleLine = true,
+                            cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = { viewModel.searchSongs() }),
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { viewModel.searchSongs() }),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+                    
+                    if (viewModel.searchQuery.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(8.dp.scaled()))
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = stringResource(R.string.clear),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .size(20.dp.scaled())
+                                .clickable { viewModel.onQueryChange("") }
+                        )
+                    }
+                }
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp.scaled()))
 
             if (viewModel.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -156,11 +224,15 @@ fun SearchSongScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp.scaled())
                 ) {
                     if (viewModel.searchResults.isEmpty() && viewModel.searchQuery.isNotEmpty()) {
                         item {
-                            Text(stringResource(R.string.search_song_empty_hint), color = MaterialTheme.colorScheme.outline)
+                            Text(
+                                text = stringResource(R.string.search_song_empty_hint), 
+                                color = MaterialTheme.colorScheme.outline,
+                                fontSize = 14.sp.scaled()
+                            )
                         }
                     }
 
@@ -197,14 +269,15 @@ fun SongCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCardClick() },
+        shape = RoundedCornerShape(16.dp.scaled()),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         border = null,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(12.dp.scaled()),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -212,14 +285,14 @@ fun SongCard(
                     model = song.imageUrl,
                     contentDescription = stringResource(R.string.search_song_album_cover_desc),
                     modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .size(56.dp.scaled())
+                        .clip(RoundedCornerShape(8.dp.scaled())),
                     contentScale = ContentScale.Crop
                 )
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .size(56.dp.scaled())
+                        .clip(RoundedCornerShape(8.dp.scaled()))
                         .background(Color.Black.copy(alpha = if (isPlaying) 0.4f else 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -230,47 +303,54 @@ fun SongCard(
                         else 
                             stringResource(R.string.search_song_play_preview_desc),
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp.scaled())
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp.scaled()))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = song.title, 
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 16.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    style = LocalTextStyle.current.copy(
+                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                    )
                 )
+                Spacer(modifier = Modifier.height(2.dp.scaled()))
                 Text(
                     text = song.artistName, 
-                    style = MaterialTheme.typography.bodyMedium, 
+                    fontSize = 12.sp.scaled(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    style = LocalTextStyle.current.copy(
+                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                    )
                 )
             }
 
             if (isSelected) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = onAddClick,
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+                Spacer(modifier = Modifier.width(8.dp.scaled()))
+                Box(
+                    modifier = Modifier
+                        .size(36.dp.scaled())
+                        .clip(CircleShape)
+                        .background(Color(0xFF4CAF50))
+                        .clickable { onAddClick() },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = stringResource(R.string.create_add_song),
-                        modifier = Modifier.size(16.dp)
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp.scaled())
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(stringResource(R.string.search_song_add_button), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

@@ -14,6 +14,12 @@ interface MemoryDao {
     @Query("SELECT * FROM memory_table WHERE isTrashed = 0 ORDER BY createdAt DESC")
     fun getAllMemories(): Flow<List<MemoryEntity>>
 
+    @Query("SELECT * FROM memory_table WHERE isTrashed = 0")
+    suspend fun getAllMemoriesOnce(): List<MemoryEntity>
+
+    @Query("SELECT * FROM memory_table")
+    suspend fun getAllLocalMemoriesIncludingTrashed(): List<MemoryEntity>
+
 
     @Query("SELECT * FROM memory_table WHERE id = :id")
     suspend fun getMemoryById(id: Int): MemoryEntity?
@@ -22,7 +28,7 @@ interface MemoryDao {
     fun getMemoryByIdAsFlow(id: Int): Flow<MemoryEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMemory(memory: MemoryEntity)
+    suspend fun insertMemory(memory: MemoryEntity): Long
 
 
     @Update
@@ -43,4 +49,7 @@ interface MemoryDao {
 
     @Query("DELETE FROM memory_table WHERE id = :id")
     suspend fun deletePermanently(id: Int)
+
+    @Query("DELETE FROM memory_table")
+    suspend fun clearAllLocalMemories()
 }
