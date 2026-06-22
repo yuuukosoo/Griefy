@@ -316,6 +316,16 @@ fun SettingsScreen(
                             subtitle = stringResource(R.string.settings_trash_subtitle),
                             onClick = { navController.navigate(Screen.Trash.route) }
                         )
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outline, thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp.scaled()))
+                        SettingsItem(
+                            icon = Icons.Default.Notifications,
+                            title = "Picu Test Crash (UAS)",
+                            subtitle = "Menghasilkan crash buatan untuk Firebase Crashlytics",
+                            titleColor = MaterialTheme.colorScheme.error,
+                            onClick = {
+                                throw RuntimeException("Uji Coba Crash UAS - Griefy")
+                            }
+                        )
                     }
                 }
 

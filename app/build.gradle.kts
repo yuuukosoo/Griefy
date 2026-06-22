@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -91,6 +92,9 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
+
 
     // Lottie
     implementation("com.airbnb.android:lottie-compose:6.4.0")
