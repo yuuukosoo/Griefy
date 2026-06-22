@@ -92,6 +92,16 @@ class AuthRepositoryImpl @Inject constructor(
         firebaseAuth.signOut()
     }
 
+    override fun sendPasswordResetEmail(email: String): Flow<Resource<Unit>> = flow {
+        emit(Resource.Loading())
+        try {
+            firebaseAuth.sendPasswordResetEmail(email).await()
+            emit(Resource.Success(Unit))
+        } catch (e: Exception) {
+            emit(Resource.Error(e.localizedMessage ?: "ERROR_SEND_RESET_EMAIL_FAILED"))
+        }
+    }
+
     override fun getUserProfile(uid: String): Flow<Resource<UserProfile>> = flow {
         emit(Resource.Loading())
         try {

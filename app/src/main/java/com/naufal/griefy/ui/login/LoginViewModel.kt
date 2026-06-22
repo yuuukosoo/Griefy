@@ -20,6 +20,9 @@ class LoginViewModel @Inject constructor(
     private val _loginState = MutableStateFlow<Resource<User>?>(null)
     val loginState: StateFlow<Resource<User>?> = _loginState.asStateFlow()
 
+    private val _forgotPasswordState = MutableStateFlow<Resource<Unit>?>(null)
+    val forgotPasswordState: StateFlow<Resource<Unit>?> = _forgotPasswordState.asStateFlow()
+
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
             _loginState.value = Resource.Error("ERROR_EMAIL_PASSWORD_EMPTY")
@@ -30,6 +33,22 @@ class LoginViewModel @Inject constructor(
                 _loginState.value = result
             }
         }
+    }
+
+    fun sendPasswordReset(email: String) {
+        if (email.isBlank()) {
+            _forgotPasswordState.value = Resource.Error("ERROR_EMAIL_EMPTY")
+            return
+        }
+        viewModelScope.launch {
+            authRepository.sendPasswordResetEmail(email).collect { result ->
+                _forgotPasswordState.value = result
+            }
+        }
+    }
+
+    fun resetForgotPasswordState() {
+        _forgotPasswordState.value = null
     }
 
     fun resetState() {

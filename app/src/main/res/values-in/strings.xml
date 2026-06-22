@@ -22,6 +22,11 @@
     <string name="login_button">Login</string>
     <string name="login_no_account">Don\'t have an account?</string>
     <string name="login_sign_up">Sign Up</string>
+    <string name="login_forgot_password">Lupa Password?</string>
+    <string name="forgot_password_desc">Masukkan email Anda untuk menerima link reset password.</string>
+    <string name="forgot_password_success">Link reset password telah dikirim ke email Anda.</string>
+    <string name="error_email_empty">Email tidak boleh kosong.</string>
+    <string name="send">Kirim</string>
 
     <!-- Register Screen -->
     <string name="register_sign_up">Sign Up</string>
