@@ -369,7 +369,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
     private suspend fun syncUserMemoriesFromFirestore(userId: String) {
         try {
-            // 1. Sinkronisasi Memori Milik Pengguna Sendiri
+
             val snapshot = firestore.collection(COLLECTION_PUBLIC_MEMORIES)
                 .whereEqualTo("userId", userId)
                 .get()
@@ -427,7 +427,7 @@ class MemoryRepositoryImpl @Inject constructor(
                 }
             }
 
-            // 2. Sinkronisasi Memori yang Disimpan/Bookmark
+
             val savedSnapshot = firestore.collection(COLLECTION_SAVED_MEMORIES)
                 .whereEqualTo("userId", userId)
                 .get()
@@ -481,7 +481,7 @@ class MemoryRepositoryImpl @Inject constructor(
                 }
             }
 
-            // Masukkan data memori yang disimpan ke Room local cache
+
             val updatedLocalMemories = dao.getAllLocalMemoriesIncludingTrashed()
             for (savedMem in savedMemories) {
                 val local = updatedLocalMemories.find {
@@ -500,7 +500,7 @@ class MemoryRepositoryImpl @Inject constructor(
                 }
             }
 
-            // Bersihkan data lokal jika bookmark telah dihapus dari server
+
             val localSavedMemories = updatedLocalMemories.filter { it.isSaved }
             for (localSaved in localSavedMemories) {
                 val originalUserId = localSaved.userId ?: userId
