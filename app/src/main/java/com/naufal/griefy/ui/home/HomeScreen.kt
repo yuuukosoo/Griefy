@@ -40,7 +40,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Memory
-import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
 import androidx.compose.ui.text.TextStyle
 import java.text.SimpleDateFormat
@@ -214,14 +213,6 @@ fun HomeScreen(
         }
 
 
-        Box(
-            modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
-            FloatingNavigationDock(
-                navController = navController,
-                currentRoute = Screen.Home.route
-            )
-        }
     }
 }
 

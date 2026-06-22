@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -187,6 +188,23 @@ private fun NavigationTabItem(
         label = "tab_content_color"
     )
 
+    val iconScale by animateFloatAsState(
+        targetValue = if (selected) 1.25f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "icon_scale"
+    )
+    val iconOffset by animateDpAsState(
+        targetValue = if (selected) (-3).dp else 0.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "icon_offset"
+    )
+
     Row(
         modifier = modifier
             .height(36.dp)
@@ -211,7 +229,13 @@ private fun NavigationTabItem(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = animatedContentColor,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier
+                .offset(y = iconOffset)
+                .graphicsLayer(
+                    scaleX = iconScale,
+                    scaleY = iconScale
+                )
+                .size(18.dp)
         )
 
         AnimatedVisibility(

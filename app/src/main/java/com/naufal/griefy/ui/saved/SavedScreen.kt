@@ -22,7 +22,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.home.MemoryCard
-import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
 
 @Composable
@@ -113,14 +112,5 @@ fun SavedScreen(
             }
         }
 
-        // Bottom Navigation Dock
-        Box(
-            modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
-            FloatingNavigationDock(
-                navController = navController,
-                currentRoute = Screen.Saved.route
-            )
-        }
     }
 }

@@ -12,6 +12,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -67,81 +74,129 @@ class MainActivity : AppCompatActivity() {
 
                     val navController = rememberNavController()
 
-                    NavHost(
-                        navController = navController,
-                        startDestination = Screen.Splash.route
-                    ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val navBackStackEntry by navController.currentBackStackEntryAsState()
+                        val currentRoute = navBackStackEntry?.destination?.route
 
-                        composable(Screen.Splash.route) {
-                            SplashScreen(navController = navController)
-                        }
+                        val showDock = currentRoute in listOf(
+                            Screen.Home.route,
+                            Screen.SearchMemory.route,
+                            Screen.Saved.route,
+                            Screen.Profile.route
+                        )
 
-                        composable(Screen.Login.route) {
-                            LoginScreen(navController = navController)
-                        }
-
-                        composable(Screen.Register.route) {
-                            RegisterScreen(navController = navController)
-                        }
-
-                        composable(Screen.Home.route) {
-                            HomeScreen(navController = navController)
-                        }
-
-                        composable(Screen.Profile.route) {
-                            ProfileScreen(navController = navController)
-                        }
-
-                        composable(
-                            route = Screen.OtherProfile.route,
-                            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+                        NavHost(
+                            navController = navController,
+                            startDestination = Screen.Splash.route,
+                            enterTransition = {
+                                slideInHorizontally(
+                                    initialOffsetX = { it },
+                                    animationSpec = tween(durationMillis = 350)
+                                ) + fadeIn(animationSpec = tween(350))
+                            },
+                            exitTransition = {
+                                slideOutHorizontally(
+                                    targetOffsetX = { -it },
+                                    animationSpec = tween(durationMillis = 350)
+                                ) + fadeOut(animationSpec = tween(350))
+                            },
+                            popEnterTransition = {
+                                slideInHorizontally(
+                                    initialOffsetX = { -it },
+                                    animationSpec = tween(durationMillis = 350)
+                                ) + fadeIn(animationSpec = tween(350))
+                            },
+                            popExitTransition = {
+                                slideOutHorizontally(
+                                    targetOffsetX = { it },
+                                    animationSpec = tween(durationMillis = 350)
+                                ) + fadeOut(animationSpec = tween(350))
+                            },
+                            modifier = Modifier.fillMaxSize()
                         ) {
-                            OtherProfileScreen(navController = navController)
+
+                            composable(Screen.Splash.route) {
+                                SplashScreen(navController = navController)
+                            }
+
+                            composable(Screen.Login.route) {
+                                LoginScreen(navController = navController)
+                            }
+
+                            composable(Screen.Register.route) {
+                                RegisterScreen(navController = navController)
+                            }
+
+                            composable(Screen.Home.route) {
+                                HomeScreen(navController = navController)
+                            }
+
+                            composable(Screen.Profile.route) {
+                                ProfileScreen(navController = navController)
+                            }
+
+                            composable(
+                                route = Screen.OtherProfile.route,
+                                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+                            ) {
+                                OtherProfileScreen(navController = navController)
+                            }
+
+                            composable(Screen.Settings.route) {
+                                SettingsScreen(navController = navController)
+                            }
+                            
+                            composable(Screen.CreateMemory.route) {
+                                CreateMemoryScreen(navController = navController)
+                            }
+
+                            composable(
+                                route = Screen.DetailMemory.route,
+                                arguments = listOf(navArgument("memoryId") { type = NavType.IntType })
+                            ) {
+                                DetailScreen(navController = navController)
+                            }
+
+                            composable(
+                                route = Screen.EditMemory.route,
+                                arguments = listOf(navArgument("memoryId") { type = NavType.IntType })
+                            ) {
+                                EditMemoryScreen(navController = navController)
+                            }
+
+                            composable(Screen.SearchPublic.route) {
+                                SearchSongScreen(navController = navController)
+                            }
+
+                            composable(Screen.SearchMemory.route) {
+                                SearchMemoryScreen(navController = navController)
+                            }
+
+                            composable(Screen.Trash.route) {
+                                TrashScreen(navController = navController)
+                            }
+
+                            composable(Screen.Reminders.route) {
+                                ReminderScreen(navController = navController)
+                            }
+
+                            composable(Screen.Saved.route) {
+                                SavedScreen(navController = navController)
+                            }
+
                         }
 
-                        composable(Screen.Settings.route) {
-                            SettingsScreen(navController = navController)
-                        }
-                        
-                        composable(Screen.CreateMemory.route) {
-                            CreateMemoryScreen(navController = navController)
-                        }
-
-                        composable(
-                            route = Screen.DetailMemory.route,
-                            arguments = listOf(navArgument("memoryId") { type = NavType.IntType })
+                        AnimatedVisibility(
+                            visible = showDock,
+                            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                            modifier = Modifier.align(Alignment.BottomCenter)
                         ) {
-                            DetailScreen(navController = navController)
+                            FloatingNavigationDock(
+                                navController = navController,
+                                currentRoute = currentRoute ?: Screen.Home.route
+                            )
                         }
-
-                        composable(
-                            route = Screen.EditMemory.route,
-                            arguments = listOf(navArgument("memoryId") { type = NavType.IntType })
-                        ) {
-                            EditMemoryScreen(navController = navController)
-                        }
-
-                        composable(Screen.SearchPublic.route) {
-                            SearchSongScreen(navController = navController)
-                        }
-
-                        composable(Screen.SearchMemory.route) {
-                            SearchMemoryScreen(navController = navController)
-                        }
-
-                        composable(Screen.Trash.route) {
-                            TrashScreen(navController = navController)
-                        }
-
-                        composable(Screen.Reminders.route) {
-                            ReminderScreen(navController = navController)
-                        }
-
-                        composable(Screen.Saved.route) {
-                            SavedScreen(navController = navController)
-                        }
-
-
                     }
                 }
             }

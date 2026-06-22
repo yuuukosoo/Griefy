@@ -41,7 +41,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.naufal.griefy.R
-import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.util.toImageModel
 import com.naufal.griefy.util.scaled
@@ -288,15 +287,6 @@ fun ProfileScreen(
             }
         }
 
-        // Shared Custom Navigation Dock overlay
-        Box(
-            modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
-            FloatingNavigationDock(
-                navController = navController,
-                currentRoute = Screen.Profile.route
-            )
-        }
     }
 }
 
