@@ -10,8 +10,8 @@ import javax.inject.Inject
 class RemembranceRepositoryImpl @Inject constructor(
     private val dao: RemembranceDayDao
 ) : RemembranceRepository {
-    override fun getAllRemembranceDays(): Flow<List<RemembranceDay>> {
-        return dao.getAllRemembranceDays().map { entities ->
+    override fun getAllRemembranceDays(currentUserId: String): Flow<List<RemembranceDay>> {
+        return dao.getAllRemembranceDays(currentUserId).map { entities ->
             entities.map { it.toDomain() }
         }
     }

@@ -9,9 +9,9 @@ import com.naufal.griefy.domain.repository.MemoryRepository
 import com.naufal.griefy.domain.repository.RemembranceRepository
 import com.naufal.griefy.ui.settings.ReminderScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,7 +25,9 @@ class ReminderViewModel @Inject constructor(
 
     private val scheduler = ReminderScheduler(context)
 
-    val remembranceDays: StateFlow<List<RemembranceDay>> = repository.getAllRemembranceDays()
+    private val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+    val remembranceDays: StateFlow<List<RemembranceDay>> = repository.getAllRemembranceDays(currentUserId)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -33,6 +35,7 @@ class ReminderViewModel @Inject constructor(
         )
 
     val memories: StateFlow<List<Memory>> = memoryRepository.getAllMemories()
+        .map { list -> list.filter { it.userId == currentUserId } }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
