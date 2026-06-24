@@ -1,16 +1,16 @@
 package com.naufal.griefy.ui.profile
 
 import android.app.Application
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.UserProfile
-import com.naufal.griefy.domain.repository.AuthRepository
 import com.naufal.griefy.domain.util.Resource
 import com.naufal.griefy.util.getBase64FromUri
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,32 +23,9 @@ class ProfileViewModel @Inject constructor(
     private val saveUserProfileUseCase: SaveUserProfileUseCase,
     private val application: Application
 ) : ViewModel() {
-    var isEditing by mutableStateOf(false)
-        private set
 
-    var username by mutableStateOf("")
-        private set
-
-    var email by mutableStateOf("")
-        private set
-
-    var gender by mutableStateOf(com.naufal.griefy.util.ProfileUtils.GENDER_MALE_KEY)
-        private set
-
-    var profileImageUriString by mutableStateOf<String?>(null)
-        private set
-
-    var isLoading by mutableStateOf(false)
-        private set
-
-    var errorMessage by mutableStateOf<String?>(null)
-        private set
-
-    var isSaving by mutableStateOf(false)
-        private set
-
-    var saveSuccess by mutableStateOf(false)
-        private set
+    private val _uiState = MutableStateFlow(ProfileState())
+    val uiState: StateFlow<ProfileState> = _uiState.asStateFlow()
 
     private var originalProfile: UserProfile? = null
 
@@ -61,23 +38,27 @@ class ProfileViewModel @Inject constructor(
             getMyUserProfileUseCase().collect { resource ->
                 when (resource) {
                     is Resource.Loading -> {
-                        isLoading = true
-                        errorMessage = null
+                        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
                     }
                     is Resource.Success -> {
-                        isLoading = false
                         val profile = resource.data
                         if (profile != null) {
                             originalProfile = profile
-                            username = profile.displayName
-                            email = profile.email
-                            gender = profile.gender ?: com.naufal.griefy.util.ProfileUtils.GENDER_MALE_KEY
-                            profileImageUriString = profile.avatarBase64
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    username = profile.displayName,
+                                    email = profile.email,
+                                    gender = profile.gender ?: com.naufal.griefy.util.ProfileUtils.GENDER_MALE_KEY,
+                                    profileImageUriString = profile.avatarBase64
+                                )
+                            }
+                        } else {
+                            _uiState.update { it.copy(isLoading = false) }
                         }
                     }
                     is Resource.Error -> {
-                        isLoading = false
-                        errorMessage = resource.message
+                        _uiState.update { it.copy(isLoading = false, errorMessage = resource.message) }
                     }
                 }
             }
@@ -85,74 +66,87 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun setIsEditing(editing: Boolean) {
-        if (!editing && isEditing) {
-            // Revert changes if we exit editing mode without saving
-            originalProfile?.let { profile ->
-                username = profile.displayName
-                email = profile.email
-                gender = profile.gender ?: com.naufal.griefy.util.ProfileUtils.GENDER_MALE_KEY
-                profileImageUriString = profile.avatarBase64
+        _uiState.update { state ->
+            if (!editing && state.isEditing) {
+                // Revert changes if we exit editing mode without saving
+                originalProfile?.let { profile ->
+                    state.copy(
+                        isEditing = false,
+                        username = profile.displayName,
+                        email = profile.email,
+                        gender = profile.gender ?: com.naufal.griefy.util.ProfileUtils.GENDER_MALE_KEY,
+                        profileImageUriString = profile.avatarBase64
+                    )
+                } ?: state.copy(isEditing = false)
+            } else {
+                state.copy(isEditing = editing)
             }
         }
-        isEditing = editing
     }
 
     fun onUsernameChange(newUsername: String) {
-        username = newUsername
+        _uiState.update { it.copy(username = newUsername) }
     }
 
     fun onEmailChange(newEmail: String) {
-        email = newEmail
+        _uiState.update { it.copy(email = newEmail) }
     }
 
     fun onGenderChange(newGender: String) {
-        gender = newGender
+        _uiState.update { it.copy(gender = newGender) }
     }
 
     fun onProfileImagePicked(uriString: String) {
         viewModelScope.launch {
             val base64 = getBase64FromUri(application, uriString)
             if (base64 != null) {
-                profileImageUriString = base64
+                _uiState.update { it.copy(profileImageUriString = base64) }
             } else {
-                errorMessage = "ERROR_PROCESS_IMAGE_FAILED"
+                _uiState.update { it.copy(errorMessage = "ERROR_PROCESS_IMAGE_FAILED") }
             }
         }
     }
 
     fun clearSaveSuccess() {
-        saveSuccess = false
+        _uiState.update { it.copy(saveSuccess = false) }
     }
 
     fun clearErrorMessage() {
-        errorMessage = null
+        _uiState.update { it.copy(errorMessage = null) }
     }
 
     fun saveUserProfile() {
         val original = originalProfile ?: return
+        val currentState = _uiState.value
         viewModelScope.launch {
-            isSaving = true
-            errorMessage = null
-            saveSuccess = false
+            _uiState.update { it.copy(isSaving = true, errorMessage = null, saveSuccess = false) }
 
             val updatedProfile = UserProfile(
                 uid = original.uid,
-                email = email,
-                displayName = username,
-                gender = gender,
-                avatarBase64 = profileImageUriString
+                email = currentState.email,
+                displayName = currentState.username,
+                gender = currentState.gender,
+                avatarBase64 = currentState.profileImageUriString
             )
 
             when (val result = saveUserProfileUseCase(updatedProfile)) {
                 is Resource.Success -> {
-                    isSaving = false
-                    saveSuccess = true
-                    isEditing = false
                     originalProfile = updatedProfile
+                    _uiState.update {
+                        it.copy(
+                            isSaving = false,
+                            saveSuccess = true,
+                            isEditing = false
+                        )
+                    }
                 }
                 is Resource.Error -> {
-                    isSaving = false
-                    errorMessage = result.message ?: "ERROR_SAVE_PROFILE_FAILED"
+                    _uiState.update {
+                        it.copy(
+                            isSaving = false,
+                            errorMessage = result.message ?: "ERROR_SAVE_PROFILE_FAILED"
+                        )
+                    }
                 }
                 is Resource.Loading -> {
                     // Safe fallback
@@ -161,4 +155,3 @@ class ProfileViewModel @Inject constructor(
         }
     }
 }
-

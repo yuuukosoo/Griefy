@@ -77,16 +77,18 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val isDarkMode by viewModel.isDarkMode.collectAsState()
-    val currentLangCode by viewModel.currentLanguageCode.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val isDarkMode = uiState.isDarkMode
+    val currentLangCode = uiState.currentLanguageCode
     val showLogoutDialog = remember { mutableStateOf(false) }
     val showDeleteAccountDialog = remember { mutableStateOf(false) }
     val showDeleteLoading = remember { mutableStateOf(false) }
     val deleteErrorMessage = remember { mutableStateOf<String?>(null) }
     val horizontalPadding = getAdaptiveHorizontalPadding()
 
-    LaunchedEffect(key1 = true) {
-        viewModel.deleteAccountResult.collect { result ->
+    LaunchedEffect(uiState.deleteAccountResult) {
+        val result = uiState.deleteAccountResult
+        if (result != null) {
             when (result) {
                 is Resource.Loading -> {
                     showDeleteLoading.value = true
@@ -97,10 +99,12 @@ fun SettingsScreen(
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0)
                     }
+                    viewModel.resetDeleteAccountResult()
                 }
                 is Resource.Error -> {
                     showDeleteLoading.value = false
                     deleteErrorMessage.value = result.message ?: context.getString(R.string.settings_delete_account_error)
+                    viewModel.resetDeleteAccountResult()
                 }
             }
         }

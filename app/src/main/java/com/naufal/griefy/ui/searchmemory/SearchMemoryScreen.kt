@@ -45,8 +45,9 @@ fun SearchMemoryScreen(
     navController: NavController,
     viewModel: SearchMemoryViewModel = hiltViewModel()
 ) {
-    val memories by viewModel.publicMemories.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
+    val state by viewModel.uiState.collectAsState()
+    val memories = state.publicMemories
+    val searchQuery = state.searchQuery
     val horizontalPadding = getAdaptiveHorizontalPadding()
 
     Box(

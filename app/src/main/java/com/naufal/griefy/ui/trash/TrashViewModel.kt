@@ -1,8 +1,8 @@
-﻿package com.naufal.griefy.ui.trash
+package com.naufal.griefy.ui.trash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naufal.griefy.domain.model.Memory
+import com.naufal.griefy.domain.usecase.auth.IsCurrentUserUseCase
 import com.naufal.griefy.domain.usecase.memory.trash.DeletePermanentlyUseCase
 import com.naufal.griefy.domain.usecase.memory.trash.EmptyTrashUseCase
 import com.naufal.griefy.domain.usecase.memory.trash.GetTrashedMemoriesUseCase
@@ -17,14 +17,16 @@ class TrashViewModel @Inject constructor(
     getTrashedMemoriesUseCase: GetTrashedMemoriesUseCase,
     private val restoreMemoryUseCase: RestoreMemoryUseCase,
     private val deletePermanentlyUseCase: DeletePermanentlyUseCase,
-    private val emptyTrashUseCase: EmptyTrashUseCase
+    private val emptyTrashUseCase: EmptyTrashUseCase,
+    private val isCurrentUserUseCase: IsCurrentUserUseCase
 ) : ViewModel() {
 
-    val trashedMemories: StateFlow<List<Memory>> = getTrashedMemoriesUseCase()
+    val uiState: StateFlow<TrashState> = getTrashedMemoriesUseCase()
+        .map { TrashState(it) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = TrashState()
         )
 
     fun restoreMemory(id: Int) {
@@ -41,7 +43,11 @@ class TrashViewModel @Inject constructor(
 
     fun emptyTrash() {
         viewModelScope.launch {
-            emptyTrashUseCase(trashedMemories.value)
+            emptyTrashUseCase(uiState.value.trashedMemories)
         }
+    }
+
+    fun isCurrentUser(userId: String?): Boolean {
+        return isCurrentUserUseCase(userId)
     }
 }

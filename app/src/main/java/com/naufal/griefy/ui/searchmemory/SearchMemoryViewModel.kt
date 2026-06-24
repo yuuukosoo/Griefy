@@ -1,4 +1,4 @@
-﻿package com.naufal.griefy.ui.searchmemory
+package com.naufal.griefy.ui.searchmemory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,14 +19,20 @@ class SearchMemoryViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery
 
-    val publicMemories: StateFlow<List<Memory>> = searchMemoriesUseCase(_searchQuery)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+    val uiState: StateFlow<SearchMemoryState> = combine(
+        _searchQuery,
+        searchMemoriesUseCase(_searchQuery)
+    ) { query, memoriesList ->
+        SearchMemoryState(
+            searchQuery = query,
+            publicMemories = memoriesList
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = SearchMemoryState()
+    )
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query

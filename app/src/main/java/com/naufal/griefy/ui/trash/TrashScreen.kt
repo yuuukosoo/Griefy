@@ -41,7 +41,8 @@ fun TrashScreen(
     navController: NavController,
     viewModel: TrashViewModel = hiltViewModel()
 ) {
-    val trashedMemories by viewModel.trashedMemories.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val trashedMemories = uiState.trashedMemories
 
     val showEmptyTrashDialog = remember { mutableStateOf(false) }
     val showDeleteSingleDialog = remember { mutableStateOf(false) }
@@ -249,9 +250,8 @@ fun TrashScreen(
                                     showDeleteSingleDialog.value = true
                                 },
                                 onProfileClick = {
-                                    val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                                     val authorId = memory.userId
-                                    if (authorId.isNullOrEmpty() || authorId == currentUserId) {
+                                    if (authorId.isNullOrEmpty() || viewModel.isCurrentUser(authorId)) {
                                         navController.navigate(Screen.Profile.route) {
                                             popUpTo(Screen.Home.route) { saveState = true }
                                             launchSingleTop = true

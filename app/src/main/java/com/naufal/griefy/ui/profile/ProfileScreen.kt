@@ -28,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,18 +53,19 @@ fun ProfileScreen(
     navController: NavController,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val isEditing = viewModel.isEditing
-    val username = viewModel.username
-    val email = viewModel.email
-    val gender = viewModel.gender
-    val profileImageUriString = viewModel.profileImageUriString
+    val uiState by viewModel.uiState.collectAsState()
+    val isEditing = uiState.isEditing
+    val username = uiState.username
+    val email = uiState.email
+    val gender = uiState.gender
+    val profileImageUriString = uiState.profileImageUriString
     val profileImageModel = profileImageUriString?.toImageModel()
 
     val context = LocalContext.current
-    val isLoading = viewModel.isLoading
-    val isSaving = viewModel.isSaving
-    val errorMessage = viewModel.errorMessage
-    val saveSuccess = viewModel.saveSuccess
+    val isLoading = uiState.isLoading
+    val isSaving = uiState.isSaving
+    val errorMessage = uiState.errorMessage
+    val saveSuccess = uiState.saveSuccess
 
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.logo_animation))
     val progress by animateLottieCompositionAsState(

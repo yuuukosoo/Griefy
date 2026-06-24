@@ -50,9 +50,10 @@ fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val memories by viewModel.memories.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val userProfile by viewModel.userProfile.collectAsState()
+    val state by viewModel.uiState.collectAsState()
+    val memories = state.memories
+    val searchQuery = state.searchQuery
+    val userProfile = state.userProfile
     val horizontalPadding = getAdaptiveHorizontalPadding()
 
     Box(

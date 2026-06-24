@@ -1,8 +1,7 @@
-﻿package com.naufal.griefy.ui.reminders
+package com.naufal.griefy.ui.reminders
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.model.RemembranceDay
 import com.naufal.griefy.domain.usecase.reminder.AddRemembranceDayUseCase
 import com.naufal.griefy.domain.usecase.reminder.DeleteRemembranceDayUseCase
@@ -13,7 +12,7 @@ import com.naufal.griefy.domain.usecase.reminder.UpdateRemembranceDayUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,20 +29,19 @@ class ReminderViewModel @Inject constructor(
 
     private val currentUserId = getMyUserIdUseCase()
 
-    val remembranceDays: StateFlow<List<RemembranceDay>> = getRemembranceDaysUseCase(currentUserId)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+    val uiState: StateFlow<ReminderState> = combine(
+        getRemembranceDaysUseCase(currentUserId),
+        getMemoriesUseCase("", currentUserId)
+    ) { days, mems ->
+        ReminderState(
+            remembranceDays = days,
+            memories = mems
         )
-
-    val memories: StateFlow<List<Memory>> = getMemoriesUseCase("", currentUserId)
-        .map { list -> list.filter { it.userId == currentUserId } }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ReminderState()
+    )
 
     fun addReminder(title: String, description: String, dateTime: Long, memoryId: Int?) {
         viewModelScope.launch {

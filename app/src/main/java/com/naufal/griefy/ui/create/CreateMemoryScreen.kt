@@ -53,12 +53,13 @@ fun CreateMemoryScreen(
     viewModel: CreateMemoryViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-
-    val titleText = viewModel.titleText
-    val contentText = viewModel.contentText
-    val isPublic = viewModel.isPublic
-    val selectedImageUris = viewModel.selectedImageUris
-    val tagsList = viewModel.tagsList
+    val state by viewModel.uiState.collectAsState()
+    val titleText = state.titleText
+    val contentText = state.contentText
+    val isPublic = state.isPublic
+    val selectedImageUris = state.selectedImageUris
+    val tagsList = state.tagsList
+    val selectedSongTrackId = state.selectedSongTrackId
 
     val showAddLabelDialog = remember { mutableStateOf(false) }
     var newLabelText by remember { mutableStateOf("") }
@@ -258,13 +259,13 @@ fun CreateMemoryScreen(
                             .size(36.dp.scaled())
                             .clip(CircleShape)
                             .background(
-                                if (viewModel.selectedSongTrackId != null)
+                                if (selectedSongTrackId != null)
                                     MaterialTheme.colorScheme.primary
                                 else
                                     MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
                             )
                             .clickable {
-                                if (viewModel.selectedSongTrackId != null) {
+                                if (selectedSongTrackId != null) {
                                     showMusicMenu = true
                                 } else {
                                     navController.navigate(Screen.SearchPublic.route)
@@ -275,7 +276,7 @@ fun CreateMemoryScreen(
                         Icon(
                             imageVector = Icons.Default.MusicNote,
                             contentDescription = stringResource(R.string.create_memory_song),
-                            tint = if (viewModel.selectedSongTrackId != null)
+                            tint = if (selectedSongTrackId != null)
                                 Color.White
                             else
                                 MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),

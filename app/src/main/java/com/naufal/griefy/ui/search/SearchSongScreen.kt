@@ -48,6 +48,11 @@ fun SearchSongScreen(
     navController: NavController,
     viewModel: SearchSongViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    val searchQuery = uiState.searchQuery
+    val searchResults = uiState.searchResults
+    val isLoading = uiState.isLoading
+
     var playingTrackId by remember { mutableStateOf<String?>(null) }
     var isMediaPlaying by remember { mutableStateOf(false) }
     val mediaPlayer = remember { android.media.MediaPlayer() }
@@ -182,7 +187,7 @@ fun SearchSongScreen(
                     Spacer(modifier = Modifier.width(8.dp.scaled()))
                     
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-                        if (viewModel.searchQuery.isEmpty()) {
+                        if (searchQuery.isEmpty()) {
                             Text(
                                 text = stringResource(R.string.search_song_placeholder),
                                 color = MaterialTheme.colorScheme.outline,
@@ -190,7 +195,7 @@ fun SearchSongScreen(
                             )
                         }
                         BasicTextField(
-                            value = viewModel.searchQuery,
+                            value = searchQuery,
                             onValueChange = { viewModel.onQueryChange(it) },
                             textStyle = TextStyle(fontSize = 14.sp.scaled(), color = MaterialTheme.colorScheme.onBackground),
                             singleLine = true,
@@ -201,7 +206,7 @@ fun SearchSongScreen(
                         )
                     }
                     
-                    if (viewModel.searchQuery.isNotEmpty()) {
+                    if (searchQuery.isNotEmpty()) {
                         Spacer(modifier = Modifier.width(8.dp.scaled()))
                         Icon(
                             imageVector = Icons.Default.Clear,
@@ -217,7 +222,7 @@ fun SearchSongScreen(
 
             Spacer(modifier = Modifier.height(16.dp.scaled()))
 
-            if (viewModel.isLoading) {
+            if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
@@ -226,7 +231,7 @@ fun SearchSongScreen(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp.scaled())
                 ) {
-                    if (viewModel.searchResults.isEmpty() && viewModel.searchQuery.isNotEmpty()) {
+                    if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
                         item {
                             Text(
                                 text = stringResource(R.string.search_song_empty_hint), 
@@ -236,7 +241,7 @@ fun SearchSongScreen(
                         }
                     }
 
-                    items(viewModel.searchResults) { song ->
+                    items(searchResults) { song ->
                         SongCard(
                             song = song,
                             isPlaying = playingTrackId == song.trackId && isMediaPlaying,

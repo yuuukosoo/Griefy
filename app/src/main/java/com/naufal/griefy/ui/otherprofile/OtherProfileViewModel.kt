@@ -1,22 +1,21 @@
-﻿package com.naufal.griefy.ui.profile
+package com.naufal.griefy.ui.otherprofile
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naufal.griefy.domain.model.UserProfile
 import com.naufal.griefy.domain.usecase.memory.memories.GetMemoryCountUseCase
 import com.naufal.griefy.domain.usecase.profile.GetUserProfileUseCase
 import com.naufal.griefy.domain.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class OtherProfileViewModel @Inject constructor(
+class   OtherProfileViewModel @Inject constructor(
     private val getUserProfileUseCase: GetUserProfileUseCase,
     private val getMemoryCountUseCase: GetMemoryCountUseCase,
     savedStateHandle: SavedStateHandle
@@ -24,11 +23,8 @@ class OtherProfileViewModel @Inject constructor(
 
     val userId: String = checkNotNull(savedStateHandle["userId"])
 
-    var profileState by mutableStateOf<Resource<UserProfile>>(Resource.Loading())
-        private set
-
-    var memoryCount by mutableIntStateOf(0)
-        private set
+    private val _uiState = MutableStateFlow(OtherProfileState())
+    val uiState: StateFlow<OtherProfileState> = _uiState.asStateFlow()
 
     init {
         loadUserProfile()
@@ -37,9 +33,9 @@ class OtherProfileViewModel @Inject constructor(
 
     fun loadUserProfile() {
         viewModelScope.launch {
-            profileState = Resource.Loading()
+            _uiState.update { it.copy(profileState = Resource.Loading()) }
             getUserProfileUseCase(userId).collect { result ->
-                profileState = result
+                _uiState.update { it.copy(profileState = result) }
             }
         }
     }
@@ -47,7 +43,7 @@ class OtherProfileViewModel @Inject constructor(
     private fun loadMemoryCount() {
         viewModelScope.launch {
             getMemoryCountUseCase(userId).collect { count ->
-                memoryCount = count
+                _uiState.update { it.copy(memoryCount = count) }
             }
         }
     }

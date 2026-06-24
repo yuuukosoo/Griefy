@@ -1,4 +1,4 @@
-﻿package com.naufal.griefy.ui.saved
+package com.naufal.griefy.ui.saved
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,16 +13,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SavedViewModel @Inject constructor(
-    private val getSavedMemoriesUseCase: GetSavedMemoriesUseCase,
+    getSavedMemoriesUseCase: GetSavedMemoriesUseCase,
     private val toggleSaveLocalMemoryUseCase: ToggleSaveLocalMemoryUseCase,
     private val isCurrentUserUseCase: IsCurrentUserUseCase
 ) : ViewModel() {
 
-    val savedMemories: StateFlow<List<Memory>> = getSavedMemoriesUseCase()
+    val uiState: StateFlow<SavedState> = getSavedMemoriesUseCase()
+        .map { SavedState(it) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = SavedState()
         )
 
     fun isCurrentUser(userId: String?): Boolean {

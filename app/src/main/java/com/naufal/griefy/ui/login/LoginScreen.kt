@@ -43,12 +43,13 @@ fun LoginScreen(
     var showErrorResId by remember { mutableStateOf<Int?>(null) }
     var showErrorRawMsg by remember { mutableStateOf<String?>(null) }
 
-    val loginState by viewModel.loginState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val loginState = uiState.loginState
     val context = LocalContext.current
 
     var showForgotPasswordDialog by remember { mutableStateOf(false) }
     var resetEmail by remember { mutableStateOf("") }
-    val forgotPasswordState by viewModel.forgotPasswordState.collectAsState()
+    val forgotPasswordState = uiState.forgotPasswordState
 
     val successMessage = stringResource(id = R.string.login_success_toast)
     val forgotPasswordSuccessMsg = stringResource(id = R.string.forgot_password_success)
@@ -63,7 +64,7 @@ fun LoginScreen(
                 viewModel.resetState()
             }
             is Resource.Error -> {
-                val msg = loginState?.message
+                val msg = loginState.message
                 if (msg != null) {
                     when (msg) {
                         "ERROR_EMAIL_PASSWORD_EMPTY" -> showErrorResId = R.string.error_email_password_empty
@@ -87,7 +88,7 @@ fun LoginScreen(
                 viewModel.resetForgotPasswordState()
             }
             is Resource.Error -> {
-                val msg = forgotPasswordState?.message
+                val msg = forgotPasswordState.message
                 if (msg != null) {
                     when (msg) {
                         "ERROR_EMAIL_EMPTY" -> showErrorResId = R.string.error_email_empty

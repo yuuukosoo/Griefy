@@ -59,9 +59,10 @@ fun DetailScreen(
     navController: NavController,
     viewModel: DetailViewModel = hiltViewModel()
 ) {
-    val memory by viewModel.memory.collectAsState()
-    val songDetails by viewModel.songDetails.collectAsState()
-    val isOwnMemory by viewModel.isOwnMemory.collectAsState()
+    val state by viewModel.uiState.collectAsState()
+    val memory = state.memory
+    val songDetails = state.songDetails
+    val isOwnMemory = state.isOwnMemory
     val horizontalPadding = getAdaptiveHorizontalPadding()
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -150,7 +151,7 @@ fun DetailScreen(
                     currentPosition = mediaPlayer.currentPosition.toFloat()
                     duration = mediaPlayer.duration.toFloat()
                 } catch (_: Exception) {
-                    // ignore if media player is released/reset
+
                 }
                 delay(300)
             }
@@ -402,9 +403,8 @@ fun DetailScreen(
                             .fillMaxWidth()
                             .padding(horizontal = horizontalPadding)
                             .clickable {
-                                val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                                 val authorId = mem.userId
-                                if (authorId.isNullOrEmpty() || authorId == currentUserId) {
+                                if (isOwnMemory || authorId.isNullOrEmpty()) {
                                     navController.navigate(Screen.Profile.route) {
                                         popUpTo(Screen.Home.route) { saveState = true }
                                         launchSingleTop = true
@@ -577,8 +577,7 @@ fun DetailScreen(
                 }
 
                 if (isLandscape && songDetails != null) {
-                    val song = songDetails!!
-                    if (!song.previewUrl.isNullOrEmpty()) {
+                    if (!songDetails.previewUrl.isNullOrEmpty()) {
                         IconButton(
                             onClick = {
                                 if (isPrepared) {
@@ -622,7 +621,7 @@ fun DetailScreen(
     }
 
     if (selectedImageIndexForFullScreen.value != null && memory != null) {
-        val pagerState = rememberPagerState(initialPage = selectedImageIndexForFullScreen.value!!) { memory!!.imageUris.size }
+        val pagerState = rememberPagerState(initialPage = selectedImageIndexForFullScreen.value!!) { memory.imageUris.size }
         Dialog(
             onDismissRequest = { selectedImageIndexForFullScreen.value = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -637,7 +636,7 @@ fun DetailScreen(
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
                     AsyncImage(
-                        model = memory!!.imageUris[page].toImageModel(),
+                        model = memory.imageUris[page].toImageModel(),
                         contentDescription = stringResource(R.string.home_memory_photo_desc),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit

@@ -11,12 +11,10 @@ import com.naufal.griefy.domain.usecase.auth.LogoutUseCase
 import com.naufal.griefy.domain.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,14 +25,21 @@ class SettingsViewModel @Inject constructor(
     private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
 
-    private val _deleteAccountResult = MutableSharedFlow<Resource<Unit>>()
-    val deleteAccountResult: SharedFlow<Resource<Unit>> = _deleteAccountResult.asSharedFlow()
+    private val sharedPreferences = context.getSharedPreferences("settings_pref", Context.MODE_PRIVATE)
+
+    private val _uiState = MutableStateFlow(
+        SettingsState(
+            isDarkMode = sharedPreferences.getBoolean("dark_mode", false),
+            currentLanguageCode = getCurrentLanguage()
+        )
+    )
+    val uiState: StateFlow<SettingsState> = _uiState.asStateFlow()
 
     fun deleteAccount() {
         viewModelScope.launch {
-            _deleteAccountResult.emit(Resource.Loading())
+            _uiState.update { it.copy(deleteAccountResult = Resource.Loading()) }
             val result = deleteAccountUseCase()
-            _deleteAccountResult.emit(result)
+            _uiState.update { it.copy(deleteAccountResult = result) }
         }
     }
 
@@ -45,16 +50,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private val sharedPreferences = context.getSharedPreferences("settings_pref", Context.MODE_PRIVATE)
-
-    private val _isDarkMode = MutableStateFlow(sharedPreferences.getBoolean("dark_mode", false))
-    val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
-
-    private val _currentLanguageCode = MutableStateFlow(getCurrentLanguage())
-    val currentLanguageCode: StateFlow<String> = _currentLanguageCode.asStateFlow()
-
     fun setDarkMode(enabled: Boolean) {
-        _isDarkMode.value = enabled
+        _uiState.update { it.copy(isDarkMode = enabled) }
         sharedPreferences.edit {
             putBoolean("dark_mode", enabled)
         }
@@ -64,12 +61,16 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun changeLanguage(langCode: String) {
-        _currentLanguageCode.value = langCode
+        _uiState.update { it.copy(currentLanguageCode = langCode) }
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(langCode))
     }
 
     private fun getCurrentLanguage(): String {
         val currentLocale = AppCompatDelegate.getApplicationLocales().get(0)
         return currentLocale?.language ?: "en"
+    }
+
+    fun resetDeleteAccountResult() {
+        _uiState.update { it.copy(deleteAccountResult = null) }
     }
 }

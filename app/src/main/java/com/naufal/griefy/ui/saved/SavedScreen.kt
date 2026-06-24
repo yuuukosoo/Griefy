@@ -29,7 +29,8 @@ fun SavedScreen(
     navController: NavController,
     viewModel: SavedViewModel = hiltViewModel()
 ) {
-    val savedMemories by viewModel.savedMemories.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val savedMemories = uiState.savedMemories
     val horizontalPadding = getAdaptiveHorizontalPadding()
 
     Box(

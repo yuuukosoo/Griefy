@@ -1,15 +1,16 @@
-﻿package com.naufal.griefy.ui.create
+package com.naufal.griefy.ui.create
 
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.app.Application
 import com.naufal.griefy.R
 import com.naufal.griefy.domain.usecase.memory.memories.AddMemoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,82 +20,73 @@ class CreateMemoryViewModel @Inject constructor(
     private val application: Application
 ) : ViewModel() {
 
-    var titleText by mutableStateOf("")
-        private set
-
-    var contentText by mutableStateOf("")
-        private set
-
-    var isPublic by mutableStateOf(false)
-        private set
-
-    var selectedImageUris by mutableStateOf<List<Uri>>(emptyList())
-        private set
-
-    var tagsList by mutableStateOf<List<String>>(emptyList())
-        private set
-
-    var selectedSongTrackId by mutableStateOf<String?>(null)
-        private set
-
-    var selectedSongTitle by mutableStateOf<String?>(null)
-        private set
-
-    var selectedSongArtist by mutableStateOf<String?>(null)
-        private set
-
-    var selectedSongImageUrl by mutableStateOf<String?>(null)
-        private set
+    private val _uiState = MutableStateFlow(CreateMemoryState())
+    val uiState: StateFlow<CreateMemoryState> = _uiState.asStateFlow()
 
     fun onTitleChange(newTitle: String) {
-        titleText = newTitle
+        _uiState.update { it.copy(titleText = newTitle) }
     }
 
     fun onContentChange(newContent: String) {
-        contentText = newContent
+        _uiState.update { it.copy(contentText = newContent) }
     }
 
     fun onPrivacyChange(newIsPublic: Boolean) {
-        isPublic = newIsPublic
+        _uiState.update { it.copy(isPublic = newIsPublic) }
     }
 
     fun addTag(tag: String) {
         val clean = tag.trim()
-        if (clean.isNotEmpty() && !tagsList.contains(clean)) {
-            tagsList = tagsList + clean
+        _uiState.update { state ->
+            if (clean.isNotEmpty() && !state.tagsList.contains(clean)) {
+                state.copy(tagsList = state.tagsList + clean)
+            } else {
+                state
+            }
         }
     }
 
     fun removeTag(tag: String) {
-        tagsList = tagsList - tag
+        _uiState.update { state ->
+            state.copy(tagsList = state.tagsList - tag)
+        }
     }
 
     fun setSelectedSong(trackId: String?, title: String?, artist: String?, imageUrl: String?) {
-        selectedSongTrackId = trackId
-        selectedSongTitle = title
-        selectedSongArtist = artist
-        selectedSongImageUrl = imageUrl
+        _uiState.update {
+            it.copy(
+                selectedSongTrackId = trackId,
+                selectedSongTitle = title,
+                selectedSongArtist = artist,
+                selectedSongImageUrl = imageUrl
+            )
+        }
     }
 
     fun addImages(uris: List<Uri>) {
-        val combined = (selectedImageUris + uris).distinct().take(5)
-        selectedImageUris = combined
+        _uiState.update { state ->
+            val combined = (state.selectedImageUris + uris).distinct().take(5)
+            state.copy(selectedImageUris = combined)
+        }
     }
 
     fun removeImage(uri: Uri) {
-        selectedImageUris = selectedImageUris.filter { it != uri }
+        _uiState.update { state ->
+            state.copy(selectedImageUris = state.selectedImageUris.filter { it != uri })
+        }
     }
 
     fun saveMemory(onSaveSuccess: () -> Unit) {
+        val state = _uiState.value
         viewModelScope.launch {
             addMemoryUseCase(
-                title = titleText,
-                content = contentText,
-                imageUris = selectedImageUris.map { it.toString() },
-                tags = tagsList,
-                isPublic = isPublic,
-                songTrackId = selectedSongTrackId,
-                songTitle = selectedSongTitle,
+                title = state.titleText,
+                content = state.contentText,
+                imageUris = state.selectedImageUris.map { it.toString() },
+                tags = state.tagsList,
+                isPublic = state.isPublic,
+                songTrackId = state.selectedSongTrackId,
+                songTitle = state.selectedSongTitle,
                 defaultTagString = application.getString(R.string.default_memory_tag)
             )
             onSaveSuccess()

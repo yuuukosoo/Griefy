@@ -46,7 +46,8 @@ fun RegisterScreen(
     var showErrorResId by remember { mutableStateOf<Int?>(null) }
     var showErrorRawMsg by remember { mutableStateOf<String?>(null) }
 
-    val registerState by viewModel.registerState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+    val registerState = uiState.registerState
     val context = LocalContext.current
 
     val successMessage = stringResource(id = R.string.register_success_toast)
@@ -59,7 +60,7 @@ fun RegisterScreen(
                 viewModel.resetState()
             }
             is Resource.Error -> {
-                val msg = registerState?.message
+                val msg = registerState.message
                 if (msg != null) {
                     when (msg) {
                         "ERROR_ALL_FIELDS_REQUIRED" -> showErrorResId = R.string.error_all_fields_required

@@ -1,13 +1,13 @@
-﻿package com.naufal.griefy.ui.search
+package com.naufal.griefy.ui.search
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naufal.griefy.domain.model.Song
 import com.naufal.griefy.domain.usecase.memory.song.SearchSongsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,26 +16,26 @@ class SearchSongViewModel @Inject constructor(
     private val searchSongsUseCase: SearchSongsUseCase
 ) : ViewModel() {
 
-    var searchQuery by mutableStateOf("")
-        private set
-
-    var searchResults by mutableStateOf<List<Song>>(emptyList())
-        private set
-
-    var isLoading by mutableStateOf(false)
-        private set
+    private val _uiState = MutableStateFlow(SearchSongState())
+    val uiState: StateFlow<SearchSongState> = _uiState.asStateFlow()
 
     fun onQueryChange(query: String) {
-        searchQuery = query
+        _uiState.update { it.copy(searchQuery = query) }
     }
 
     fun searchSongs() {
-        if (searchQuery.isBlank()) return
+        val query = _uiState.value.searchQuery
+        if (query.isBlank()) return
 
         viewModelScope.launch {
-            isLoading = true
-            searchResults = searchSongsUseCase(searchQuery)
-            isLoading = false
+            _uiState.update { it.copy(isLoading = true) }
+            val results = searchSongsUseCase(query)
+            _uiState.update {
+                it.copy(
+                    searchResults = results,
+                    isLoading = false
+                )
+            }
         }
     }
 }

@@ -74,8 +74,9 @@ fun ReminderScreen(
     viewModel: ReminderViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val remembranceDays by viewModel.remembranceDays.collectAsState()
-    val memories by viewModel.memories.collectAsState() 
+    val uiState by viewModel.uiState.collectAsState()
+    val remembranceDays = uiState.remembranceDays
+    val memories = uiState.memories
 
     val alarmManager = remember { context.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
     val powerManager = remember { context.getSystemService(Context.POWER_SERVICE) as PowerManager }

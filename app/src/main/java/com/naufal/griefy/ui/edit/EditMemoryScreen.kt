@@ -52,6 +52,15 @@ fun EditMemoryScreen(
     viewModel: EditMemoryViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val state by viewModel.uiState.collectAsState()
+
+    val titleText = state.titleText
+    val contentText = state.contentText
+    val isPublic = state.isPublic
+    val selectedImageUris = state.selectedImageUris
+    val tagsList = state.tagsList
+    val selectedSongTrackId = state.selectedSongTrackId
+
     val showAddLabelDialog = remember { mutableStateOf(false) }
     var newLabelText by remember { mutableStateOf("") }
 
@@ -152,7 +161,7 @@ fun EditMemoryScreen(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                if (viewModel.selectedImageUris.isEmpty()) {
+                if (selectedImageUris.isEmpty()) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -176,7 +185,7 @@ fun EditMemoryScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp.scaled()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        items(viewModel.selectedImageUris) { uri ->
+                        items(selectedImageUris) { uri ->
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
@@ -229,12 +238,12 @@ fun EditMemoryScreen(
                         .size(36.dp.scaled())
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
-                        .clickable { viewModel.onPrivacyChange(!viewModel.isPublic) },
+                        .clickable { viewModel.onPrivacyChange(!isPublic) },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = if (viewModel.isPublic) Icons.Default.Language else Icons.Default.Lock,
-                        contentDescription = if (viewModel.isPublic) stringResource(R.string.public_text) else stringResource(R.string.private_text),
+                        imageVector = if (isPublic) Icons.Default.Language else Icons.Default.Lock,
+                        contentDescription = if (isPublic) stringResource(R.string.public_text) else stringResource(R.string.private_text),
                         tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                         modifier = Modifier.size(20.dp.scaled())
                     )
@@ -250,13 +259,13 @@ fun EditMemoryScreen(
                             .size(36.dp.scaled())
                             .clip(CircleShape)
                             .background(
-                                if (viewModel.selectedSongTrackId != null)
+                                if (selectedSongTrackId != null)
                                     MaterialTheme.colorScheme.primary
                                 else
                                     MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
                             )
                             .clickable {
-                                if (viewModel.selectedSongTrackId != null) {
+                                if (selectedSongTrackId != null) {
                                     showMusicMenu = true
                                 } else {
                                     navController.navigate(Screen.SearchPublic.route)
@@ -267,7 +276,7 @@ fun EditMemoryScreen(
                         Icon(
                             imageVector = Icons.Default.MusicNote,
                             contentDescription = stringResource(R.string.create_memory_song),
-                            tint = if (viewModel.selectedSongTrackId != null)
+                            tint = if (selectedSongTrackId != null)
                                 Color.White
                             else
                                 MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
@@ -301,7 +310,7 @@ fun EditMemoryScreen(
 
             // Title Input Field
             TextField(
-                value = viewModel.titleText,
+                value = titleText,
                 onValueChange = { viewModel.onTitleChange(it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
@@ -333,7 +342,7 @@ fun EditMemoryScreen(
 
             // Content Input Field - limited height and internally scrollable
             TextField(
-                value = viewModel.contentText,
+                value = contentText,
                 onValueChange = { viewModel.onContentChange(it) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -360,14 +369,14 @@ fun EditMemoryScreen(
             Spacer(modifier = Modifier.height(12.dp.scaled()))
 
             // Tags Display (Chips) if any custom tags exist
-            if (viewModel.tagsList.isNotEmpty()) {
+            if (tagsList.isNotEmpty()) {
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp.scaled()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp.scaled())
                 ) {
-                    items(viewModel.tagsList) { tag ->
+                    items(tagsList) { tag ->
                         Box(
                             modifier = Modifier
                                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp.scaled()))
@@ -411,7 +420,7 @@ fun EditMemoryScreen(
             // Save Button
             Button(
                 onClick = {
-                    if (viewModel.titleText.isNotBlank() || viewModel.contentText.isNotBlank() || viewModel.selectedImageUris.isNotEmpty()) {
+                    if (titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty()) {
                         viewModel.updateMemory(
                             onUpdateSuccess = { navController.navigateUp() }
                         )
@@ -422,7 +431,7 @@ fun EditMemoryScreen(
                     .height(56.dp.scaled()),
                 shape = RoundedCornerShape(12.dp.scaled()),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                enabled = viewModel.titleText.isNotBlank() || viewModel.contentText.isNotBlank() || viewModel.selectedImageUris.isNotEmpty()
+                enabled = titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty()
             ) {
                 Text(
                     text = stringResource(R.string.edit_save_button),

@@ -1,4 +1,4 @@
-package com.naufal.griefy.ui.profile
+package com.naufal.griefy.ui.otherprofile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,6 +16,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material3.*
 import coil.compose.AsyncImage
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,7 +40,8 @@ fun OtherProfileScreen(
     navController: NavController,
     viewModel: OtherProfileViewModel = hiltViewModel()
 ) {
-    val profileState = viewModel.profileState
+    val uiState by viewModel.uiState.collectAsState()
+    val profileState = uiState.profileState
     val displayName = (profileState as? Resource.Success)?.data?.displayName
 
     Scaffold(
@@ -97,7 +100,7 @@ fun OtherProfileScreen(
                     is Resource.Success -> {
                         val profile = profileState.data
                         if (profile != null) {
-                            OtherProfileContent(profile = profile, memoryCount = viewModel.memoryCount)
+                            OtherProfileContent(profile = profile, memoryCount = uiState.memoryCount)
                         } else {
                             Text(
                                 text = stringResource(R.string.profile_not_found),
