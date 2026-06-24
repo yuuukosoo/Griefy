@@ -14,9 +14,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.naufal.griefy.domain.usecase.profile.GetMyUserProfileUseCase
+import com.naufal.griefy.domain.usecase.profile.SaveUserProfileUseCase
+
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val authRepository: AuthRepository,
+    private val getMyUserProfileUseCase: GetMyUserProfileUseCase,
+    private val saveUserProfileUseCase: SaveUserProfileUseCase,
     private val application: Application
 ) : ViewModel() {
     var isEditing by mutableStateOf(false)
@@ -53,13 +57,8 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun loadUserProfile() {
-        val currentUser = authRepository.getCurrentUser()
-        if (currentUser == null) {
-            errorMessage = "ERROR_UNAUTHENTICATED"
-            return
-        }
         viewModelScope.launch {
-            authRepository.getUserProfile(currentUser.uid).collect { resource ->
+            getMyUserProfileUseCase().collect { resource ->
                 when (resource) {
                     is Resource.Loading -> {
                         isLoading = true
@@ -130,26 +129,21 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun saveUserProfile() {
-        val currentUser = authRepository.getCurrentUser()
-        if (currentUser == null) {
-            errorMessage = "ERROR_UNAUTHENTICATED"
-            return
-        }
-
+        val original = originalProfile ?: return
         viewModelScope.launch {
             isSaving = true
             errorMessage = null
             saveSuccess = false
 
             val updatedProfile = UserProfile(
-                uid = currentUser.uid,
+                uid = original.uid,
                 email = email,
                 displayName = username,
                 gender = gender,
                 avatarBase64 = profileImageUriString
             )
 
-            when (val result = authRepository.saveUserProfile(updatedProfile)) {
+            when (val result = saveUserProfileUseCase(updatedProfile)) {
                 is Resource.Success -> {
                     isSaving = false
                     saveSuccess = true

@@ -118,4 +118,12 @@ object AppModule {
     fun provideFirebaseFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
     }
+
+    @Provides
+    @Singleton
+    fun provideReminderScheduler(
+        @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context
+    ): com.naufal.griefy.domain.repository.ReminderScheduler {
+        return com.naufal.griefy.ui.settings.ReminderScheduler(context)
+    }
 }

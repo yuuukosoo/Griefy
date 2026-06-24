@@ -44,13 +44,7 @@ class MemoryRepositoryImpl @Inject constructor(
             }
         }
         return dao.getAllMemories().map { entities ->
-            entities.filter {
-                it.isPublic ||
-                it.isSaved ||
-                (currentUserId != null && it.userId == currentUserId) ||
-                it.userName == Memory.DEFAULT_USERNAME ||
-                it.userName.isNullOrEmpty()
-            }.map { it.toDomain() }
+            entities.map { it.toDomain() }
         }
     }
 
@@ -544,6 +538,22 @@ class MemoryRepositoryImpl @Inject constructor(
             }
         }
     }
+
+    override fun getMemoryCount(userId: String): Flow<Int> = callbackFlow {
+        val listener = firestore.collection(COLLECTION_PUBLIC_MEMORIES)
+            .whereEqualTo("userId", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    trySend(snapshot.size())
+                }
+            }
+        awaitClose { listener.remove() }
+    }
+
 
     companion object {
         private const val COLLECTION_PUBLIC_MEMORIES = "public_memories"

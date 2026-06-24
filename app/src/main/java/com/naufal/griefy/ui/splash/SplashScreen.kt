@@ -13,9 +13,13 @@ import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.util.scaled
 import kotlinx.coroutines.delay
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun SplashScreen(navController: NavController) {
+fun SplashScreen(
+    navController: NavController,
+    viewModel: SplashViewModel = hiltViewModel()
+) {
 
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.logo_animation))
     
@@ -28,8 +32,7 @@ fun SplashScreen(navController: NavController) {
 
     LaunchedEffect(Unit) {
         delay(3000)
-        val isLoggedIn = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser != null
-        val startRoute = if (isLoggedIn) Screen.Home.route else Screen.Login.route
+        val startRoute = if (viewModel.isLoggedIn) Screen.Home.route else Screen.Login.route
         navController.navigate(startRoute) {
             popUpTo(Screen.Splash.route) { inclusive = true }
         }

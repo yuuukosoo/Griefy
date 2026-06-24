@@ -6,10 +6,18 @@ import android.content.Context
 import android.content.Intent
 import com.naufal.griefy.domain.model.RemembranceDay
 
-class ReminderScheduler(private val context: Context) {
+import com.naufal.griefy.domain.repository.ReminderScheduler as DomainReminderScheduler
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class ReminderScheduler @Inject constructor(
+    @field:ApplicationContext private val context: Context
+) : DomainReminderScheduler {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    fun schedule(day: RemembranceDay) {
+    override fun schedule(day: RemembranceDay) {
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra("REMINDER_ID", day.id)
             putExtra("REMINDER_TITLE", day.title)
@@ -36,7 +44,7 @@ class ReminderScheduler(private val context: Context) {
         }
     }
 
-    fun cancel(day: RemembranceDay) {
+    override fun cancel(day: RemembranceDay) {
         val intent = Intent(context, ReminderReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context,

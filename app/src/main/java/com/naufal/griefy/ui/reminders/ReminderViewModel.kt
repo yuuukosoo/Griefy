@@ -1,13 +1,15 @@
-package com.naufal.griefy.ui.reminders
+﻿package com.naufal.griefy.ui.reminders
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.model.RemembranceDay
-import com.naufal.griefy.domain.repository.MemoryRepository
-import com.naufal.griefy.domain.repository.RemembranceRepository
-import com.naufal.griefy.ui.settings.ReminderScheduler
+import com.naufal.griefy.domain.usecase.reminder.AddRemembranceDayUseCase
+import com.naufal.griefy.domain.usecase.reminder.DeleteRemembranceDayUseCase
+import com.naufal.griefy.domain.usecase.memory.memories.GetMemoriesUseCase
+import com.naufal.griefy.domain.usecase.auth.GetMyUserIdUseCase
+import com.naufal.griefy.domain.usecase.reminder.GetRemembranceDaysUseCase
+import com.naufal.griefy.domain.usecase.reminder.UpdateRemembranceDayUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,23 +20,24 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReminderViewModel @Inject constructor(
-    private val repository: RemembranceRepository,
-    memoryRepository: MemoryRepository,
-    @ApplicationContext context: Context
+    getRemembranceDaysUseCase: GetRemembranceDaysUseCase,
+    private val addRemembranceDayUseCase: AddRemembranceDayUseCase,
+    private val updateRemembranceDayUseCase: UpdateRemembranceDayUseCase,
+    private val deleteRemembranceDayUseCase: DeleteRemembranceDayUseCase,
+    getMyUserIdUseCase: GetMyUserIdUseCase,
+    getMemoriesUseCase: GetMemoriesUseCase
 ) : ViewModel() {
 
-    private val scheduler = ReminderScheduler(context)
+    private val currentUserId = getMyUserIdUseCase()
 
-    private val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: ""
-
-    val remembranceDays: StateFlow<List<RemembranceDay>> = repository.getAllRemembranceDays(currentUserId)
+    val remembranceDays: StateFlow<List<RemembranceDay>> = getRemembranceDaysUseCase(currentUserId)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
 
-    val memories: StateFlow<List<Memory>> = memoryRepository.getAllMemories()
+    val memories: StateFlow<List<Memory>> = getMemoriesUseCase("", currentUserId)
         .map { list -> list.filter { it.userId == currentUserId } }
         .stateIn(
             scope = viewModelScope,
@@ -50,22 +53,19 @@ class ReminderViewModel @Inject constructor(
                 dateTime = dateTime,
                 memoryId = memoryId
             )
-            val generatedId = repository.addRemembranceDay(newDay)
-            scheduler.schedule(newDay.copy(id = generatedId.toInt()))
+            addRemembranceDayUseCase(newDay)
         }
     }
 
     fun updateReminder(day: RemembranceDay) {
         viewModelScope.launch {
-            repository.updateRemembranceDay(day)
-            scheduler.schedule(day)
+            updateRemembranceDayUseCase(day)
         }
     }
 
     fun deleteReminder(day: RemembranceDay) {
         viewModelScope.launch {
-            repository.deleteRemembranceDay(day)
-            scheduler.cancel(day)
+            deleteRemembranceDayUseCase(day)
         }
     }
 }

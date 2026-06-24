@@ -149,16 +149,15 @@ fun SearchMemoryScreen(
                                 navController.navigate(Screen.DetailMemory.createRoute(memory.id))
                             },
                             onProfileClick = {
-                                val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                                 val authorId = memory.userId
-                                if (authorId.isNullOrEmpty() || authorId == currentUserId) {
+                                if (viewModel.isCurrentUser(authorId)) {
                                     navController.navigate(Screen.Profile.route) {
                                         popUpTo(Screen.Home.route) { saveState = true }
                                         launchSingleTop = true
                                         restoreState = true
                                     }
                                 } else {
-                                    navController.navigate(Screen.OtherProfile.createRoute(authorId))
+                                    navController.navigate(Screen.OtherProfile.createRoute(authorId!!))
                                 }
                             },
                             onSaveClick = {

@@ -6,8 +6,8 @@ import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naufal.griefy.domain.repository.AuthRepository
-import com.naufal.griefy.domain.repository.MemoryRepository
+import com.naufal.griefy.domain.usecase.auth.DeleteAccountUseCase
+import com.naufal.griefy.domain.usecase.auth.LogoutUseCase
 import com.naufal.griefy.domain.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,8 +23,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext context: Context,
-    private val authRepository: AuthRepository,
-    private val memoryRepository: MemoryRepository
+    private val deleteAccountUseCase: DeleteAccountUseCase,
+    private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
 
     private val _deleteAccountResult = MutableSharedFlow<Resource<Unit>>()
@@ -33,24 +33,14 @@ class SettingsViewModel @Inject constructor(
     fun deleteAccount() {
         viewModelScope.launch {
             _deleteAccountResult.emit(Resource.Loading())
-            try {
-                memoryRepository.clearAllLocalMemories()
-            } catch (_: Exception) {
-                // Ignore Room delete failure
-            }
-            val result = authRepository.deleteAccount()
+            val result = deleteAccountUseCase()
             _deleteAccountResult.emit(result)
         }
     }
 
     fun logout(onComplete: () -> Unit) {
         viewModelScope.launch {
-            try {
-                memoryRepository.clearAllLocalMemories()
-            } catch (_: Exception) {
-                // Ignore Room delete failure
-            }
-            authRepository.logout()
+            logoutUseCase()
             onComplete()
         }
     }

@@ -9,17 +9,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.Memory
-import com.naufal.griefy.domain.repository.AuthRepository
 import com.naufal.griefy.domain.repository.MemoryRepository
-import com.naufal.griefy.domain.util.Resource
+import com.naufal.griefy.domain.usecase.memory.memories.GetMemoryDetailUseCase
+import com.naufal.griefy.domain.usecase.memory.memories.UpdateMemoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class EditMemoryViewModel @Inject constructor(
+    private val getMemoryDetailUseCase: GetMemoryDetailUseCase,
+    private val updateMemoryUseCase: UpdateMemoryUseCase,
     private val repository: MemoryRepository,
-    private val authRepository: AuthRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -54,22 +55,25 @@ class EditMemoryViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            currentMemory = repository.getMemoryById(memoryId)
-            currentMemory?.let { memory ->
-                titleText = memory.title
-                contentText = memory.content
-                isPublic = memory.isPublic
-                tagsList = memory.tags
-                selectedImageUris = memory.imageUris.map { uriString -> uriString.toUri() }
-                selectedSongTrackId = memory.songTrackId
-                selectedSongTitle = memory.songTitle
+            getMemoryDetailUseCase(memoryId).collect { detail ->
+                val memory = detail.memory
+                currentMemory = memory
+                memory?.let { m ->
+                    titleText = m.title
+                    contentText = m.content
+                    isPublic = m.isPublic
+                    tagsList = m.tags
+                    selectedImageUris = m.imageUris.map { uriString -> uriString.toUri() }
+                    selectedSongTrackId = m.songTrackId
+                    selectedSongTitle = m.songTitle
 
-                memory.songTrackId?.let { trackId ->
-                    val song = repository.getSongDetails(trackId)
-                    song?.let { s ->
-                        selectedSongTitle = s.title
-                        selectedSongArtist = s.artistName
-                        selectedSongImageUrl = s.imageUrl
+                    m.songTrackId?.let { trackId ->
+                        val song = repository.getSongDetails(trackId)
+                        song?.let { s ->
+                            selectedSongTitle = s.title
+                            selectedSongArtist = s.artistName
+                            selectedSongImageUrl = s.imageUrl
+                        }
                     }
                 }
             }
@@ -117,35 +121,17 @@ class EditMemoryViewModel @Inject constructor(
 
     fun updateMemory(onUpdateSuccess: () -> Unit) {
         viewModelScope.launch {
-            val currentUser = authRepository.getCurrentUser()
-            var profileName = currentUser?.displayName ?: Memory.DEFAULT_USERNAME
-            var profileAvatar: String? = null
-
-            if (currentUser != null) {
-                authRepository.getUserProfile(currentUser.uid).collect { resource ->
-                    if (resource is Resource.Success) {
-                        resource.data?.let {
-                            profileName = it.displayName
-                            profileAvatar = it.avatarBase64
-                        }
-                    }
-                }
-            }
-
             currentMemory?.let { oldMemory ->
-                val updatedMemory = oldMemory.copy(
+                updateMemoryUseCase(
+                    oldMemory = oldMemory,
                     title = titleText,
                     content = contentText,
                     tags = tagsList,
                     isPublic = isPublic,
                     imageUris = selectedImageUris.map { it.toString() },
                     songTrackId = selectedSongTrackId,
-                    songTitle = selectedSongTitle,
-                    userName = profileName,
-                    userAvatar = profileAvatar,
-                    userId = oldMemory.userId ?: currentUser?.uid
+                    songTitle = selectedSongTitle
                 )
-                repository.updateMemory(updatedMemory)
                 onUpdateSuccess()
             }
         }

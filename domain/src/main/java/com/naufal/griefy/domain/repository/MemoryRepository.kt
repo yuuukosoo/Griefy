@@ -28,4 +28,5 @@ interface MemoryRepository {
     suspend fun searchSongs(query: String): List<com.naufal.griefy.domain.model.Song>
     suspend fun getSongDetails(trackId: String): com.naufal.griefy.domain.model.Song?
     suspend fun clearAllLocalMemories()
+    fun getMemoryCount(userId: String): Flow<Int>
 }

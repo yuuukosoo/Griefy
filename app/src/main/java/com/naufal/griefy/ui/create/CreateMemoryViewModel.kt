@@ -1,4 +1,4 @@
-package com.naufal.griefy.ui.create
+﻿package com.naufal.griefy.ui.create
 
 import android.net.Uri
 import androidx.compose.runtime.getValue
@@ -8,18 +8,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.app.Application
 import com.naufal.griefy.R
-import com.naufal.griefy.domain.model.Memory
-import com.naufal.griefy.domain.repository.AuthRepository
-import com.naufal.griefy.domain.repository.MemoryRepository
-import com.naufal.griefy.domain.util.Resource
+import com.naufal.griefy.domain.usecase.memory.memories.AddMemoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateMemoryViewModel @Inject constructor(
-    private val repository: MemoryRepository,
-    private val authRepository: AuthRepository,
+    private val addMemoryUseCase: AddMemoryUseCase,
     private val application: Application
 ) : ViewModel() {
 
@@ -91,37 +87,16 @@ class CreateMemoryViewModel @Inject constructor(
 
     fun saveMemory(onSaveSuccess: () -> Unit) {
         viewModelScope.launch {
-            val currentUser = authRepository.getCurrentUser()
-            var profileName = currentUser?.displayName ?: Memory.DEFAULT_USERNAME
-            var profileAvatar: String? = null
-
-            if (currentUser != null) {
-                authRepository.getUserProfile(currentUser.uid).collect { resource ->
-                    if (resource is Resource.Success) {
-                        resource.data?.let {
-                            profileName = it.displayName
-                            profileAvatar = it.avatarBase64
-                        }
-                    }
-                }
-            }
-
-            val newMemory = Memory(
+            addMemoryUseCase(
                 title = titleText,
                 content = contentText,
                 imageUris = selectedImageUris.map { it.toString() },
-                createdAt = System.currentTimeMillis(),
-                tags = tagsList.ifEmpty { listOf(application.getString(R.string.default_memory_tag)) },
+                tags = tagsList,
                 isPublic = isPublic,
                 songTrackId = selectedSongTrackId,
                 songTitle = selectedSongTitle,
-                isTrashed = false,
-                userName = profileName,
-                userAvatar = profileAvatar,
-                userId = authRepository.getCurrentUser()?.uid
+                defaultTagString = application.getString(R.string.default_memory_tag)
             )
-
-            repository.addMemory(newMemory)
             onSaveSuccess()
         }
     }
