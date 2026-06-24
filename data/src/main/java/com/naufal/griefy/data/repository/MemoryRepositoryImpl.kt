@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.ByteArrayOutputStream
+import java.io.File
 import javax.inject.Inject
 
 class MemoryRepositoryImpl @Inject constructor(
@@ -124,40 +125,46 @@ class MemoryRepositoryImpl @Inject constructor(
 
     override suspend fun addMemory(memory: Memory) {
         val currentUid = firebaseAuth.currentUser?.uid
-        var processedMemory = memory.copy(userId = memory.userId ?: currentUid)
-        if (processedMemory.imageUris.isNotEmpty()) {
-            val base64Uris = processedMemory.imageUris.mapNotNull { getBase64FromUri(context, it) }
-            processedMemory = processedMemory.copy(imageUris = base64Uris)
+        val userId = memory.userId ?: currentUid
+
+        val localImageUris = memory.imageUris.mapIndexedNotNull { index, uri ->
+            saveUriToLocalFile(context, uri, "${userId ?: "guest"}_add_${index}")
         }
+        val localMemory = memory.copy(userId = userId, imageUris = localImageUris)
 
         // Save locally and get the generated ID
-        val localId = dao.insertMemory(processedMemory.toEntity()).toInt()
-        val finalMemory = processedMemory.copy(id = localId)
+        val localId = dao.insertMemory(localMemory.toEntity()).toInt()
+        val finalLocalMemory = localMemory.copy(id = localId)
 
         // Upload to Firestore if it belongs to the current user
-        if (finalMemory.userId == currentUid) {
-            uploadToFirestore(finalMemory)
+        if (userId == currentUid && currentUid != null) {
+            val base64Uris = localImageUris.mapNotNull { getBase64FromUri(context, it) }
+            val uploadMemory = finalLocalMemory.copy(imageUris = base64Uris)
+            uploadToFirestore(uploadMemory)
         }
     }
 
     override suspend fun updateMemory(memory: Memory) {
         val currentUid = firebaseAuth.currentUser?.uid
-        var processedMemory = memory.copy(userId = memory.userId ?: currentUid)
-        if (processedMemory.imageUris.isNotEmpty()) {
-            val base64Uris = processedMemory.imageUris.mapNotNull { getBase64FromUri(context, it) }
-            processedMemory = processedMemory.copy(imageUris = base64Uris)
-        }
+        val userId = memory.userId ?: currentUid
 
-        dao.updateMemory(processedMemory.toEntity())
+        val localImageUris = memory.imageUris.mapIndexedNotNull { index, uri ->
+            saveUriToLocalFile(context, uri, "${userId ?: "guest"}_update_${index}")
+        }
+        val localMemory = memory.copy(userId = userId, imageUris = localImageUris)
+
+        dao.updateMemory(localMemory.toEntity())
 
         // Sync with Firestore if it belongs to the current user
-        if (processedMemory.userId == currentUid) {
-            uploadToFirestore(processedMemory)
+        if (userId == currentUid && currentUid != null) {
+            val base64Uris = localImageUris.mapNotNull { getBase64FromUri(context, it) }
+            val uploadMemory = localMemory.copy(imageUris = base64Uris)
+            uploadToFirestore(uploadMemory)
         }
 
         // Sync bookmark/saved status to Firestore
         if (currentUid != null) {
-            syncSavedStatusToFirestore(processedMemory, currentUid)
+            syncSavedStatusToFirestore(localMemory, currentUid)
         }
     }
 
@@ -325,6 +332,36 @@ class MemoryRepositoryImpl @Inject constructor(
         }
     }
 
+    private fun saveUriToLocalFile(context: Context, uriString: String, id: String): String? {
+        if (uriString.startsWith("file:/")) {
+            return uriString // Sudah berupa file lokal, tidak perlu disalin ulang
+        }
+        return try {
+            val dir = File(context.filesDir, "memory_images")
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+            val file = File(dir, "img_${id}_${System.currentTimeMillis()}.jpg")
+            val inputStream = if (uriString.startsWith(PREFIX_BASE64)) {
+                val base64Data = uriString.substringAfter(PREFIX_BASE64)
+                val bytes = Base64.decode(base64Data, Base64.DEFAULT)
+                bytes.inputStream()
+            } else {
+                context.contentResolver.openInputStream(uriString.toUri())
+            }
+
+            inputStream?.use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            file.toURI().toString()
+        } catch (e: Exception) {
+            android.util.Log.e("LOCAL_IMAGE_SAVE", "Gagal menyimpan file gambar lokal: ${e.message}", e)
+            null
+        }
+    }
+
     // Helper to upload memory to Firestore
     private fun uploadToFirestore(memory: Memory) {
         val uid = memory.userId ?: firebaseAuth.currentUser?.uid ?: FALLBACK_USER_ID
@@ -404,16 +441,21 @@ class MemoryRepositoryImpl @Inject constructor(
 
             val localMemories = dao.getAllLocalMemoriesIncludingTrashed()
             for (remote in remoteMemories) {
-                val local = if (remote.id != 0) {
-                    localMemories.find { it.id == remote.id }
+                val localImageUris = remote.imageUris.mapIndexedNotNull { index, uri ->
+                    saveUriToLocalFile(context, uri, "${userId}_sync_${remote.createdAt}_$index")
+                }
+                val remoteWithLocalImages = remote.copy(imageUris = localImageUris)
+
+                val local = if (remoteWithLocalImages.id != 0) {
+                    localMemories.find { it.id == remoteWithLocalImages.id }
                 } else {
-                    localMemories.find { it.createdAt == remote.createdAt && it.title == remote.title }
+                    localMemories.find { it.createdAt == remoteWithLocalImages.createdAt && it.title == remoteWithLocalImages.title }
                 }
 
                 if (local == null) {
-                    dao.insertMemory(remote.toEntity())
+                    dao.insertMemory(remoteWithLocalImages.toEntity())
                 } else {
-                    dao.updateMemory(remote.copy(
+                    dao.updateMemory(remoteWithLocalImages.copy(
                         id = local.id,
                         isSaved = local.isSaved,
                         isTrashed = local.isTrashed
@@ -478,15 +520,20 @@ class MemoryRepositoryImpl @Inject constructor(
 
             val updatedLocalMemories = dao.getAllLocalMemoriesIncludingTrashed()
             for (savedMem in savedMemories) {
+                val localImageUris = savedMem.imageUris.mapIndexedNotNull { index, uri ->
+                    saveUriToLocalFile(context, uri, "${userId}_syncSaved_${savedMem.createdAt}_$index")
+                }
+                val savedMemWithLocalImages = savedMem.copy(imageUris = localImageUris)
+
                 val local = updatedLocalMemories.find {
-                    (savedMem.id != 0 && it.id == savedMem.id) ||
-                    (it.createdAt == savedMem.createdAt && it.title == savedMem.title)
+                    (savedMemWithLocalImages.id != 0 && it.id == savedMemWithLocalImages.id) ||
+                    (it.createdAt == savedMemWithLocalImages.createdAt && it.title == savedMemWithLocalImages.title)
                 }
 
                 if (local == null) {
-                    dao.insertMemory(savedMem.toEntity())
+                    dao.insertMemory(savedMemWithLocalImages.toEntity())
                 } else {
-                    dao.updateMemory(savedMem.copy(
+                    dao.updateMemory(savedMemWithLocalImages.copy(
                         id = local.id,
                         isSaved = true,
                         isTrashed = local.isTrashed

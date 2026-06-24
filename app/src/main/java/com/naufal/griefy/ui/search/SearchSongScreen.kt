@@ -65,12 +65,18 @@ fun SearchSongScreen(
 
     val onCardClick = { song: Song ->
         if (playingTrackId == song.trackId) {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
+            try {
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.pause()
+                    isMediaPlaying = false
+                } else {
+                    mediaPlayer.start()
+                    isMediaPlaying = true
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("SEARCH_PREVIEW", "Gagal memutar/menjeda lagu pratinjau", e)
                 isMediaPlaying = false
-            } else {
-                mediaPlayer.start()
-                isMediaPlaying = true
+                playingTrackId = null
             }
         } else {
             mediaPlayer.reset()
@@ -91,28 +97,20 @@ fun SearchSongScreen(
                             mediaPlayer.start()
                             isMediaPlaying = true
                         } catch (_: Exception) {
+                            playingTrackId = null
+                            isMediaPlaying = false
                             try {
                                 mediaPlayer.reset()
-                                mediaPlayer.setDataSource(previewUrl)
-                                mediaPlayer.isLooping = true
-                                mediaPlayer.prepareAsync()
-                            } catch (_: Exception) {
-                                playingTrackId = null
-                                isMediaPlaying = false
-                            }
+                            } catch (_: Exception) {}
                         }
                     }
                     mediaPlayer.setOnErrorListener { _, what, extra ->
-                        android.util.Log.e("SEARCH_PREVIEW", "MediaPlayer error: what=$what, extra=$extra. Menginisialisasi ulang...")
+                        android.util.Log.e("SEARCH_PREVIEW", "MediaPlayer error: what=$what, extra=$extra")
+                        playingTrackId = null
+                        isMediaPlaying = false
                         try {
                             mediaPlayer.reset()
-                            mediaPlayer.setDataSource(previewUrl)
-                            mediaPlayer.isLooping = true
-                            mediaPlayer.prepareAsync()
-                        } catch (_: Exception) {
-                            playingTrackId = null
-                            isMediaPlaying = false
-                        }
+                        } catch (_: Exception) {}
                         true
                     }
                 } catch (e: Exception) {

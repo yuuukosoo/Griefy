@@ -100,28 +100,20 @@ fun DetailScreen(
                         mediaPlayer.start()
                         isPlaying = true
                     } catch (_: Exception) {
+                        isPrepared = false
+                        isPlaying = false
                         try {
-                            isPrepared = false
                             mediaPlayer.reset()
-                            mediaPlayer.setDataSource(previewUrl)
-                            mediaPlayer.isLooping = true
-                            mediaPlayer.prepareAsync()
-                        } catch (_: Exception) {
-                            isPlaying = false
-                        }
+                        } catch (_: Exception) {}
                     }
                 }
                 mediaPlayer.setOnErrorListener { _, what, extra ->
-                    android.util.Log.e("MEDIA_PLAYER", "MediaPlayer error: what=$what, extra=$extra. Menginisialisasi ulang...")
+                    android.util.Log.e("MEDIA_PLAYER", "MediaPlayer error: what=$what, extra=$extra")
                     isPrepared = false
+                    isPlaying = false
                     try {
                         mediaPlayer.reset()
-                        mediaPlayer.setDataSource(previewUrl)
-                        mediaPlayer.isLooping = true
-                        mediaPlayer.prepareAsync()
-                    } catch (_: Exception) {
-                        isPlaying = false
-                    }
+                    } catch (_: Exception) {}
                     true
                 }
             } catch (e: Exception) {
@@ -144,12 +136,14 @@ fun DetailScreen(
         }
     }
 
-    LaunchedEffect(isPlaying) {
+    LaunchedEffect(mediaPlayer, isPlaying) {
         if (isPlaying) {
             while (isPlaying) {
                 try {
-                    currentPosition = mediaPlayer.currentPosition.toFloat()
-                    duration = mediaPlayer.duration.toFloat()
+                    if (isPrepared) {
+                        currentPosition = mediaPlayer.currentPosition.toFloat()
+                        duration = mediaPlayer.duration.toFloat()
+                    }
                 } catch (_: Exception) {
 
                 }

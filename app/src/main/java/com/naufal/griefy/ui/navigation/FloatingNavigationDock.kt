@@ -205,25 +205,17 @@ private fun NavigationTabItem(
         label = "icon_offset"
     )
 
-    Row(
+    Box(
         modifier = modifier
-            .height(36.dp)
-            .clip(RoundedCornerShape(18.dp))
+            .size(36.dp)
+            .clip(CircleShape)
             .background(animatedBgColor)
             .clickable(
                 onClick = onClick,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
-            )
-            .padding(horizontal = 8.dp, vertical = 6.dp)
-            .animateContentSize(
-                animationSpec = tween(
-                    durationMillis = 300,
-                    easing = LinearOutSlowInEasing
-                )
             ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
@@ -237,27 +229,6 @@ private fun NavigationTabItem(
                 )
                 .size(18.dp)
         )
-
-        AnimatedVisibility(
-            visible = selected,
-            enter = fadeIn(animationSpec = tween(150, delayMillis = 150)) + expandHorizontally(
-                animationSpec = tween(300, easing = LinearOutSlowInEasing)
-            ),
-            exit = fadeOut(animationSpec = tween(150)) + shrinkHorizontally(
-                animationSpec = tween(300, easing = LinearOutSlowInEasing)
-            )
-        ) {
-            Row {
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = label,
-                    color = animatedContentColor,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
-                )
-            }
-        }
     }
 }
 
