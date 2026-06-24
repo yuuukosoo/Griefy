@@ -30,7 +30,7 @@ class ReminderViewModel @Inject constructor(
     private val currentUserId = getMyUserIdUseCase()
 
     val uiState: StateFlow<ReminderState> = combine(
-        getRemembranceDaysUseCase(currentUserId),
+        getRemembranceDaysUseCase(),
         getMemoriesUseCase("", currentUserId)
     ) { days, mems ->
         ReminderState(
@@ -49,7 +49,8 @@ class ReminderViewModel @Inject constructor(
                 title = title,
                 description = description,
                 dateTime = dateTime,
-                memoryId = memoryId
+                memoryId = memoryId,
+                userId = currentUserId
             )
             addRemembranceDayUseCase(newDay)
         }

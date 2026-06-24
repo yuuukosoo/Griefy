@@ -21,13 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+
 import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.util.getAdaptiveHorizontalPadding
@@ -86,7 +86,6 @@ fun FloatingNavigationDock(
                             }
                         },
                         icon = Icons.Default.Home,
-                        label = stringResource(R.string.nav_home),
                         contentDescription = stringResource(R.string.nav_home)
                     )
 
@@ -103,7 +102,6 @@ fun FloatingNavigationDock(
                             }
                         },
                         icon = Icons.Default.Search,
-                        label = stringResource(R.string.nav_search),
                         contentDescription = stringResource(R.string.nav_search)
                     )
 
@@ -120,7 +118,6 @@ fun FloatingNavigationDock(
                             }
                         },
                         icon = Icons.Default.Bookmark,
-                        label = stringResource(R.string.nav_saved),
                         contentDescription = stringResource(R.string.nav_saved)
                     )
 
@@ -137,7 +134,6 @@ fun FloatingNavigationDock(
                             }
                         },
                         icon = Icons.Default.Person,
-                        label = stringResource(R.string.nav_profile),
                         contentDescription = stringResource(R.string.nav_profile)
                     )
                 }
@@ -183,7 +179,6 @@ private fun NavigationTabItem(
     selected: Boolean,
     onClick: () -> Unit,
     icon: ImageVector,
-    label: String,
     contentDescription: String,
     modifier: Modifier = Modifier
 ) {

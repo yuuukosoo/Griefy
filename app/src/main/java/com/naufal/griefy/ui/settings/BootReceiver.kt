@@ -22,8 +22,7 @@ class BootReceiver : BroadcastReceiver() {
             val scheduler = ReminderScheduler(context)
             val scope = CoroutineScope(Dispatchers.IO)
             scope.launch {
-                val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: ""
-                val list = repository.getAllRemembranceDays(currentUserId).first()
+                val list = repository.getAllRemembranceDays().first()
                 val now = System.currentTimeMillis()
                 list.forEach { day ->
                     if (day.dateTime > now) {

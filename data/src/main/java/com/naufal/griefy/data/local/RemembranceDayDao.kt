@@ -11,12 +11,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface RemembranceDayDao {
     @Query("""
-        SELECT r.* FROM remembrance_days r 
-        INNER JOIN memory_table m ON r.memoryId = m.id 
-        WHERE m.userId = :currentUserId 
-        ORDER BY r.dateTime ASC
+        SELECT * FROM remembrance_days 
+        ORDER BY dateTime ASC
     """)
-    fun getAllRemembranceDays(currentUserId: String): Flow<List<RemembranceDayEntity>>
+    fun getAllRemembranceDays(): Flow<List<RemembranceDayEntity>>
 
     @Query("SELECT * FROM remembrance_days WHERE id = :id")
     suspend fun getRemembranceDayById(id: Int): RemembranceDayEntity?

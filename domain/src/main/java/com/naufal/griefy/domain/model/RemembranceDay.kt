@@ -5,5 +5,6 @@ data class RemembranceDay(
     val title: String,
     val description: String = "",
     val dateTime: Long,
-    val memoryId: Int? = null
+    val memoryId: Int? = null,
+    val userId: String = ""
 )
