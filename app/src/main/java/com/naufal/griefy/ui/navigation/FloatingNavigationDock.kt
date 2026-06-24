@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.naufal.griefy.R
-
+import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 
 @Composable
 fun FloatingNavigationDock(
@@ -40,67 +40,117 @@ fun FloatingNavigationDock(
 ) {
     val isDark = isSystemInDarkTheme()
     val dockBgColor = if (isDark) {
-        MaterialTheme.colorScheme.surface
+        MaterialTheme.colorScheme.surfaceVariant
     } else {
         MaterialTheme.colorScheme.primary
     }
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RectangleShape,
-        color = dockBgColor,
-        tonalElevation = 0.dp
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = getAdaptiveHorizontalPadding())
+            .padding(bottom = 12.dp)
+            .height(64.dp),
+        contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .height(72.dp)
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. Home Tab
-            NavigationTabItem(
-                selected = currentRoute == Screen.Home.route,
-                onClick = {
-                    if (currentRoute != Screen.Home.route) {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Home.route) { inclusive = true }
-                        }
-                    }
-                },
-                icon = Icons.Default.Home,
-                label = stringResource(R.string.nav_home),
-                contentDescription = stringResource(R.string.nav_home)
-            )
-
-            // 2. Search Tab
-            NavigationTabItem(
-                selected = currentRoute == Screen.SearchMemory.route,
-                onClick = {
-                    if (currentRoute != Screen.SearchMemory.route) {
-                        navController.navigate(Screen.SearchMemory.route) {
-                            popUpTo(Screen.Home.route) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                },
-                icon = Icons.Default.Search,
-                label = stringResource(R.string.nav_search),
-                contentDescription = stringResource(R.string.nav_search)
-            )
-
-            // 3. Create Button (Center)
-            val createBgColor = if (isDark) MaterialTheme.colorScheme.primary else Color.White
-            val createIconColor = if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
-
-            Box(
+            // 1. Grouped Dock Container (Home, Search, Saved, Profile)
+            Surface(
                 modifier = Modifier
-                    .size(44.dp)
+                    .weight(1f)
+                    .fillMaxHeight(),
+                shape = RoundedCornerShape(28.dp),
+                color = dockBgColor,
+                shadowElevation = 0.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Home Tab
+                    NavigationTabItem(
+                        selected = currentRoute == Screen.Home.route,
+                        onClick = {
+                            if (currentRoute != Screen.Home.route) {
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Home.route) { inclusive = true }
+                                }
+                            }
+                        },
+                        icon = Icons.Default.Home,
+                        label = stringResource(R.string.nav_home),
+                        contentDescription = stringResource(R.string.nav_home)
+                    )
+
+                    // Search Tab
+                    NavigationTabItem(
+                        selected = currentRoute == Screen.SearchMemory.route,
+                        onClick = {
+                            if (currentRoute != Screen.SearchMemory.route) {
+                                navController.navigate(Screen.SearchMemory.route) {
+                                    popUpTo(Screen.Home.route) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = Icons.Default.Search,
+                        label = stringResource(R.string.nav_search),
+                        contentDescription = stringResource(R.string.nav_search)
+                    )
+
+                    // Saved Tab
+                    NavigationTabItem(
+                        selected = currentRoute == Screen.Saved.route,
+                        onClick = {
+                            if (currentRoute != Screen.Saved.route) {
+                                navController.navigate(Screen.Saved.route) {
+                                    popUpTo(Screen.Home.route) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = Icons.Default.Bookmark,
+                        label = stringResource(R.string.nav_saved),
+                        contentDescription = stringResource(R.string.nav_saved)
+                    )
+
+                    // Profile Tab
+                    NavigationTabItem(
+                        selected = currentRoute == Screen.Profile.route,
+                        onClick = {
+                            if (currentRoute != Screen.Profile.route) {
+                                navController.navigate(Screen.Profile.route) {
+                                    popUpTo(Screen.Home.route) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = Icons.Default.Person,
+                        label = stringResource(R.string.nav_profile),
+                        contentDescription = stringResource(R.string.nav_profile)
+                    )
+                }
+            }
+
+            // 2. Separate FAB (Add Button)
+            val createBgColor = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary
+            val createIconColor = if (isDark) MaterialTheme.colorScheme.onPrimary else Color.White
+
+            Surface(
+                modifier = Modifier
+                    .size(56.dp)
                     .clip(CircleShape)
-                    .background(createBgColor)
                     .clickable {
                         if (onFabClick != null) {
                             onFabClick()
@@ -108,49 +158,22 @@ fun FloatingNavigationDock(
                             navController.navigate(Screen.CreateMemory.route)
                         }
                     },
-                contentAlignment = Alignment.Center
+                shape = CircleShape,
+                color = createBgColor,
+                shadowElevation = 6.dp
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.nav_write_memory_desc),
-                    tint = createIconColor,
-                    modifier = Modifier.size(24.dp)
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.nav_write_memory_desc),
+                        tint = createIconColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
-
-            // 4. Saved Tab
-            NavigationTabItem(
-                selected = currentRoute == Screen.Saved.route,
-                onClick = {
-                    if (currentRoute != Screen.Saved.route) {
-                        navController.navigate(Screen.Saved.route) {
-                            popUpTo(Screen.Home.route) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                },
-                icon = Icons.Default.Bookmark,
-                label = stringResource(R.string.nav_saved),
-                contentDescription = stringResource(R.string.nav_saved)
-            )
-
-            // 5. Profile Tab
-            NavigationTabItem(
-                selected = currentRoute == Screen.Profile.route,
-                onClick = {
-                    if (currentRoute != Screen.Profile.route) {
-                        navController.navigate(Screen.Profile.route) {
-                            popUpTo(Screen.Home.route) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                },
-                icon = Icons.Default.Person,
-                label = stringResource(R.string.nav_profile),
-                contentDescription = stringResource(R.string.nav_profile)
-            )
         }
     }
 }
@@ -196,14 +219,6 @@ private fun NavigationTabItem(
         ),
         label = "icon_scale"
     )
-    val iconOffset by animateDpAsState(
-        targetValue = if (selected) (-3).dp else 0.dp,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "icon_offset"
-    )
 
     Box(
         modifier = modifier
@@ -222,7 +237,6 @@ private fun NavigationTabItem(
             contentDescription = contentDescription,
             tint = animatedContentColor,
             modifier = Modifier
-                .offset(y = iconOffset)
                 .graphicsLayer(
                     scaleX = iconScale,
                     scaleY = iconScale

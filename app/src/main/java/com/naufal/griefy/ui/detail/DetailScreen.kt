@@ -241,23 +241,19 @@ fun DetailScreen(
         bottomBar = {
             if (!isLandscape) {
                 songDetails?.let { song ->
-                    Card(
+                    Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .navigationBarsPadding()
-                            .padding(
-                                start = horizontalPadding,
-                                end = horizontalPadding,
-                                top = 16.dp.scaled(),
-                                bottom = 48.dp.scaled()
-                            ),
-                        shape = RoundedCornerShape(16.dp.scaled()),
-                        colors = CardDefaults.cardColors(containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else Color(0xFFC4D8BF)),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                            .navigationBarsPadding(),
+                        shape = RoundedCornerShape(topStart = 28.dp.scaled(), topEnd = 28.dp.scaled()),
+                        color = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary,
+                        shadowElevation = 8.dp.scaled()
                     ) {
                         val context = LocalContext.current
                         Column(
-                            modifier = Modifier.padding(16.dp.scaled())
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = horizontalPadding, vertical = 20.dp.scaled())
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -280,14 +276,14 @@ fun DetailScreen(
                                         text = song.title,
                                         fontSize = 16.sp.scaled(),
                                         fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onBackground,
+                                        color = Color.White,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = song.artistName,
                                         fontSize = 12.sp.scaled(),
-                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                                        color = Color.White.copy(alpha = 0.7f),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -362,7 +358,7 @@ fun DetailScreen(
                                     Text(
                                         text = stringResource(R.string.detail_preview_unavailable),
                                         fontSize = 12.sp.scaled(),
-                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                                        color = Color.White.copy(alpha = 0.7f),
                                         modifier = Modifier.padding(vertical = 8.dp.scaled())
                                     )
                                 }

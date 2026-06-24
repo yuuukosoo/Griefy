@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MusicNote
@@ -21,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -117,10 +120,9 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp.scaled())
-                            .height(44.dp.scaled())
-                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp.scaled()))
-                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp.scaled()))
-                            .padding(horizontal = 12.dp.scaled()),
+                            .height(52.dp.scaled())
+                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(percent = 50))
+                            .padding(horizontal = 16.dp.scaled()),
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Row(
@@ -131,22 +133,22 @@ fun HomeScreen(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp.scaled())
+                                modifier = Modifier.size(22.dp.scaled())
                             )
-                            Spacer(modifier = Modifier.width(8.dp.scaled()))
+                            Spacer(modifier = Modifier.width(12.dp.scaled()))
                             
                             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                                 if (searchQuery.isEmpty()) {
                                     Text(
                                         text = stringResource(R.string.home_search_placeholder),
                                         color = MaterialTheme.colorScheme.outline,
-                                        fontSize = 14.sp.scaled()
+                                        fontSize = 15.sp.scaled()
                                     )
                                 }
                                 BasicTextField(
                                     value = searchQuery,
                                     onValueChange = { viewModel.setSearchQuery(it) },
-                                    textStyle = TextStyle(fontSize = 14.sp.scaled(), color = MaterialTheme.colorScheme.onBackground),
+                                    textStyle = TextStyle(fontSize = 15.sp.scaled(), color = MaterialTheme.colorScheme.onBackground),
                                     singleLine = true,
                                     cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
                                     modifier = Modifier.fillMaxWidth()
@@ -235,12 +237,12 @@ fun MemoryCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp.scaled())) {
-            // Profile Header Row with Save button on far right
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Header Row (Padding 16.dp)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp.scaled()),
+                    .padding(16.dp.scaled()),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -250,7 +252,7 @@ fun MemoryCard(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(20.dp.scaled())
+                            .size(36.dp.scaled())
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center
@@ -264,19 +266,26 @@ fun MemoryCard(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            Text("👤", fontSize = 10.sp.scaled())
+                            Text("👤", fontSize = 16.sp.scaled())
                         }
                     }
-                    Spacer(modifier = Modifier.width(8.dp.scaled()))
-                    Text(
-                        text = memory.userName ?: Memory.DEFAULT_USERNAME,
-                        fontSize = 14.sp.scaled(),
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                    Spacer(modifier = Modifier.width(12.dp.scaled()))
+                    Column {
+                        Text(
+                            text = memory.userName ?: Memory.DEFAULT_USERNAME,
+                            fontSize = 15.sp.scaled(),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = dateString,
+                            fontSize = 12.sp.scaled(),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
-                // Save button
+                // Save/Bookmark button
                 val isSaved = memory.isSaved
                 IconButton(
                     onClick = { onSaveClick() },
@@ -300,46 +309,33 @@ fun MemoryCard(
                 }
             }
 
+            // Media Section (Edge-to-Edge)
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first().toImageModel(),
                     contentDescription = stringResource(R.string.home_memory_photo_desc),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp.scaled())
-                        .clip(RoundedCornerShape(12.dp.scaled())),
+                        .height(180.dp.scaled()),
                     contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.height(12.dp.scaled()))
             }
 
-            Text(
-                text = memory.title,
-                fontSize = 18.sp.scaled(),
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp.scaled()))
-            
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            // Content Section (Padding 16.dp)
+            Column(modifier = Modifier.padding(16.dp.scaled())) {
                 Text(
-                    text = dateString,
-                    fontSize = 12.sp.scaled(),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
+                    text = memory.title,
+                    fontSize = 18.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
+                // Subtitle: Pinned Song Details
                 if (!memory.songTrackId.isNullOrEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .padding(6.dp.scaled()),
-                        contentAlignment = Alignment.Center
+                    Spacer(modifier = Modifier.height(4.dp.scaled()))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
                             imageVector = Icons.Default.MusicNote,
@@ -347,39 +343,49 @@ fun MemoryCard(
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp.scaled())
                         )
+                        Spacer(modifier = Modifier.width(4.dp.scaled()))
+                        Text(
+                            text = memory.songTitle ?: "Lagu Tersemat",
+                            fontSize = 13.sp.scaled(),
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(8.dp.scaled()))
-
-            Text(
-                text = memory.content,
-                fontSize = 14.sp.scaled(),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            if (memory.tags.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp.scaled()))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp.scaled()),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    memory.tags.forEach { tag ->
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp.scaled()))
-                                .background(MaterialTheme.colorScheme.primaryContainer)
-                                .padding(horizontal = 8.dp.scaled(), vertical = 4.dp.scaled())
-                        ) {
-                            Text(
-                                text = tag,
-                                fontSize = 10.sp.scaled(),
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
-                            )
+
+                Text(
+                    text = memory.content,
+                    fontSize = 14.sp.scaled(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                // Tags Section
+                if (memory.tags.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp.scaled()))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp.scaled(), Alignment.End),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        memory.tags.forEach { tag ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp.scaled()))
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                                    .padding(horizontal = 8.dp.scaled(), vertical = 4.dp.scaled())
+                            ) {
+                                Text(
+                                    text = tag,
+                                    fontSize = 10.sp.scaled(),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
