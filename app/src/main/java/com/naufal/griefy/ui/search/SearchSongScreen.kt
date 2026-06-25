@@ -2,7 +2,6 @@ package com.naufal.griefy.ui.search
 
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.*
@@ -123,10 +122,10 @@ fun SearchSongScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(44.dp.scaled())
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(16.dp.scaled()))
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp.scaled()))
-                    .padding(horizontal = 12.dp.scaled()),
+                    .padding(vertical = 8.dp.scaled())
+                    .height(52.dp.scaled())
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(percent = 50))
+                    .padding(horizontal = 16.dp.scaled()),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Row(
@@ -137,22 +136,22 @@ fun SearchSongScreen(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp.scaled())
+                        modifier = Modifier.size(22.dp.scaled())
                     )
-                    Spacer(modifier = Modifier.width(8.dp.scaled()))
+                    Spacer(modifier = Modifier.width(12.dp.scaled()))
                     
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                         if (searchQuery.isEmpty()) {
                             Text(
                                 text = stringResource(R.string.search_song_placeholder),
                                 color = MaterialTheme.colorScheme.outline,
-                                fontSize = 14.sp.scaled()
+                                fontSize = 15.sp.scaled()
                             )
                         }
                         BasicTextField(
                             value = searchQuery,
                             onValueChange = { viewModel.onQueryChange(it) },
-                            textStyle = TextStyle(fontSize = 14.sp.scaled(), color = MaterialTheme.colorScheme.onBackground),
+                            textStyle = TextStyle(fontSize = 15.sp.scaled(), color = MaterialTheme.colorScheme.onBackground),
                             singleLine = true,
                             cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),

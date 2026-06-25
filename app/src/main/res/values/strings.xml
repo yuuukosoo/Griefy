@@ -176,6 +176,10 @@
     <string name="dialog_delete_account_title">Delete Account?</string>
     <string name="dialog_delete_account_text">Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be permanently deleted.</string>
 
+    <string name="dialog_discard_title">Discard Changes?</string>
+    <string name="dialog_discard_text">Are you sure you want to go back? Unsaved changes will be lost.</string>
+    <string name="dialog_discard_confirm">Discard</string>
+
     <!-- Error / Validation Strings -->
     <string name="error_dialog_title">Form Error</string>
     <string name="error_dialog_dismiss">Understood</string>

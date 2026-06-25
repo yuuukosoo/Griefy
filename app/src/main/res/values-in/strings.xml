@@ -224,6 +224,11 @@
     <string name="settings_delete_account_error">Gagal Menghapus Akun</string>
     <string name="ok">OK</string>
 
+    <!-- Discard Dialog -->
+    <string name="dialog_discard_title">Buang Perubahan?</string>
+    <string name="dialog_discard_text">Apakah kamu yakin ingin kembali? Perubahan yang belum disimpan akan hilang.</string>
+    <string name="dialog_discard_confirm">Buang</string>
+
     <!-- Notification Strings -->
     <string name="reminder_noti_default_title">Hari Peringatan Penting ✨</string>
     <string name="reminder_noti_default_desc">Mari luangkan waktu sejenak untuk mengingat kenangan indah.</string>

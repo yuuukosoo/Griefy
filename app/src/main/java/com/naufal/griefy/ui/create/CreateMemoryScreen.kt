@@ -1,6 +1,7 @@
 package com.naufal.griefy.ui.create
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,8 +37,10 @@ import com.naufal.griefy.util.toImageModel
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -107,29 +110,109 @@ fun CreateMemoryScreen(
     }
 
     val horizontalPadding = getAdaptiveHorizontalPadding()
+    val scrollState = rememberScrollState()
+
+    val showExitDialog = remember { mutableStateOf(false) }
+
+    BackHandler(enabled = state.hasChanges) {
+        showExitDialog.value = true
+    }
+
+    if (showExitDialog.value) {
+        Dialog(onDismissRequest = { showExitDialog.value = false }) {
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.dialog_discard_title),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.dialog_discard_text),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = { showExitDialog.value = false },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.cancel),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                showExitDialog.value = false
+                                navController.navigateUp()
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.dialog_discard_confirm),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
-            .navigationBarsPadding()
-            .imePadding(),
+            .navigationBarsPadding(),
         contentAlignment = Alignment.TopCenter
     ) {
         val boxBgColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else Color(0xFFC4D8BF)
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .adaptiveWidth()
                 .padding(start = horizontalPadding, end = horizontalPadding, top = 48.dp.scaled())
+                .imePadding()
+                .verticalScroll(scrollState)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp.scaled()),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
-                    onClick = { navController.navigateUp() },
+                    onClick = { 
+                        if (state.hasChanges) {
+                            showExitDialog.value = true
+                        } else {
+                            navController.navigateUp()
+                        }
+                    },
                     modifier = Modifier.size(36.dp.scaled())
                 ) {
                     Icon(
@@ -174,23 +257,10 @@ fun CreateMemoryScreen(
                 }
             }
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-
             val configuration = LocalConfiguration.current
             val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
             if (isLandscape) {
-                val scrollState = rememberScrollState()
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .verticalScroll(scrollState)
-                ) {
                     // Photo Box - smaller height for landscape
                     Box(
                         modifier = Modifier
@@ -405,7 +475,7 @@ fun CreateMemoryScreen(
                         onValueChange = { viewModel.onContentChange(it) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .defaultMinSize(minHeight = 150.dp.scaled()),
+                            .heightIn(min = 250.dp.scaled(), max = 400.dp.scaled()),
                         placeholder = {
                             Text(
                                 text = stringResource(R.string.create_content_placeholder),
@@ -460,7 +530,6 @@ fun CreateMemoryScreen(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp.scaled()))
-                }
             } else {
                 // Portrait layout (original)
                 Box(
@@ -678,7 +747,7 @@ fun CreateMemoryScreen(
                     onValueChange = { viewModel.onContentChange(it) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .heightIn(min = 400.dp.scaled(), max = 650.dp.scaled()),
                     placeholder = {
                         Text(
                             text = stringResource(R.string.create_content_placeholder),
@@ -740,13 +809,16 @@ fun CreateMemoryScreen(
 
             // Removed bottom label button
             Spacer(modifier = Modifier.height(16.dp.scaled()))
-            }
         }
     }
 
 
     if (showAddLabelDialog.value) {
         AlertDialog(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = getAdaptiveHorizontalPadding() + 24.dp.scaled()),
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
             onDismissRequest = { showAddLabelDialog.value = false },
             title = { Text(stringResource(R.string.create_dialog_title), color = MaterialTheme.colorScheme.onBackground) },
             text = {

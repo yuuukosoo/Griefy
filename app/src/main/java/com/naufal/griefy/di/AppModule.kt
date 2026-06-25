@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.naufal.griefy.data.repository.AuthRepositoryImpl
 import com.naufal.griefy.domain.repository.AuthRepository
+import com.naufal.griefy.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -91,7 +92,7 @@ object AppModule {
     @Singleton
     fun provideDeezerApi(okHttpClient: OkHttpClient): DeezerApi {
         return Retrofit.Builder()
-            .baseUrl("https://api.deezer.com/")
+            .baseUrl(BuildConfig.DEEZER_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

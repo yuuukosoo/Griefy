@@ -102,7 +102,6 @@ fun DetailScreen(
                 Row(
                     modifier = Modifier
                         .padding(top = 32.dp.scaled(), start = horizontalPadding, end = horizontalPadding)
-                        .widthIn(max = 500.dp)
                         .fillMaxWidth()
                         .height(64.dp.scaled()),
                     verticalAlignment = Alignment.CenterVertically

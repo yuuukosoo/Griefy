@@ -16,7 +16,14 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.isSystemInDarkTheme
+import android.content.SharedPreferences
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.naufal.griefy.ui.navigation.FloatingNavigationDock
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -66,7 +73,33 @@ class MainActivity : AppCompatActivity() {
             trashCleanupWorkRequest
         )
         setContent {
-            GriefyTheme {
+            val context = LocalContext.current
+            val sharedPreferencesCompose = remember { context.getSharedPreferences("settings_pref", MODE_PRIVATE) }
+            val systemDark = isSystemInDarkTheme()
+            
+            var isDarkTheme by remember {
+                mutableStateOf(
+                    if (sharedPreferencesCompose.contains("dark_mode")) {
+                        sharedPreferencesCompose.getBoolean("dark_mode", false)
+                    } else {
+                        systemDark
+                    }
+                )
+            }
+
+            DisposableEffect(sharedPreferencesCompose) {
+                val listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+                    if (key == "dark_mode") {
+                        isDarkTheme = prefs.getBoolean("dark_mode", false)
+                    }
+                }
+                sharedPreferencesCompose.registerOnSharedPreferenceChangeListener(listener)
+                onDispose {
+                    sharedPreferencesCompose.unregisterOnSharedPreferenceChangeListener(listener)
+                }
+            }
+
+            GriefyTheme(darkTheme = isDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

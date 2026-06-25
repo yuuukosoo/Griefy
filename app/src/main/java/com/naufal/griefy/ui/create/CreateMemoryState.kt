@@ -13,4 +13,7 @@ data class CreateMemoryState(
     val selectedSongArtist: String? = null,
     val selectedSongImageUrl: String? = null,
     val showOfflineWarningDialog: Boolean = false
-)
+) {
+    val hasChanges: Boolean
+        get() = titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty() || tagsList.isNotEmpty() || selectedSongTrackId != null
+}

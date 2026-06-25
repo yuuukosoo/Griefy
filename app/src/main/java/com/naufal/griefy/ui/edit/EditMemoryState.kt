@@ -15,4 +15,14 @@ data class EditMemoryState(
     val selectedSongImageUrl: String? = null,
     val currentMemory: Memory? = null,
     val showOfflineWarningDialog: Boolean = false
-)
+) {
+    val hasChanges: Boolean
+        get() = currentMemory?.let { m ->
+            titleText != m.title || 
+            contentText != m.content || 
+            isPublic != m.isPublic || 
+            tagsList != m.tags || 
+            selectedImageUris.map { it.toString() } != m.imageUris ||
+            selectedSongTrackId != m.songTrackId
+        } ?: false
+}
