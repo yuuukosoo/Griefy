@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -181,278 +183,79 @@ fun EditMemoryScreen(
             val boxBgColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primaryContainer else Color(0xFFC4D8BF)
 
             if (isLandscape) {
-                Row(
+                val scrollState = rememberScrollState()
+                Column(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp.scaled())
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
                 ) {
-                    // Left column for photos and controls
-                    Column(
+                    // Photo Box - smaller height for landscape
+                    Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .background(boxBgColor, RoundedCornerShape(16.dp.scaled()))
-                                .clickable {
-                                    multiplePhotoPickerLauncher.launch(
-                                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                    )
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (selectedImageUris.isEmpty()) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = stringResource(R.string.create_select_photo_desc),
-                                        tint = MaterialTheme.colorScheme.onBackground,
-                                        modifier = Modifier.size(36.dp.scaled())
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp.scaled()))
-                                    Text(
-                                        text = stringResource(R.string.create_select_photo_text),
-                                        fontSize = 14.sp.scaled(),
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onBackground
-                                    )
-                                }
-                            } else {
-                                LazyRow(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(8.dp.scaled()),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp.scaled()),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    items(selectedImageUris) { uri ->
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxHeight()
-                                                .aspectRatio(1f)
-                                        ) {
-                                            AsyncImage(
-                                                model = uri.toString().toImageModel(),
-                                                contentDescription = stringResource(R.string.create_selected_photo_desc),
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .clip(RoundedCornerShape(12.dp.scaled())),
-                                                contentScale = ContentScale.Crop
-                                            )
-                                            Box(
-                                                modifier = Modifier
-                                                    .align(Alignment.TopEnd)
-                                                    .padding(6.dp.scaled())
-                                                    .size(24.dp.scaled())
-                                                    .clip(CircleShape)
-                                                    .background(Color.Black.copy(alpha = 0.6f))
-                                                    .clickable { viewModel.removeImage(uri) },
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Close,
-                                                    contentDescription = stringResource(R.string.delete),
-                                                    tint = Color.White,
-                                                    modifier = Modifier.size(14.dp.scaled())
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp.scaled()))
-
-                        // Privacy, Music & Add Label Row
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp.scaled()),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp.scaled())
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
-                                    .clickable { showAddLabelDialog.value = true },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Tag,
-                                    contentDescription = stringResource(R.string.create_add_label),
-                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(20.dp.scaled())
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp.scaled())
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
-                                    .clickable { viewModel.onPrivacyChange(!isPublic) },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = if (isPublic) Icons.Default.Language else Icons.Default.Lock,
-                                    contentDescription = if (isPublic) stringResource(R.string.public_text) else stringResource(R.string.private_text),
-                                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(20.dp.scaled())
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(8.dp.scaled()))
-
-                            var showMusicMenu by remember { mutableStateOf(false) }
-
-                            Box {
-                                Box(
-                                    modifier = Modifier
-                                        .size(36.dp.scaled())
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (selectedSongTrackId != null)
-                                                MaterialTheme.colorScheme.primary
-                                            else
-                                                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
-                                        )
-                                        .clickable {
-                                            if (selectedSongTrackId != null) {
-                                                showMusicMenu = true
-                                            } else {
-                                                navController.navigate(Screen.SearchPublic.route)
-                                            }
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MusicNote,
-                                        contentDescription = stringResource(R.string.create_memory_song),
-                                        tint = if (selectedSongTrackId != null)
-                                            Color.White
-                                        else
-                                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(20.dp.scaled())
-                                    )
-                                }
-
-                                DropdownMenu(
-                                    expanded = showMusicMenu,
-                                    onDismissRequest = { showMusicMenu = false }
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.create_change_song)) },
-                                        onClick = {
-                                            showMusicMenu = false
-                                            navController.navigate(Screen.SearchPublic.route)
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(R.string.create_delete_song_desc)) },
-                                        onClick = {
-                                            showMusicMenu = false
-                                            viewModel.setSelectedSong(null, null, null, null)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    // Right column for Text inputs and Tags
-                    Column(
-                        modifier = Modifier
-                            .weight(1.2f)
-                            .fillMaxHeight()
-                    ) {
-                        TextField(
-                            value = titleText,
-                            onValueChange = { viewModel.onTitleChange(it) },
-                            modifier = Modifier.fillMaxWidth(),
-                            placeholder = {
-                                Text(
-                                    text = stringResource(R.string.create_title_placeholder),
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                                    fontSize = 20.sp.scaled(),
-                                    fontWeight = FontWeight.Bold
+                            .fillMaxWidth()
+                            .height(180.dp.scaled())
+                            .background(boxBgColor, RoundedCornerShape(16.dp.scaled()))
+                            .clickable {
+                                multiplePhotoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                                 )
                             },
-                            singleLine = true,
-                            textStyle = TextStyle(
-                                fontSize = 20.sp.scaled(),
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
-                            ),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
-                        )
-
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 2.dp.scaled()),
-                            color = MaterialTheme.colorScheme.outline
-                        )
-
-                        TextField(
-                            value = contentText,
-                            onValueChange = { viewModel.onContentChange(it) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            placeholder = {
-                                Text(
-                                    text = stringResource(R.string.create_content_placeholder),
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                                    fontSize = 14.sp.scaled()
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (selectedImageUris.isEmpty()) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = stringResource(R.string.create_select_photo_desc),
+                                    tint = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier.size(36.dp.scaled())
                                 )
-                            },
-                            textStyle = TextStyle(
-                                fontSize = 14.sp.scaled(),
-                                color = MaterialTheme.colorScheme.onBackground
-                            ),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
-                        )
-
-                        if (tagsList.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(8.dp.scaled()))
+                                Text(
+                                    text = stringResource(R.string.create_select_photo_text),
+                                    fontSize = 14.sp.scaled(),
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
+                        } else {
                             LazyRow(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 4.dp.scaled()),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp.scaled())
+                                    .fillMaxSize()
+                                    .padding(8.dp.scaled()),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp.scaled()),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                items(tagsList) { tag ->
+                                items(selectedImageUris) { uri ->
                                     Box(
                                         modifier = Modifier
-                                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp.scaled()))
-                                            .background(boxBgColor, RoundedCornerShape(10.dp.scaled()))
-                                            .padding(horizontal = 10.dp.scaled(), vertical = 6.dp.scaled())
+                                            .fillMaxHeight()
+                                            .aspectRatio(1f)
                                     ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(text = tag, fontSize = 11.sp.scaled(), color = MaterialTheme.colorScheme.onBackground)
-                                            Spacer(modifier = Modifier.width(4.dp.scaled()))
+                                        AsyncImage(
+                                            model = uri.toString().toImageModel(),
+                                            contentDescription = stringResource(R.string.create_selected_photo_desc),
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .clip(RoundedCornerShape(12.dp.scaled())),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                                .padding(6.dp.scaled())
+                                                .size(24.dp.scaled())
+                                                .clip(CircleShape)
+                                                .background(Color.Black.copy(alpha = 0.6f))
+                                                .clickable { viewModel.removeImage(uri) },
+                                            contentAlignment = Alignment.Center
+                                        ) {
                                             Icon(
                                                 imageVector = Icons.Default.Close,
                                                 contentDescription = stringResource(R.string.delete),
-                                                tint = MaterialTheme.colorScheme.onBackground,
-                                                modifier = Modifier
-                                                    .size(12.dp.scaled())
-                                                    .clickable { viewModel.removeTag(tag) }
+                                                tint = Color.White,
+                                                modifier = Modifier.size(14.dp.scaled())
                                             )
                                         }
                                     }
@@ -460,6 +263,202 @@ fun EditMemoryScreen(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp.scaled()))
+
+                    // Privacy, Music & Add Label Row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp.scaled()),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp.scaled())
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+                                .clickable { showAddLabelDialog.value = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Tag,
+                                contentDescription = stringResource(R.string.create_add_label),
+                                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                                modifier = Modifier.size(20.dp.scaled())
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp.scaled())
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f))
+                                .clickable { viewModel.onPrivacyChange(!isPublic) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isPublic) Icons.Default.Language else Icons.Default.Lock,
+                                contentDescription = if (isPublic) stringResource(R.string.public_text) else stringResource(R.string.private_text),
+                                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                                modifier = Modifier.size(20.dp.scaled())
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp.scaled()))
+
+                        var showMusicMenu by remember { mutableStateOf(false) }
+
+                        Box {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp.scaled())
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (selectedSongTrackId != null)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                                    )
+                                    .clickable {
+                                        if (selectedSongTrackId != null) {
+                                            showMusicMenu = true
+                                        } else {
+                                            navController.navigate(Screen.SearchPublic.route)
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.MusicNote,
+                                    contentDescription = stringResource(R.string.create_memory_song),
+                                    tint = if (selectedSongTrackId != null)
+                                        Color.White
+                                    else
+                                        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(20.dp.scaled())
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = showMusicMenu,
+                                onDismissRequest = { showMusicMenu = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.create_change_song)) },
+                                    onClick = {
+                                        showMusicMenu = false
+                                        navController.navigate(Screen.SearchPublic.route)
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.create_delete_song_desc)) },
+                                    onClick = {
+                                        showMusicMenu = false
+                                        viewModel.setSelectedSong(null, null, null, null)
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp.scaled()))
+
+                    // Title Input Field
+                    TextField(
+                        value = titleText,
+                        onValueChange = { viewModel.onTitleChange(it) },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.create_title_placeholder),
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                fontSize = 22.sp.scaled(),
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            fontSize = 22.sp.scaled(),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        )
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp.scaled()),
+                        color = MaterialTheme.colorScheme.outline
+                    )
+
+                    // Content Input Field
+                    TextField(
+                        value = contentText,
+                        onValueChange = { viewModel.onContentChange(it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultMinSize(minHeight = 150.dp.scaled()),
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.create_content_placeholder),
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                fontSize = 16.sp.scaled()
+                            )
+                        },
+                        textStyle = TextStyle(
+                            fontSize = 16.sp.scaled(),
+                            color = MaterialTheme.colorScheme.onBackground
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp.scaled()))
+
+                    // Tags Display
+                    if (tagsList.isNotEmpty()) {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp.scaled()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp.scaled())
+                        ) {
+                            items(tagsList) { tag ->
+                                Box(
+                                    modifier = Modifier
+                                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp.scaled()))
+                                        .background(boxBgColor, RoundedCornerShape(10.dp.scaled()))
+                                        .padding(horizontal = 10.dp.scaled(), vertical = 6.dp.scaled())
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(text = tag, fontSize = 11.sp.scaled(), color = MaterialTheme.colorScheme.onBackground)
+                                        Spacer(modifier = Modifier.width(4.dp.scaled()))
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = stringResource(R.string.delete),
+                                            tint = MaterialTheme.colorScheme.onBackground,
+                                            modifier = Modifier
+                                                .size(12.dp.scaled())
+                                                .clickable { viewModel.removeTag(tag) }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp.scaled()))
                 }
             } else {
                 // Portrait layout (original)
