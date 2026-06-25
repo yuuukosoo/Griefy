@@ -50,4 +50,13 @@ class SearchSongViewModel @Inject constructor(
             manageAudioPlaybackUseCase(song.trackId, url)
         }
     }
+
+    fun stopPlayback() {
+        manageAudioPlaybackUseCase.stop()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        stopPlayback()
+    }
 }

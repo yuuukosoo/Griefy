@@ -17,4 +17,8 @@ class ManageAudioPlaybackUseCase @Inject constructor(
             audioPlayer.play(trackId, previewUrl)
         }
     }
+
+    fun stop() {
+        audioPlayer.stop()
+    }
 }

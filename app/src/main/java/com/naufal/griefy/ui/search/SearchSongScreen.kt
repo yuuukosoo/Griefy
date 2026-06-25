@@ -56,6 +56,12 @@ fun SearchSongScreen(
     val playingTrackId by viewModel.playingTrackId.collectAsState()
     val isMediaPlaying by viewModel.isMediaPlaying.collectAsState()
 
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopPlayback()
+        }
+    }
+
     val onCardClick = { song: Song ->
         viewModel.onSongClick(song)
     }
