@@ -6,7 +6,8 @@ import javax.inject.Inject
 class ManageAudioPlaybackUseCase @Inject constructor(
     private val audioPlayer: AudioPlayer
 ) {
-    operator fun invoke(trackId: String, previewUrl: String) {
+    operator fun invoke(trackId: String, previewUrl: String?) {
+        if (previewUrl.isNullOrEmpty()) return
         if (audioPlayer.currentTrackId.value == trackId) {
             if (audioPlayer.isPlaying.value) {
                 audioPlayer.pause()

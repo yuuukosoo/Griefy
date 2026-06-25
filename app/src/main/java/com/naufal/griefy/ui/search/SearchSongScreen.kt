@@ -41,6 +41,9 @@ import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 import com.naufal.griefy.util.scaled
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.PlatformTextStyle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,8 +59,16 @@ fun SearchSongScreen(
     val playingTrackId by viewModel.playingTrackId.collectAsState()
     val isMediaPlaying by viewModel.isMediaPlaying.collectAsState()
 
-    DisposableEffect(Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                viewModel.stopPlayback()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
             viewModel.stopPlayback()
         }
     }

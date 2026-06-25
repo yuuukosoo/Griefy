@@ -5,9 +5,11 @@ import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naufal.griefy.domain.repository.MemoryRepository
+import com.naufal.griefy.domain.usecase.memory.memories.AddImagesUseCase
+import com.naufal.griefy.domain.usecase.memory.memories.AddTagUseCase
 import com.naufal.griefy.domain.usecase.memory.memories.GetMemoryDetailUseCase
 import com.naufal.griefy.domain.usecase.memory.memories.UpdateMemoryUseCase
+import com.naufal.griefy.domain.usecase.memory.song.GetSongDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +22,9 @@ import javax.inject.Inject
 class EditMemoryViewModel @Inject constructor(
     private val getMemoryDetailUseCase: GetMemoryDetailUseCase,
     private val updateMemoryUseCase: UpdateMemoryUseCase,
-    private val repository: MemoryRepository,
+    private val getSongDetailsUseCase: GetSongDetailsUseCase,
+    private val addTagUseCase: AddTagUseCase,
+    private val addImagesUseCase: AddImagesUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -48,7 +52,7 @@ class EditMemoryViewModel @Inject constructor(
                     }
 
                     m.songTrackId?.let { trackId ->
-                        val song = repository.getSongDetails(trackId)
+                        val song = getSongDetailsUseCase(trackId)
                         song?.let { s ->
                             _uiState.update { state ->
                                 state.copy(
@@ -77,13 +81,8 @@ class EditMemoryViewModel @Inject constructor(
     }
 
     fun addTag(tag: String) {
-        val clean = tag.trim()
         _uiState.update { state ->
-            if (clean.isNotEmpty() && !state.tagsList.contains(clean)) {
-                state.copy(tagsList = state.tagsList + clean)
-            } else {
-                state
-            }
+            state.copy(tagsList = addTagUseCase(state.tagsList, tag))
         }
     }
 
@@ -106,8 +105,10 @@ class EditMemoryViewModel @Inject constructor(
 
     fun addImages(newUris: List<Uri>) {
         _uiState.update { state ->
-            val combinedList = (state.selectedImageUris + newUris).distinct().take(5)
-            state.copy(selectedImageUris = combinedList)
+            val current = state.selectedImageUris.map { it.toString() }
+            val new = newUris.map { it.toString() }
+            val result = addImagesUseCase(current, new)
+            state.copy(selectedImageUris = result.map { it.toUri() })
         }
     }
 

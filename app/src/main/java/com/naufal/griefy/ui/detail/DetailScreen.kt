@@ -46,6 +46,9 @@ import androidx.core.net.toUri
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import android.content.res.Configuration
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.R
@@ -70,18 +73,20 @@ fun DetailScreen(
     val selectedImageIndexForFullScreen = remember { mutableStateOf<Int?>(null) }
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
 
-    val isMediaPlaying by viewModel.isMediaPlaying.collectAsState()
-    val playingTrackId by viewModel.playingTrackId.collectAsState()
-    val currentPositionLong by viewModel.currentPosition.collectAsState()
-    val durationLong by viewModel.duration.collectAsState()
+    val isPlaying = state.isPlaying
+    val currentPosition = state.currentPosition
+    val duration = state.duration
 
-    val isCurrentTrack = songDetails?.trackId == playingTrackId
-    val isPlaying = isCurrentTrack && isMediaPlaying
-    val currentPosition = if (isCurrentTrack) currentPositionLong.toFloat() else 0f
-    val duration = if (isCurrentTrack) durationLong.toFloat() else 0f
-
-    DisposableEffect(Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                viewModel.stopAudio()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
             viewModel.stopAudio()
         }
     }

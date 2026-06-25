@@ -21,10 +21,13 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 class MemoryRepositoryImpl @Inject constructor(
@@ -36,6 +39,7 @@ class MemoryRepositoryImpl @Inject constructor(
 ) : MemoryRepository {
 
     private val repositoryScope = CoroutineScope(Dispatchers.IO)
+    private val songDetailsCache = mutableMapOf<String, com.naufal.griefy.domain.model.Song>()
 
     override fun getAllMemories(): Flow<List<Memory>> {
         val currentUserId = firebaseAuth.currentUser?.uid
@@ -95,15 +99,25 @@ class MemoryRepositoryImpl @Inject constructor(
                         }
                     }
 
-                    // Cache strategy: save remote memories to Room to allow offline viewing
+                    // Cache strategy: save/update remote memories to Room to allow offline viewing
                     repositoryScope.launch {
                         try {
-                            val localMemories = dao.getAllMemoriesOnce()
+                            val localMemories = dao.getAllMemoryKeysOnce()
                             for (remote in remoteMemories) {
-                                val exists = localMemories.any { it.createdAt == remote.createdAt && it.title == remote.title }
-                                if (!exists) {
+                                val local = localMemories.find {
+                                    (remote.id != 0 && it.id == remote.id) ||
+                                    (it.createdAt == remote.createdAt && it.userId == remote.userId)
+                                }
+                                if (local == null) {
                                     // Insert remote memory to Room database as cache
                                     dao.insertMemory(remote.toEntity())
+                                } else {
+                                    // Update existing cached memory with latest data from Firestore
+                                    dao.updateMemory(remote.copy(
+                                        id = local.id,
+                                        isSaved = local.isSaved,
+                                        isTrashed = local.isTrashed
+                                    ).toEntity())
                                 }
                             }
                         } catch (e: Exception) {
@@ -276,20 +290,42 @@ class MemoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getSongDetails(trackId: String): com.naufal.griefy.domain.model.Song? {
-        return try {
-            val id = trackId.toLongOrNull() ?: return null
-            val trackDto = deezerApi.getTrack(id)
-            com.naufal.griefy.domain.model.Song(
-                trackId = trackDto.id.toString(),
-                title = trackDto.title,
-                artistName = trackDto.artist.name,
-                imageUrl = trackDto.album.coverMedium,
-                previewUrl = trackDto.preview
-            )
-        } catch (e: Exception) {
-            android.util.Log.e(TAG_DEEZER_ERROR, "Gagal ambil detail lagu dari Deezer: ${e.message}", e)
-            null
+        songDetailsCache[trackId]?.let { return it }
+
+        val id = trackId.toLongOrNull() ?: return null
+        var lastError: Exception? = null
+
+        repeat(MAX_DEEZER_RETRIES) { attempt ->
+            try {
+                val trackDto = deezerApi.getTrack(id)
+                val song = com.naufal.griefy.domain.model.Song(
+                    trackId = trackDto.id.toString(),
+                    title = trackDto.title,
+                    artistName = trackDto.artist.name,
+                    imageUrl = trackDto.album.coverMedium,
+                    previewUrl = trackDto.preview
+                )
+                songDetailsCache[trackId] = song
+                return song
+            } catch (e: Exception) {
+                lastError = e
+                if (attempt < MAX_DEEZER_RETRIES - 1 && isDeezerRetryable(e)) {
+                    delay(DEEZER_RETRY_DELAY_MS * (attempt + 1))
+                }
+            }
         }
+
+        android.util.Log.e(
+            TAG_DEEZER_ERROR,
+            "Gagal ambil detail lagu dari Deezer setelah $MAX_DEEZER_RETRIES percobaan: ${lastError?.message}",
+            lastError
+        )
+        return songDetailsCache[trackId]
+    }
+
+    private fun isDeezerRetryable(error: Exception): Boolean {
+        return error is SocketTimeoutException ||
+            (error is IOException && error.message?.contains("timeout", ignoreCase = true) == true)
     }
 
     // Helper to compress local Uri to Base64 String
@@ -442,7 +478,7 @@ class MemoryRepositoryImpl @Inject constructor(
                 }
             }
 
-            val localMemories = dao.getAllLocalMemoriesIncludingTrashed()
+            val localMemories = dao.getAllLocalMemoryKeysIncludingTrashed()
             for (remote in remoteMemories) {
                 val localImageUris = remote.imageUris.mapIndexedNotNull { index, uri ->
                     saveUriToLocalFile(context, uri, "${userId}_sync_${remote.createdAt}_$index")
@@ -521,7 +557,7 @@ class MemoryRepositoryImpl @Inject constructor(
             }
 
 
-            val updatedLocalMemories = dao.getAllLocalMemoriesIncludingTrashed()
+            val updatedLocalMemories = dao.getAllLocalMemoryKeysIncludingTrashed()
             for (savedMem in savedMemories) {
                 val localImageUris = savedMem.imageUris.mapIndexedNotNull { index, uri ->
                     saveUriToLocalFile(context, uri, "${userId}_syncSaved_${savedMem.createdAt}_$index")
@@ -550,7 +586,7 @@ class MemoryRepositoryImpl @Inject constructor(
                 val originalUserId = localSaved.userId ?: userId
                 val originalDocId = "${originalUserId}_${localSaved.id}"
                 if (!savedDocIds.contains(originalDocId)) {
-                    dao.updateMemory(localSaved.copy(isSaved = false))
+                    dao.updateSavedStatus(localSaved.id, false)
                 }
             }
 
@@ -617,5 +653,7 @@ class MemoryRepositoryImpl @Inject constructor(
         private const val TAG_ROOM_CACHE_ERROR = "ROOM_CACHE_ERROR"
         private const val TAG_DEEZER_ERROR = "DEEZER_ERROR"
         private const val TAG_BASE64_ERROR = "BASE64_ERROR"
+        private const val MAX_DEEZER_RETRIES = 3
+        private const val DEEZER_RETRY_DELAY_MS = 500L
     }
 }

@@ -9,20 +9,25 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.naufal.griefy.domain.usecase.memory.song.ManageAudioPlaybackUseCase
+import com.naufal.griefy.domain.usecase.memory.song.ObserveAudioStateUseCase
+import com.naufal.griefy.domain.usecase.memory.song.StopAudioUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchSongViewModel @Inject constructor(
     private val searchSongsUseCase: SearchSongsUseCase,
-    private val manageAudioPlaybackUseCase: com.naufal.griefy.domain.usecase.memory.song.ManageAudioPlaybackUseCase,
-    audioPlayer: com.naufal.griefy.domain.repository.AudioPlayer
+    private val manageAudioPlaybackUseCase: ManageAudioPlaybackUseCase,
+    private val observeAudioStateUseCase: ObserveAudioStateUseCase,
+    private val stopAudioUseCase: StopAudioUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchSongState())
     val uiState: StateFlow<SearchSongState> = _uiState.asStateFlow()
 
-    val playingTrackId = audioPlayer.currentTrackId
-    val isMediaPlaying = audioPlayer.isPlaying
+    private val audioState = observeAudioStateUseCase()
+    val playingTrackId = audioState.currentTrackId
+    val isMediaPlaying = audioState.isPlaying
 
     fun onQueryChange(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
@@ -45,14 +50,11 @@ class SearchSongViewModel @Inject constructor(
     }
 
     fun onSongClick(song: com.naufal.griefy.domain.model.Song) {
-        val url = song.previewUrl
-        if (!url.isNullOrEmpty()) {
-            manageAudioPlaybackUseCase(song.trackId, url)
-        }
+        manageAudioPlaybackUseCase(song.trackId, song.previewUrl)
     }
 
     fun stopPlayback() {
-        manageAudioPlaybackUseCase.stop()
+        stopAudioUseCase()
     }
 
     override fun onCleared() {

@@ -52,4 +52,13 @@ interface MemoryDao {
 
     @Query("DELETE FROM memory_table")
     suspend fun clearAllLocalMemories()
+
+    @Query("SELECT id, title, createdAt, isSaved, isTrashed, userId FROM memory_table WHERE isTrashed = 0")
+    suspend fun getAllMemoryKeysOnce(): List<MemoryKeys>
+
+    @Query("SELECT id, title, createdAt, isSaved, isTrashed, userId FROM memory_table")
+    suspend fun getAllLocalMemoryKeysIncludingTrashed(): List<MemoryKeys>
+
+    @Query("UPDATE memory_table SET isSaved = :isSaved WHERE id = :id")
+    suspend fun updateSavedStatus(id: Int, isSaved: Boolean)
 }

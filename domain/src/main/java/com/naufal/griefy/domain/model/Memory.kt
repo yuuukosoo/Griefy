@@ -20,5 +20,6 @@ data class Memory(
 ) {
     companion object {
         const val DEFAULT_USERNAME = "Guest"
+        const val MAX_IMAGES = 5
     }
 }

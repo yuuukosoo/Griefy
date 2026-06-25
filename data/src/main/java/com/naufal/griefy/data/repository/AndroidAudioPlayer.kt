@@ -108,14 +108,23 @@ class AndroidAudioPlayer @Inject constructor() : AudioPlayer {
     override fun stop() {
         try {
             stopProgressTracker()
-            mediaPlayer?.let { player ->
+            val player = mediaPlayer
+            if (player != null) {
                 player.setOnPreparedListener(null)
                 player.setOnCompletionListener(null)
                 player.setOnErrorListener(null)
-                if (player.isPlaying) {
-                    player.stop()
+                mediaPlayer = null
+                scope.launch(Dispatchers.IO) {
+                    try {
+                        if (player.isPlaying) {
+                            player.stop()
+                        }
+                        player.reset()
+                        player.release()
+                    } catch (e: Exception) {
+                        android.util.Log.e("AUDIO_PLAYER", "Gagal menghentikan/me-release player di background", e)
+                    }
                 }
-                player.reset()
             }
         } catch (e: Exception) {
             android.util.Log.e("AUDIO_PLAYER", "Gagal menghentikan playback", e)
@@ -125,13 +134,7 @@ class AndroidAudioPlayer @Inject constructor() : AudioPlayer {
     }
 
     override fun release() {
-        try {
-            stop()
-            mediaPlayer?.release()
-            mediaPlayer = null
-        } catch (e: Exception) {
-            android.util.Log.e("AUDIO_PLAYER", "Gagal me-release MediaPlayer", e)
-        }
+        stop()
     }
 
     private fun startProgressTracker() {
@@ -143,10 +146,10 @@ class AndroidAudioPlayer @Inject constructor() : AudioPlayer {
                         _currentPosition.value = player.currentPosition.toLong()
                         _duration.value = player.duration.toLong()
                     }
-                } catch (e: Exception) {
-                    // Ignore exceptions during state transition tracking
+                } catch (_: Exception) {
+
                 }
-                delay(300)
+                delay(1000)
             }
         }
     }

@@ -3,8 +3,13 @@ package com.naufal.griefy.ui.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.naufal.griefy.domain.usecase.memory.memories.BumpMemoryUseCase
 import com.naufal.griefy.domain.usecase.memory.memories.GetMemoryDetailUseCase
-import com.naufal.griefy.domain.usecase.memory.song.GetSongDetailsUseCase
+import com.naufal.griefy.domain.model.LoadSongResult
+import com.naufal.griefy.domain.usecase.memory.song.LoadMemorySongUseCase
+import com.naufal.griefy.domain.usecase.memory.song.ManageAudioPlaybackUseCase
+import com.naufal.griefy.domain.usecase.memory.song.ObserveAudioStateUseCase
+import com.naufal.griefy.domain.usecase.memory.song.StopAudioUseCase
 import com.naufal.griefy.domain.usecase.memory.trash.MoveToTrashUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -14,34 +19,49 @@ import javax.inject.Inject
 @HiltViewModel
 class DetailViewModel @Inject constructor(
     getMemoryDetailUseCase: GetMemoryDetailUseCase,
-    private val getSongDetailsUseCase: GetSongDetailsUseCase,
+    private val loadMemorySongUseCase: LoadMemorySongUseCase,
+    private val manageAudioPlaybackUseCase: ManageAudioPlaybackUseCase,
+    private val stopAudioUseCase: StopAudioUseCase,
+    observeAudioStateUseCase: ObserveAudioStateUseCase,
     private val moveToTrashUseCase: MoveToTrashUseCase,
-    private val manageAudioPlaybackUseCase: com.naufal.griefy.domain.usecase.memory.song.ManageAudioPlaybackUseCase,
-    private val audioPlayer: com.naufal.griefy.domain.repository.AudioPlayer,
-    private val bumpMemoryUseCase: com.naufal.griefy.domain.usecase.memory.memories.BumpMemoryUseCase,
+    private val bumpMemoryUseCase: BumpMemoryUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val memoryId: Int = checkNotNull(savedStateHandle["memoryId"])
 
     private val _uiState = MutableStateFlow(DetailState())
-    val uiState: StateFlow<DetailState> = _uiState.asStateFlow()
+    private val audioState = observeAudioStateUseCase()
 
-    val playingTrackId = audioPlayer.currentTrackId
-    val isMediaPlaying = audioPlayer.isPlaying
-    val currentPosition = audioPlayer.currentPosition
-    val duration = audioPlayer.duration
+    val uiState: StateFlow<DetailState> = combine(
+        _uiState,
+        audioState.isPlaying,
+        audioState.currentTrackId,
+        audioState.currentPosition,
+        audioState.duration
+    ) { state, isPlaying, currentTrackId, position, duration ->
+        val isCurrentTrack = state.songDetails?.trackId == currentTrackId
+        state.copy(
+            isPlaying = isCurrentTrack && isPlaying,
+            currentPosition = if (isCurrentTrack) position.toFloat() else 0f,
+            duration = if (isCurrentTrack) duration.toFloat() else 0f
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = DetailState()
+    )
+
+    private var hasAutoPlayed = false
+    private var loadedSongTrackId: String? = null
 
     fun onPlayPauseClick() {
         val song = _uiState.value.songDetails ?: return
-        val url = song.previewUrl
-        if (!url.isNullOrEmpty()) {
-            manageAudioPlaybackUseCase(song.trackId, url)
-        }
+        manageAudioPlaybackUseCase(song.trackId, song.previewUrl)
     }
 
     fun stopAudio() {
-        audioPlayer.stop()
+        stopAudioUseCase()
     }
 
     fun bumpMemory() {
@@ -50,8 +70,6 @@ class DetailViewModel @Inject constructor(
             bumpMemoryUseCase(currentMemory)
         }
     }
-
-    private var hasAutoPlayed = false
 
     init {
         viewModelScope.launch {
@@ -63,20 +81,24 @@ class DetailViewModel @Inject constructor(
                     )
                 }
 
-                detail.memory?.songTrackId?.let { trackId ->
-                    val song = getSongDetailsUseCase(trackId)
-                    _uiState.update { state ->
-                        state.copy(songDetails = song)
+                val result = loadMemorySongUseCase(
+                    trackId = detail.memory?.songTrackId,
+                    loadedTrackId = loadedSongTrackId,
+                    currentSong = _uiState.value.songDetails,
+                    hasAutoPlayed = hasAutoPlayed,
+                    onAutoPlayed = { hasAutoPlayed = true }
+                )
+
+                when (result) {
+                    is LoadSongResult.Success -> {
+                        loadedSongTrackId = result.song.trackId
+                        _uiState.update { it.copy(songDetails = result.song) }
                     }
-                    val url = song?.previewUrl
-                    if (!hasAutoPlayed && song != null && !url.isNullOrEmpty()) {
-                        hasAutoPlayed = true
-                        manageAudioPlaybackUseCase(song.trackId, url)
+                    is LoadSongResult.NoSong, is LoadSongResult.FetchFailed -> {
+                        loadedSongTrackId = null
+                        _uiState.update { it.copy(songDetails = null) }
                     }
-                } ?: run {
-                    _uiState.update { state ->
-                        state.copy(songDetails = null)
-                    }
+                    is LoadSongResult.Unchanged -> Unit
                 }
             }
         }
