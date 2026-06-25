@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import com.google.firebase.firestore.FirebaseFirestore
+import com.naufal.griefy.data.BuildConfig
 import com.naufal.griefy.data.local.MemoryDao
 import com.naufal.griefy.data.remote.DeezerApi
 import com.naufal.griefy.domain.model.Memory
@@ -24,6 +25,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -40,6 +48,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
     private val repositoryScope = CoroutineScope(Dispatchers.IO)
     private val songDetailsCache = mutableMapOf<String, com.naufal.griefy.domain.model.Song>()
+    private val okHttpClient = OkHttpClient()
 
     override fun getAllMemories(): Flow<List<Memory>> {
         val currentUserId = firebaseAuth.currentUser?.uid
@@ -154,8 +163,8 @@ class MemoryRepositoryImpl @Inject constructor(
 
         // Upload to Firestore if it belongs to the current user
         if (userId == currentUid && currentUid != null) {
-            val base64Uris = localImageUris.mapNotNull { getBase64FromUri(context, it) }
-            val uploadMemory = finalLocalMemory.copy(imageUris = base64Uris)
+            val cloudinaryUris = localImageUris.mapNotNull { uploadImageToCloudinary(it) }
+            val uploadMemory = finalLocalMemory.copy(imageUris = cloudinaryUris)
             uploadToFirestore(uploadMemory)
         }
     }
@@ -173,8 +182,8 @@ class MemoryRepositoryImpl @Inject constructor(
 
         // Sync with Firestore if it belongs to the current user
         if (userId == currentUid && currentUid != null) {
-            val base64Uris = localImageUris.mapNotNull { getBase64FromUri(context, it) }
-            val uploadMemory = localMemory.copy(imageUris = base64Uris)
+            val cloudinaryUris = localImageUris.mapNotNull { uploadImageToCloudinary(it) }
+            val uploadMemory = localMemory.copy(imageUris = cloudinaryUris)
             uploadToFirestore(uploadMemory)
         }
 
@@ -248,7 +257,9 @@ class MemoryRepositoryImpl @Inject constructor(
         dao.restoreFromTrash(id)
         val memory = dao.getMemoryById(id)?.toDomain()
         if (memory != null && (memory.isPublic || memory.userId == currentUid)) {
-            uploadToFirestore(memory)
+            val cloudinaryUris = memory.imageUris.mapNotNull { uploadImageToCloudinary(it) }
+            val uploadMemory = memory.copy(imageUris = cloudinaryUris)
+            uploadToFirestore(uploadMemory)
         }
     }
 
@@ -328,45 +339,59 @@ class MemoryRepositoryImpl @Inject constructor(
             (error is IOException && error.message?.contains("timeout", ignoreCase = true) == true)
     }
 
-    // Helper to compress local Uri to Base64 String
-    private fun getBase64FromUri(context: Context, uriString: String): String? {
-        if (uriString.startsWith(PREFIX_BASE64) || uriString.isBlank()) return uriString
-        return try {
-            val uri = uriString.toUri()
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val originalBitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
+    // Helper to upload image to Cloudinary and return the secure URL
+    private suspend fun uploadImageToCloudinary(uriString: String): String? {
+        // Already a Cloudinary/remote URL — skip re-upload
+        if (uriString.startsWith("https://")) return uriString
+        if (uriString.isBlank()) return null
 
-            if (originalBitmap == null) return null
+        return withContext(Dispatchers.IO) {
+            try {
+                val uri = uriString.toUri()
+                val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
+                val originalBitmap = BitmapFactory.decodeStream(inputStream)
+                inputStream.close()
 
-            val maxDimension = 800
-            val width = originalBitmap.width
-            val height = originalBitmap.height
-            val scaledBitmap = if (width > maxDimension || height > maxDimension) {
-                val ratio = width.toFloat() / height.toFloat()
-                val newWidth: Int
-                val newHeight: Int
-                if (ratio > 1) {
-                    newWidth = maxDimension
-                    newHeight = (maxDimension / ratio).toInt()
+                if (originalBitmap == null) return@withContext null
+
+                // Resize to max 1080px before upload
+                val maxDimension = 1080
+                val width = originalBitmap.width
+                val height = originalBitmap.height
+                val scaledBitmap = if (width > maxDimension || height > maxDimension) {
+                    val ratio = width.toFloat() / height.toFloat()
+                    if (ratio > 1) originalBitmap.scale(maxDimension, (maxDimension / ratio).toInt(), true)
+                    else originalBitmap.scale((maxDimension * ratio).toInt(), maxDimension, true)
+                } else originalBitmap
+
+                val outputStream = ByteArrayOutputStream()
+                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
+                val imageBytes = outputStream.toByteArray()
+                outputStream.close()
+
+                val requestBody = MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("upload_preset", BuildConfig.CLOUDINARY_UPLOAD_PRESET)
+                    .addFormDataPart("file", "image.jpg", imageBytes.toRequestBody("image/jpeg".toMediaType()))
+                    .build()
+
+                val request = Request.Builder()
+                    .url("https://api.cloudinary.com/v1_1/${BuildConfig.CLOUDINARY_CLOUD_NAME}/image/upload")
+                    .post(requestBody)
+                    .build()
+
+                val response = okHttpClient.newCall(request).execute()
+                if (response.isSuccessful) {
+                    val body = response.body?.string() ?: return@withContext null
+                    JSONObject(body).getString("secure_url")
                 } else {
-                    newHeight = maxDimension
-                    newWidth = (maxDimension * ratio).toInt()
+                    android.util.Log.e(TAG_CLOUDINARY, "Upload gagal: ${response.code} - ${response.body?.string()}")
+                    null
                 }
-                originalBitmap.scale(newWidth, newHeight, true)
-            } else {
-                originalBitmap
+            } catch (e: Exception) {
+                android.util.Log.e(TAG_CLOUDINARY, "Error upload ke Cloudinary: ${e.message}", e)
+                null
             }
-
-            val outputStream = ByteArrayOutputStream()
-            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-            val imageBytes = outputStream.toByteArray()
-            outputStream.close()
-
-            PREFIX_BASE64 + Base64.encodeToString(imageBytes, Base64.DEFAULT).trim()
-        } catch (e: Exception) {
-            android.util.Log.e(TAG_BASE64_ERROR, "Error converting image to Base64: ${e.message}", e)
-            null
         }
     }
 
@@ -480,10 +505,11 @@ class MemoryRepositoryImpl @Inject constructor(
 
             val localMemories = dao.getAllLocalMemoryKeysIncludingTrashed()
             for (remote in remoteMemories) {
-                val localImageUris = remote.imageUris.mapIndexedNotNull { index, uri ->
-                    saveUriToLocalFile(context, uri, "${userId}_sync_${remote.createdAt}_$index")
+                val resolvedUris = remote.imageUris.mapIndexedNotNull { index, uri ->
+                    if (uri.startsWith("https://")) uri
+                    else saveUriToLocalFile(context, uri, "${userId}_sync_${remote.createdAt}_$index")
                 }
-                val remoteWithLocalImages = remote.copy(imageUris = localImageUris)
+                val remoteWithLocalImages = remote.copy(imageUris = resolvedUris)
 
                 val local = if (remoteWithLocalImages.id != 0) {
                     localMemories.find { it.id == remoteWithLocalImages.id }
@@ -559,10 +585,11 @@ class MemoryRepositoryImpl @Inject constructor(
 
             val updatedLocalMemories = dao.getAllLocalMemoryKeysIncludingTrashed()
             for (savedMem in savedMemories) {
-                val localImageUris = savedMem.imageUris.mapIndexedNotNull { index, uri ->
-                    saveUriToLocalFile(context, uri, "${userId}_syncSaved_${savedMem.createdAt}_$index")
+                val resolvedUris = savedMem.imageUris.mapIndexedNotNull { index, uri ->
+                    if (uri.startsWith("https://")) uri
+                    else saveUriToLocalFile(context, uri, "${userId}_syncSaved_${savedMem.createdAt}_$index")
                 }
-                val savedMemWithLocalImages = savedMem.copy(imageUris = localImageUris)
+                val savedMemWithLocalImages = savedMem.copy(imageUris = resolvedUris)
 
                 val local = updatedLocalMemories.find {
                     (savedMemWithLocalImages.id != 0 && it.id == savedMemWithLocalImages.id) ||
@@ -652,7 +679,7 @@ class MemoryRepositoryImpl @Inject constructor(
         private const val TAG_FIRESTORE_ERROR = "FIRESTORE_ERROR"
         private const val TAG_ROOM_CACHE_ERROR = "ROOM_CACHE_ERROR"
         private const val TAG_DEEZER_ERROR = "DEEZER_ERROR"
-        private const val TAG_BASE64_ERROR = "BASE64_ERROR"
+        private const val TAG_CLOUDINARY = "CLOUDINARY_UPLOAD"
         private const val MAX_DEEZER_RETRIES = 3
         private const val DEEZER_RETRY_DELAY_MS = 500L
     }

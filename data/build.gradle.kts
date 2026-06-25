@@ -16,6 +16,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"dmuils2vt\"")
+        buildConfigField("String", "CLOUDINARY_UPLOAD_PRESET", "\"griefy_upload\"")
     }
 
     buildFeatures {
