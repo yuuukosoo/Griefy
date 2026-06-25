@@ -19,7 +19,8 @@ fun MemoryEntity.toDomain(): Memory {
         userName = userName,
         userAvatar = userAvatar,
         userId = userId,
-        isSaved = isSaved
+        isSaved = isSaved,
+        savedAt = savedAt
     )
 }
 
@@ -39,6 +40,7 @@ fun Memory.toEntity(): MemoryEntity {
         userName = userName,
         userAvatar = userAvatar,
         userId = userId,
-        isSaved = isSaved
+        isSaved = isSaved,
+        savedAt = savedAt
     )
 }

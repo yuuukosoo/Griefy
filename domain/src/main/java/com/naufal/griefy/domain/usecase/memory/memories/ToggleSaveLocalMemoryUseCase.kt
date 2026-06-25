@@ -1,4 +1,4 @@
-﻿package com.naufal.griefy.domain.usecase.memory.memories
+package com.naufal.griefy.domain.usecase.memory.memories
 
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.repository.MemoryRepository
@@ -8,6 +8,13 @@ class ToggleSaveLocalMemoryUseCase @Inject constructor(
     private val memoryRepository: MemoryRepository
 ) {
     suspend operator fun invoke(memory: Memory) {
-        memoryRepository.updateMemory(memory.copy(isSaved = !memory.isSaved))
+        val newIsSaved = !memory.isSaved
+        val newSavedAt = if (newIsSaved) System.currentTimeMillis() else 0L
+        memoryRepository.updateMemory(
+            memory.copy(
+                isSaved = newIsSaved,
+                savedAt = newSavedAt
+            )
+        )
     }
 }

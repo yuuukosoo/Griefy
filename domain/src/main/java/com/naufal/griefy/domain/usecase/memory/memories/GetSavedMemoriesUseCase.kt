@@ -1,4 +1,4 @@
-﻿package com.naufal.griefy.domain.usecase.memory.memories
+package com.naufal.griefy.domain.usecase.memory.memories
 
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.model.UserProfile
@@ -41,7 +41,7 @@ class GetSavedMemoriesUseCase @Inject constructor(
                 } else {
                     memory
                 }
-            }.sortedByDescending { it.createdAt }
+            }.sortedByDescending { it.savedAt }
         }
     }
 }

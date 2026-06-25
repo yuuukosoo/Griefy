@@ -1,4 +1,4 @@
-﻿package com.naufal.griefy.domain.usecase.memory.memories
+package com.naufal.griefy.domain.usecase.memory.memories
 
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.repository.MemoryRepository
@@ -12,9 +12,21 @@ class ToggleSaveMemoryUseCase @Inject constructor(
         val localMemories = memoryRepository.getAllMemories().first()
         val localMatch = localMemories.find { it.createdAt == memory.createdAt && it.title == memory.title }
         if (localMatch != null) {
-            memoryRepository.updateMemory(localMatch.copy(isSaved = !localMatch.isSaved))
+            val newIsSaved = !localMatch.isSaved
+            val newSavedAt = if (newIsSaved) System.currentTimeMillis() else 0L
+            memoryRepository.updateMemory(
+                localMatch.copy(
+                    isSaved = newIsSaved,
+                    savedAt = newSavedAt
+                )
+            )
         } else {
-            memoryRepository.addMemory(memory.copy(isSaved = true))
+            memoryRepository.addMemory(
+                memory.copy(
+                    isSaved = true,
+                    savedAt = System.currentTimeMillis()
+                )
+            )
         }
     }
 }

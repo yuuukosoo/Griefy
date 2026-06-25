@@ -15,7 +15,8 @@ data class Memory(
     val userName: String? = null,
     val userAvatar: String? = null,
     val userId: String? = null,
-    val isSaved: Boolean = false
+    val isSaved: Boolean = false,
+    val savedAt: Long = 0L
 ) {
     companion object {
         const val DEFAULT_USERNAME = "Guest"
