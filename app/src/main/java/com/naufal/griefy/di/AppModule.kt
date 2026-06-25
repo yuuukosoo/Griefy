@@ -126,4 +126,10 @@ object AppModule {
     ): com.naufal.griefy.domain.repository.ReminderScheduler {
         return com.naufal.griefy.ui.settings.ReminderScheduler(context)
     }
+
+    @Provides
+    @Singleton
+    fun provideAudioPlayer(): com.naufal.griefy.domain.repository.AudioPlayer {
+        return com.naufal.griefy.data.repository.AndroidAudioPlayer()
+    }
 }

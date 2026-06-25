@@ -13,11 +13,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchSongViewModel @Inject constructor(
-    private val searchSongsUseCase: SearchSongsUseCase
+    private val searchSongsUseCase: SearchSongsUseCase,
+    private val manageAudioPlaybackUseCase: com.naufal.griefy.domain.usecase.memory.song.ManageAudioPlaybackUseCase,
+    audioPlayer: com.naufal.griefy.domain.repository.AudioPlayer
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchSongState())
     val uiState: StateFlow<SearchSongState> = _uiState.asStateFlow()
+
+    val playingTrackId = audioPlayer.currentTrackId
+    val isMediaPlaying = audioPlayer.isPlaying
 
     fun onQueryChange(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
@@ -36,6 +41,13 @@ class SearchSongViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+        }
+    }
+
+    fun onSongClick(song: com.naufal.griefy.domain.model.Song) {
+        val url = song.previewUrl
+        if (!url.isNullOrEmpty()) {
+            manageAudioPlaybackUseCase(song.trackId, url)
         }
     }
 }

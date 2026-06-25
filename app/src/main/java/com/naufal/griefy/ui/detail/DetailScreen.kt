@@ -49,7 +49,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
-import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -70,85 +69,19 @@ fun DetailScreen(
     val selectedImageIndexForFullScreen = remember { mutableStateOf<Int?>(null) }
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
 
-    var isPlaying by remember { mutableStateOf(false) }
-    var isPrepared by remember { mutableStateOf(false) }
-    val mediaPlayer = remember(songDetails) { android.media.MediaPlayer() }
+    val isMediaPlaying by viewModel.isMediaPlaying.collectAsState()
+    val playingTrackId by viewModel.playingTrackId.collectAsState()
+    val currentPositionLong by viewModel.currentPosition.collectAsState()
+    val durationLong by viewModel.duration.collectAsState()
 
-    var currentPosition by remember { mutableFloatStateOf(0f) }
-    var duration by remember { mutableFloatStateOf(0f) }
+    val isCurrentTrack = songDetails?.trackId == playingTrackId
+    val isPlaying = isCurrentTrack && isMediaPlaying
+    val currentPosition = if (isCurrentTrack) currentPositionLong.toFloat() else 0f
+    val duration = if (isCurrentTrack) durationLong.toFloat() else 0f
 
-    DisposableEffect(mediaPlayer) {
-        val previewUrl = songDetails?.previewUrl
-        if (!previewUrl.isNullOrEmpty()) {
-            try {
-                mediaPlayer.setDataSource(previewUrl)
-                mediaPlayer.isLooping = true
-                mediaPlayer.prepareAsync()
-                mediaPlayer.setOnPreparedListener {
-                    isPrepared = true
-                    try {
-                        mediaPlayer.start()
-                        isPlaying = true
-                    } catch (e: Exception) {
-                        android.util.Log.e("MEDIA_PLAYER", "Gagal memutar lagu setelah disiapkan", e)
-                        isPlaying = false
-                    }
-                }
-                mediaPlayer.setOnCompletionListener {
-                    try {
-                        mediaPlayer.seekTo(0)
-                        mediaPlayer.start()
-                        isPlaying = true
-                    } catch (_: Exception) {
-                        isPrepared = false
-                        isPlaying = false
-                        try {
-                            mediaPlayer.reset()
-                        } catch (_: Exception) {}
-                    }
-                }
-                mediaPlayer.setOnErrorListener { _, what, extra ->
-                    android.util.Log.e("MEDIA_PLAYER", "MediaPlayer error: what=$what, extra=$extra")
-                    isPrepared = false
-                    isPlaying = false
-                    try {
-                        mediaPlayer.reset()
-                    } catch (_: Exception) {}
-                    true
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("MEDIA_PLAYER", "Gagal inisialisasi MediaPlayer", e)
-            }
-        }
+    DisposableEffect(Unit) {
         onDispose {
-            isPrepared = false
-            try {
-                if (mediaPlayer.isPlaying) {
-                    mediaPlayer.stop()
-                }
-            } catch (_: Exception) {}
-            try {
-                mediaPlayer.release()
-            } catch (_: Exception) {}
-            isPlaying = false
-            currentPosition = 0f
-            duration = 0f
-        }
-    }
-
-    LaunchedEffect(mediaPlayer, isPlaying) {
-        if (isPlaying) {
-            while (isPlaying) {
-                try {
-                    if (isPrepared) {
-                        currentPosition = mediaPlayer.currentPosition.toFloat()
-                        duration = mediaPlayer.duration.toFloat()
-                    }
-                } catch (_: Exception) {
-
-                }
-                delay(300)
-            }
+            viewModel.stopAudio()
         }
     }
 
@@ -314,20 +247,7 @@ fun DetailScreen(
                                 if (!song.previewUrl.isNullOrEmpty()) {
                                     IconButton(
                                         onClick = {
-                                            if (isPrepared) {
-                                                try {
-                                                    if (isPlaying) {
-                                                        mediaPlayer.pause()
-                                                        isPlaying = false
-                                                    } else {
-                                                        mediaPlayer.start()
-                                                        isPlaying = true
-                                                    }
-                                                } catch (e: Exception) {
-                                                    android.util.Log.e("MEDIA_PLAYER", "Gagal memutar/menjeda lagu", e)
-                                                    isPlaying = false
-                                                }
-                                            }
+                                            viewModel.onPlayPauseClick()
                                         },
                                         modifier = Modifier.size(36.dp.scaled())
                                     ) {
@@ -415,8 +335,9 @@ fun DetailScreen(
                         ) {
                             val avatar = mem.userAvatar
                             if (!avatar.isNullOrEmpty()) {
+                                val avatarModel = remember(avatar) { avatar.toImageModel() }
                                 AsyncImage(
-                                    model = avatar.toImageModel(),
+                                    model = avatarModel,
                                     contentDescription = null,
                                     modifier = Modifier.fillMaxSize().clip(CircleShape),
                                     contentScale = ContentScale.Crop
@@ -460,8 +381,11 @@ fun DetailScreen(
                                 state = pagerState,
                                 modifier = pagerModifier
                             ) { page ->
+                                val imageModel = remember(mem.imageUris, page) {
+                                    mem.imageUris[page].toImageModel()
+                                }
                                 AsyncImage(
-                                    model = mem.imageUris[page].toImageModel(),
+                                    model = imageModel,
                                     contentDescription = stringResource(R.string.home_memory_photo_desc),
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -570,20 +494,7 @@ fun DetailScreen(
                     if (!songDetails.previewUrl.isNullOrEmpty()) {
                         IconButton(
                             onClick = {
-                                if (isPrepared) {
-                                    try {
-                                        if (isPlaying) {
-                                            mediaPlayer.pause()
-                                            isPlaying = false
-                                        } else {
-                                            mediaPlayer.start()
-                                            isPlaying = true
-                                        }
-                                    } catch (e: Exception) {
-                                        android.util.Log.e("MEDIA_PLAYER", "Gagal memutar/menjeda lagu (Landscape)", e)
-                                        isPlaying = false
-                                    }
-                                }
+                                viewModel.onPlayPauseClick()
                             },
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
@@ -625,8 +536,11 @@ fun DetailScreen(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
+                    val imageModel = remember(memory.imageUris, page) {
+                        memory.imageUris[page].toImageModel()
+                    }
                     AsyncImage(
-                        model = memory.imageUris[page].toImageModel(),
+                        model = imageModel,
                         contentDescription = stringResource(R.string.home_memory_photo_desc),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit

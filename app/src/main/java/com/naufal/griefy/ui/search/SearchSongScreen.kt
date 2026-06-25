@@ -53,71 +53,11 @@ fun SearchSongScreen(
     val searchResults = uiState.searchResults
     val isLoading = uiState.isLoading
 
-    var playingTrackId by remember { mutableStateOf<String?>(null) }
-    var isMediaPlaying by remember { mutableStateOf(false) }
-    val mediaPlayer = remember { android.media.MediaPlayer() }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            mediaPlayer.release()
-        }
-    }
+    val playingTrackId by viewModel.playingTrackId.collectAsState()
+    val isMediaPlaying by viewModel.isMediaPlaying.collectAsState()
 
     val onCardClick = { song: Song ->
-        if (playingTrackId == song.trackId) {
-            try {
-                if (mediaPlayer.isPlaying) {
-                    mediaPlayer.pause()
-                    isMediaPlaying = false
-                } else {
-                    mediaPlayer.start()
-                    isMediaPlaying = true
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("SEARCH_PREVIEW", "Gagal memutar/menjeda lagu pratinjau", e)
-                isMediaPlaying = false
-                playingTrackId = null
-            }
-        } else {
-            mediaPlayer.reset()
-            val previewUrl = song.previewUrl
-            if (!previewUrl.isNullOrEmpty()) {
-                try {
-                    mediaPlayer.setDataSource(previewUrl)
-                    mediaPlayer.isLooping = true
-                    mediaPlayer.prepareAsync()
-                    mediaPlayer.setOnPreparedListener {
-                        mediaPlayer.start()
-                        playingTrackId = song.trackId
-                        isMediaPlaying = true
-                    }
-                    mediaPlayer.setOnCompletionListener {
-                        try {
-                            mediaPlayer.seekTo(0)
-                            mediaPlayer.start()
-                            isMediaPlaying = true
-                        } catch (_: Exception) {
-                            playingTrackId = null
-                            isMediaPlaying = false
-                            try {
-                                mediaPlayer.reset()
-                            } catch (_: Exception) {}
-                        }
-                    }
-                    mediaPlayer.setOnErrorListener { _, what, extra ->
-                        android.util.Log.e("SEARCH_PREVIEW", "MediaPlayer error: what=$what, extra=$extra")
-                        playingTrackId = null
-                        isMediaPlaying = false
-                        try {
-                            mediaPlayer.reset()
-                        } catch (_: Exception) {}
-                        true
-                    }
-                } catch (e: Exception) {
-                    android.util.Log.e("SEARCH_PREVIEW", "Gagal memutar lagu pratinjau", e)
-                }
-            }
-        }
+        viewModel.onSongClick(song)
     }
 
     val horizontalPadding = getAdaptiveHorizontalPadding()

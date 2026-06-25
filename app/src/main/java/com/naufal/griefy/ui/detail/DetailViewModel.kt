@@ -16,6 +16,8 @@ class DetailViewModel @Inject constructor(
     getMemoryDetailUseCase: GetMemoryDetailUseCase,
     private val getSongDetailsUseCase: GetSongDetailsUseCase,
     private val moveToTrashUseCase: MoveToTrashUseCase,
+    private val manageAudioPlaybackUseCase: com.naufal.griefy.domain.usecase.memory.song.ManageAudioPlaybackUseCase,
+    private val audioPlayer: com.naufal.griefy.domain.repository.AudioPlayer,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -23,6 +25,25 @@ class DetailViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(DetailState())
     val uiState: StateFlow<DetailState> = _uiState.asStateFlow()
+
+    val playingTrackId = audioPlayer.currentTrackId
+    val isMediaPlaying = audioPlayer.isPlaying
+    val currentPosition = audioPlayer.currentPosition
+    val duration = audioPlayer.duration
+
+    fun onPlayPauseClick() {
+        val song = _uiState.value.songDetails ?: return
+        val url = song.previewUrl
+        if (!url.isNullOrEmpty()) {
+            manageAudioPlaybackUseCase(song.trackId, url)
+        }
+    }
+
+    fun stopAudio() {
+        audioPlayer.stop()
+    }
+
+    private var hasAutoPlayed = false
 
     init {
         viewModelScope.launch {
@@ -38,6 +59,11 @@ class DetailViewModel @Inject constructor(
                     val song = getSongDetailsUseCase(trackId)
                     _uiState.update { state ->
                         state.copy(songDetails = song)
+                    }
+                    val url = song?.previewUrl
+                    if (!hasAutoPlayed && song != null && !url.isNullOrEmpty()) {
+                        hasAutoPlayed = true
+                        manageAudioPlaybackUseCase(song.trackId, url)
                     }
                 } ?: run {
                     _uiState.update { state ->
