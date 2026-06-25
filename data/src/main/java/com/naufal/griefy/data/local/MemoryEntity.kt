@@ -11,6 +11,7 @@ data class MemoryEntity(
     val content: String,
     val imageUris: List<String>,
     val createdAt: Long,
+    val updatedAt: Long = createdAt,
     val tags: List<String>,
     val isPublic: Boolean,
     val songTrackId: String?,

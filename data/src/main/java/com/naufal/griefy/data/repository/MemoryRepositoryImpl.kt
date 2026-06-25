@@ -65,6 +65,7 @@ class MemoryRepositoryImpl @Inject constructor(
                             val title = doc.getString("title") ?: ""
                             val content = doc.getString("content") ?: ""
                             val createdAt = doc.getLong("createdAt") ?: 0L
+                            val updatedAt = doc.getLong("updatedAt") ?: createdAt
                             val tags = (doc.get("tags") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
                             val songTrackId = doc.getString("songTrackId")
                             val songTitle = doc.getString("songTitle")
@@ -79,6 +80,7 @@ class MemoryRepositoryImpl @Inject constructor(
                                 content = content,
                                 imageUris = imageUris,
                                 createdAt = createdAt,
+                                updatedAt = updatedAt,
                                 tags = tags,
                                 isPublic = true,
                                 songTrackId = songTrackId,
@@ -151,7 +153,7 @@ class MemoryRepositoryImpl @Inject constructor(
         val localImageUris = memory.imageUris.mapIndexedNotNull { index, uri ->
             saveUriToLocalFile(context, uri, "${userId ?: "guest"}_update_${index}")
         }
-        val localMemory = memory.copy(userId = userId, imageUris = localImageUris)
+        val localMemory = memory.copy(userId = userId, imageUris = localImageUris, updatedAt = System.currentTimeMillis())
 
         dao.updateMemory(localMemory.toEntity())
 
@@ -374,6 +376,7 @@ class MemoryRepositoryImpl @Inject constructor(
             "title" to memory.title,
             "content" to memory.content,
             "createdAt" to memory.createdAt,
+            "updatedAt" to memory.updatedAt,
             "imageUris" to memory.imageUris,
             "tags" to memory.tags,
             "isPublic" to memory.isPublic,

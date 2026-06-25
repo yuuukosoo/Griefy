@@ -127,7 +127,7 @@ fun SearchMemoryScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 40.dp.scaled()),
+                                .fillParentMaxHeight(0.7f),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -135,7 +135,7 @@ fun SearchMemoryScreen(
                                     stringResource(R.string.search_memory_empty) 
                                 else 
                                     stringResource(R.string.search_memory_empty_search),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                 fontWeight = FontWeight.Medium
                             )
                         }

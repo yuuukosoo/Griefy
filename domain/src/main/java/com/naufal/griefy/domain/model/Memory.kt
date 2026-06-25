@@ -6,6 +6,7 @@ data class Memory(
     val content: String,
     val imageUris: List<String>,
     val createdAt : Long,
+    val updatedAt : Long = createdAt,
     val tags : List<String>,
     val isPublic : Boolean = false,
     val songTrackId: String? = null,

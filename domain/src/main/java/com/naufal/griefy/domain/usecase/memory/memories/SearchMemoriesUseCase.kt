@@ -56,7 +56,12 @@ class SearchMemoriesUseCase @Inject constructor(
                     memory
                 }
             }
-            val sortedList = processedList.sortedByDescending { it.createdAt }
+            val currentTime = System.currentTimeMillis()
+            val oneDayInMillis = 24 * 60 * 60 * 1000L
+            val filteredByTime = processedList.filter {
+                (currentTime - it.updatedAt) < oneDayInMillis
+            }
+            val sortedList = filteredByTime.sortedByDescending { it.createdAt }
             if (query.isBlank()) {
                 sortedList
             } else {

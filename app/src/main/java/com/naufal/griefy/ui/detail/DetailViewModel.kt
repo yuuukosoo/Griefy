@@ -18,6 +18,7 @@ class DetailViewModel @Inject constructor(
     private val moveToTrashUseCase: MoveToTrashUseCase,
     private val manageAudioPlaybackUseCase: com.naufal.griefy.domain.usecase.memory.song.ManageAudioPlaybackUseCase,
     private val audioPlayer: com.naufal.griefy.domain.repository.AudioPlayer,
+    private val bumpMemoryUseCase: com.naufal.griefy.domain.usecase.memory.memories.BumpMemoryUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -41,6 +42,13 @@ class DetailViewModel @Inject constructor(
 
     fun stopAudio() {
         audioPlayer.stop()
+    }
+
+    fun bumpMemory() {
+        val currentMemory = _uiState.value.memory ?: return
+        viewModelScope.launch {
+            bumpMemoryUseCase(currentMemory)
+        }
     }
 
     private var hasAutoPlayed = false

@@ -102,7 +102,7 @@
 
     <!-- Search Memory Screen -->
     <string name="search_memory_placeholder">Cari album publik...</string>
-    <string name="search_memory_empty">Belum ada album publik.</string>
+    <string name="search_memory_empty">Belum ada album terbaru diupload.</string>
     <string name="search_memory_empty_search">Tidak ada album publik yang cocok.</string>
     <string name="search_memory_by_other_user">Oleh Pengguna Lain • %1$s</string>
 

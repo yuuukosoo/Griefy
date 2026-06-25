@@ -102,7 +102,7 @@
 
     <!-- Search Memory Screen -->
     <string name="search_memory_placeholder">Search public albums...</string>
-    <string name="search_memory_empty">No public albums yet.</string>
+    <string name="search_memory_empty">No recent albums uploaded.</string>
     <string name="search_memory_empty_search">No matching public albums.</string>
     <string name="search_memory_by_other_user">By Other User • %1$s</string>
 
