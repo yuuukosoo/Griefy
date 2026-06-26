@@ -1,11 +1,10 @@
 package com.naufal.griefy.ui.profile
 
-import android.app.Application
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.UserProfile
 import com.naufal.griefy.domain.util.Resource
-import com.naufal.griefy.util.getBase64FromUri
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,8 +19,7 @@ import com.naufal.griefy.domain.usecase.profile.SaveUserProfileUseCase
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val getMyUserProfileUseCase: GetMyUserProfileUseCase,
-    private val saveUserProfileUseCase: SaveUserProfileUseCase,
-    private val application: Application
+    private val saveUserProfileUseCase: SaveUserProfileUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileState())
@@ -97,14 +95,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun onProfileImagePicked(uriString: String) {
-        viewModelScope.launch {
-            val base64 = getBase64FromUri(application, uriString)
-            if (base64 != null) {
-                _uiState.update { it.copy(profileImageUriString = base64) }
-            } else {
-                _uiState.update { it.copy(errorMessage = "ERROR_PROCESS_IMAGE_FAILED") }
-            }
-        }
+        _uiState.update { it.copy(profileImageUriString = uriString) }
     }
 
     fun clearSaveSuccess() {

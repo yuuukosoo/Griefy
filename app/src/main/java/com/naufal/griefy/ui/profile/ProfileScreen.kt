@@ -40,9 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.naufal.griefy.R
-import com.naufal.griefy.ui.navigation.Screen
 import com.airbnb.lottie.compose.*
 import com.naufal.griefy.util.toImageModel
 import com.naufal.griefy.util.scaled
@@ -50,7 +48,6 @@ import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 
 @Composable
 fun ProfileScreen(
-    navController: NavController,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()

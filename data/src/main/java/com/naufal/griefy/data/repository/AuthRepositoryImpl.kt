@@ -14,12 +14,19 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import com.naufal.griefy.data.remote.CloudinaryUploader
+import android.content.Context
+import okhttp3.OkHttpClient
 
 @Suppress("SpellCheckingInspection")
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    okHttpClient: OkHttpClient,
+    @dagger.hilt.android.qualifiers.ApplicationContext context: Context
 ) : AuthRepository {
+
+    private val cloudinaryUploader = CloudinaryUploader(okHttpClient, context)
 
     override fun login(email: String, password: String): Flow<Resource<User>> = flow {
         emit(Resource.Loading())
@@ -154,13 +161,21 @@ class AuthRepositoryImpl @Inject constructor(
                 firebaseUser.updateProfile(profileUpdates).await()
             }
             
+            // Upload image to Cloudinary if it's a local URI
+            val avatarBase64 = profile.avatarBase64
+            val avatarUrl = if (avatarBase64 != null && (avatarBase64.startsWith("content://") || avatarBase64.startsWith("file://"))) {
+                cloudinaryUploader.uploadImage(avatarBase64) ?: avatarBase64
+            } else {
+                avatarBase64
+            }
+
             // 2. Save profile details to Firestore
             val userMap = mapOf(
                 "uid" to profile.uid,
                 "email" to profile.email,
                 "displayName" to profile.displayName,
                 "gender" to profile.gender,
-                "avatarBase64" to profile.avatarBase64
+                "avatarBase64" to avatarUrl
             )
             firestore.collection("users").document(profile.uid).set(userMap).await()
             

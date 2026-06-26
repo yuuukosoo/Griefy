@@ -1,21 +1,19 @@
 package com.naufal.griefy.data.repository
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Base64
-import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import com.google.firebase.firestore.FirebaseFirestore
-import com.naufal.griefy.data.BuildConfig
 import com.naufal.griefy.data.local.MemoryDao
+import com.naufal.griefy.data.remote.CloudinaryUploader
 import com.naufal.griefy.data.remote.DeezerApi
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.domain.repository.MemoryRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -25,14 +23,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -41,14 +31,14 @@ import javax.inject.Inject
 class MemoryRepositoryImpl @Inject constructor(
     private val dao: MemoryDao,
     private val deezerApi: DeezerApi,
-    private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val firestore: FirebaseFirestore,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val cloudinaryUploader: CloudinaryUploader
 ) : MemoryRepository {
 
     private val repositoryScope = CoroutineScope(Dispatchers.IO)
     private val songDetailsCache = mutableMapOf<String, com.naufal.griefy.domain.model.Song>()
-    private val okHttpClient = OkHttpClient()
 
     override fun getAllMemories(): Flow<List<Memory>> {
         val currentUserId = firebaseAuth.currentUser?.uid
@@ -163,7 +153,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
         // Upload to Firestore if it belongs to the current user
         if (userId == currentUid && currentUid != null) {
-            val cloudinaryUris = localImageUris.mapNotNull { uploadImageToCloudinary(it) }
+            val cloudinaryUris = localImageUris.mapNotNull { cloudinaryUploader.uploadImage(it) }
             val uploadMemory = finalLocalMemory.copy(imageUris = cloudinaryUris)
             uploadToFirestore(uploadMemory)
         }
@@ -182,7 +172,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
         // Sync with Firestore if it belongs to the current user
         if (userId == currentUid && currentUid != null) {
-            val cloudinaryUris = localImageUris.mapNotNull { uploadImageToCloudinary(it) }
+            val cloudinaryUris = localImageUris.mapNotNull { cloudinaryUploader.uploadImage(it) }
             val uploadMemory = localMemory.copy(imageUris = cloudinaryUris)
             uploadToFirestore(uploadMemory)
         }
@@ -257,7 +247,7 @@ class MemoryRepositoryImpl @Inject constructor(
         dao.restoreFromTrash(id)
         val memory = dao.getMemoryById(id)?.toDomain()
         if (memory != null && (memory.isPublic || memory.userId == currentUid)) {
-            val cloudinaryUris = memory.imageUris.mapNotNull { uploadImageToCloudinary(it) }
+            val cloudinaryUris = memory.imageUris.mapNotNull { cloudinaryUploader.uploadImage(it) }
             val uploadMemory = memory.copy(imageUris = cloudinaryUris)
             uploadToFirestore(uploadMemory)
         }
@@ -337,62 +327,6 @@ class MemoryRepositoryImpl @Inject constructor(
     private fun isDeezerRetryable(error: Exception): Boolean {
         return error is SocketTimeoutException ||
             (error is IOException && error.message?.contains("timeout", ignoreCase = true) == true)
-    }
-
-    // Helper to upload image to Cloudinary and return the secure URL
-    private suspend fun uploadImageToCloudinary(uriString: String): String? {
-        // Already a Cloudinary/remote URL — skip re-upload
-        if (uriString.startsWith("https://")) return uriString
-        if (uriString.isBlank()) return null
-
-        return withContext(Dispatchers.IO) {
-            try {
-                val uri = uriString.toUri()
-                val inputStream = context.contentResolver.openInputStream(uri) ?: return@withContext null
-                val originalBitmap = BitmapFactory.decodeStream(inputStream)
-                inputStream.close()
-
-                if (originalBitmap == null) return@withContext null
-
-                // Resize to max 1080px before upload
-                val maxDimension = 1080
-                val width = originalBitmap.width
-                val height = originalBitmap.height
-                val scaledBitmap = if (width > maxDimension || height > maxDimension) {
-                    val ratio = width.toFloat() / height.toFloat()
-                    if (ratio > 1) originalBitmap.scale(maxDimension, (maxDimension / ratio).toInt(), true)
-                    else originalBitmap.scale((maxDimension * ratio).toInt(), maxDimension, true)
-                } else originalBitmap
-
-                val outputStream = ByteArrayOutputStream()
-                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
-                val imageBytes = outputStream.toByteArray()
-                outputStream.close()
-
-                val requestBody = MultipartBody.Builder()
-                    .setType(MultipartBody.FORM)
-                    .addFormDataPart("upload_preset", BuildConfig.CLOUDINARY_UPLOAD_PRESET)
-                    .addFormDataPart("file", "image.jpg", imageBytes.toRequestBody("image/jpeg".toMediaType()))
-                    .build()
-
-                val request = Request.Builder()
-                    .url("https://api.cloudinary.com/v1_1/${BuildConfig.CLOUDINARY_CLOUD_NAME}/image/upload")
-                    .post(requestBody)
-                    .build()
-
-                val response = okHttpClient.newCall(request).execute()
-                if (response.isSuccessful) {
-                    val body = response.body?.string() ?: return@withContext null
-                    JSONObject(body).getString("secure_url")
-                } else {
-                    android.util.Log.e(TAG_CLOUDINARY, "Upload gagal: ${response.code} - ${response.body?.string()}")
-                    null
-                }
-            } catch (e: Exception) {
-                android.util.Log.e(TAG_CLOUDINARY, "Error upload ke Cloudinary: ${e.message}", e)
-                null
-            }
-        }
     }
 
     private fun saveUriToLocalFile(context: Context, uriString: String, id: String): String? {
@@ -679,7 +613,6 @@ class MemoryRepositoryImpl @Inject constructor(
         private const val TAG_FIRESTORE_ERROR = "FIRESTORE_ERROR"
         private const val TAG_ROOM_CACHE_ERROR = "ROOM_CACHE_ERROR"
         private const val TAG_DEEZER_ERROR = "DEEZER_ERROR"
-        private const val TAG_CLOUDINARY = "CLOUDINARY_UPLOAD"
         private const val MAX_DEEZER_RETRIES = 3
         private const val DEEZER_RETRY_DELAY_MS = 500L
     }

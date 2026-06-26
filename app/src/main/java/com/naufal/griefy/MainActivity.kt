@@ -165,7 +165,7 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             composable(Screen.Profile.route) {
-                                ProfileScreen(navController = navController)
+                                ProfileScreen()
                             }
 
                             composable(

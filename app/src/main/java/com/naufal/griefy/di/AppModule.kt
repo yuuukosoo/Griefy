@@ -65,9 +65,10 @@ object AppModule {
         deezerApi: DeezerApi,
         app: Application,
         firestore: FirebaseFirestore,
-        firebaseAuth: FirebaseAuth
+        firebaseAuth: FirebaseAuth,
+        cloudinaryUploader: com.naufal.griefy.data.remote.CloudinaryUploader
     ): MemoryRepository {
-        return MemoryRepositoryImpl(dao, deezerApi, app, firestore, firebaseAuth)
+        return MemoryRepositoryImpl(dao, deezerApi, app, firestore, firebaseAuth, cloudinaryUploader)
     }
 
     @Provides
@@ -111,9 +112,11 @@ object AppModule {
     @Singleton
     fun provideAuthRepository(
         firebaseAuth: FirebaseAuth,
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
+        okHttpClient: OkHttpClient,
+        @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context
     ): AuthRepository {
-        return AuthRepositoryImpl(firebaseAuth, firestore)
+        return AuthRepositoryImpl(firebaseAuth, firestore, okHttpClient, context)
     }
 
     @Provides
