@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.compose.dialog
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -184,9 +185,12 @@ class MainActivity : AppCompatActivity() {
                                 CreateMemoryScreen(navController = navController)
                             }
 
-                            composable(
+                            dialog(
                                 route = Screen.DetailMemory.route,
-                                arguments = listOf(navArgument("memoryId") { type = NavType.IntType })
+                                arguments = listOf(navArgument("memoryId") { type = NavType.IntType }),
+                                dialogProperties = androidx.compose.ui.window.DialogProperties(
+                                    usePlatformDefaultWidth = false
+                                )
                             ) {
                                 DetailScreen(navController = navController)
                             }

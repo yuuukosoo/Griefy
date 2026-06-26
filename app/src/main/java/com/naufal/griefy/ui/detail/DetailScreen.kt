@@ -11,6 +11,14 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.activity.compose.BackHandler
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -90,9 +98,42 @@ fun DetailScreen(
             viewModel.stopAudio()
         }
     }
+    val coroutineScope = rememberCoroutineScope()
+    var isVisible by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
+    LaunchedEffect(Unit) {
+        isVisible = true
+    }
+
+    val handleBack = {
+        coroutineScope.launch {
+            isVisible = false
+            delay(300)
+            navController.navigateUp()
+        }
+    }
+
+    BackHandler {
+        handleBack()
+    }
+
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+            .padding(top = 64.dp), 
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        color = MaterialTheme.colorScheme.background,
+        shadowElevation = 16.dp
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,7 +152,7 @@ fun DetailScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
-                            onClick = { navController.navigateUp() },
+                            onClick = { handleBack() },
                             modifier = Modifier
                                 .size(36.dp.scaled())
                                 .offset(x = (-8).dp.scaled())
@@ -538,8 +579,9 @@ fun DetailScreen(
                 }
             }
         }
+        }
     }
-
+}
     if (selectedImageIndexForFullScreen.value != null && memory != null) {
         val pagerState = rememberPagerState(initialPage = selectedImageIndexForFullScreen.value!!) { memory.imageUris.size }
         Dialog(
@@ -628,7 +670,7 @@ fun DetailScreen(
                             onClick = {
                                 showDeleteDialog.value = false
                                 viewModel.moveToTrash(
-                                    onDeleteSuccess = { navController.navigateUp() }
+                                    onDeleteSuccess = { handleBack() }
                                 )
                             },
                             colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
