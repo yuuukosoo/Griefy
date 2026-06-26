@@ -10,6 +10,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,27 +47,33 @@ fun SavedScreen(
                 .fillMaxSize()
                 .adaptiveWidth()
         ) {
+            val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+            val headerBgColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
+            val headerTextColor = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = headerBgColor
+                    )
+                    .padding(start = horizontalPadding, end = horizontalPadding, top = 24.dp.scaled(), bottom = 24.dp.scaled()),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.saved_title),
+                    fontSize = 24.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
+                    color = headerTextColor
+                )
+            }
+
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding, top = 8.dp.scaled(), bottom = 100.dp.scaled()),
+                contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding, top = 24.dp.scaled(), bottom = 100.dp.scaled()),
                 verticalArrangement = Arrangement.spacedBy(16.dp.scaled())
             ) {
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 48.dp.scaled(), bottom = 16.dp.scaled()),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.saved_title),
-                            fontSize = 24.sp.scaled(),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                }
 
                 if (savedMemories.isEmpty()) {
                     item {

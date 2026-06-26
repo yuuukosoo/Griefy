@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -18,7 +19,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.naufal.griefy.domain.model.PhotoAlbumGroup
 import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 import com.naufal.griefy.util.scaled
 import com.naufal.griefy.util.adaptiveWidth
@@ -29,8 +29,9 @@ import androidx.compose.ui.unit.sp
 fun PhotoAlbumScreen(
     viewModel: PhotoAlbumViewModel = hiltViewModel()
 ) {
-    val photoGroups by viewModel.photoGroups.collectAsState()
-    var selectedPhotoUri by remember { mutableStateOf<String?>(null) }
+    val uiState by viewModel.uiState.collectAsState()
+    val photoGroups = uiState.photoGroups
+    val selectedPhotoUri = remember { mutableStateOf<String?>(null) }
 
     val horizontalPadding = getAdaptiveHorizontalPadding()
 
@@ -46,7 +47,33 @@ fun PhotoAlbumScreen(
                 .fillMaxSize()
                 .adaptiveWidth()
         ) {
-            if (photoGroups.isEmpty()) {
+            val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+            val headerBgColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
+            val headerTextColor = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = headerBgColor
+                    )
+                    .padding(start = horizontalPadding, end = horizontalPadding, top = 24.dp.scaled(), bottom = 24.dp.scaled()),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Album Foto",
+                    fontSize = 24.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
+                    color = headerTextColor
+                )
+            }
+
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (photoGroups.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("Belum ada foto yang diupload.")
                 }
@@ -54,35 +81,30 @@ fun PhotoAlbumScreen(
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding, top = 8.dp.scaled(), bottom = 100.dp.scaled()),
+                    contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding, top = 24.dp.scaled(), bottom = 100.dp.scaled()),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 48.dp.scaled(), bottom = 16.dp.scaled()),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Album Foto",
-                                fontSize = 24.sp.scaled(),
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
-                    }
-                    photoGroups.forEach { group ->
+                    photoGroups.forEachIndexed { index, group ->
                         item(span = { GridItemSpan(maxLineSpan) }) {
-                            Text(
-                                text = group.date,
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 12.dp)
-                            )
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                if (index > 0) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(top = 16.dp.scaled()),
+                                        thickness = 1.dp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                                    )
+                                }
+                                Text(
+                                    text = group.date,
+                                    fontSize = 14.sp.scaled(),
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = if (index > 0) 16.dp.scaled() else 8.dp.scaled(), bottom = 8.dp.scaled())
+                                )
+                            }
                         }
                         items(group.photos) { photoUri ->
                             AsyncImage(
@@ -92,7 +114,7 @@ fun PhotoAlbumScreen(
                                 modifier = Modifier
                                     .aspectRatio(1f)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .clickable { selectedPhotoUri = photoUri }
+                                    .clickable { selectedPhotoUri.value = photoUri }
                             )
                         }
                     }
@@ -101,16 +123,16 @@ fun PhotoAlbumScreen(
         }
     }
 
-    selectedPhotoUri?.let { uri ->
+    selectedPhotoUri.value?.let { uri ->
         Dialog(
-            onDismissRequest = { selectedPhotoUri = null },
+            onDismissRequest = { selectedPhotoUri.value = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.9f))
-                    .clickable { selectedPhotoUri = null },
+                    .clickable { selectedPhotoUri.value = null },
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(

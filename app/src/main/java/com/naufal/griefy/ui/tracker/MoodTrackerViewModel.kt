@@ -2,7 +2,6 @@ package com.naufal.griefy.ui.tracker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naufal.griefy.domain.model.DailyMood
 import com.naufal.griefy.domain.model.Mood
 import com.naufal.griefy.domain.usecase.mood.GetMoodsByMonthUseCase
 import com.naufal.griefy.domain.usecase.mood.SaveDailyMoodUseCase
@@ -18,13 +17,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
 
-data class MoodTrackerState(
-    val currentMonth: YearMonth = YearMonth.now(),
-    val moodsForMonth: List<DailyMood> = emptyList(),
-    val selectedDate: LocalDate? = null,
-    val showMoodSelector: Boolean = false,
-    val calendarGrid: List<List<LocalDate?>> = emptyList()
-)
 
 @HiltViewModel
 class MoodTrackerViewModel @Inject constructor(
@@ -79,11 +71,10 @@ class MoodTrackerViewModel @Inject constructor(
 
     fun onMoodSelected(mood: Mood) {
         val date = _uiState.value.selectedDate ?: return
-        val dateString = date.toString()
         val currentMonth = _uiState.value.currentMonth
         
         viewModelScope.launch {
-            saveDailyMoodUseCase(dateString, mood.stringValue)
+            saveDailyMoodUseCase(date, mood.stringValue)
             loadMoodsForMonth(currentMonth)
         }
         
@@ -92,11 +83,10 @@ class MoodTrackerViewModel @Inject constructor(
 
     fun onMoodDeleted() {
         val date = _uiState.value.selectedDate ?: return
-        val dateString = date.toString()
         val currentMonth = _uiState.value.currentMonth
         
         viewModelScope.launch {
-            deleteDailyMoodUseCase(dateString)
+            deleteDailyMoodUseCase(date)
             loadMoodsForMonth(currentMonth)
         }
         
@@ -104,9 +94,8 @@ class MoodTrackerViewModel @Inject constructor(
     }
 
     private fun loadMoodsForMonth(yearMonth: YearMonth) {
-        val monthString = String.format(java.util.Locale.US, "%04d-%02d", yearMonth.year, yearMonth.monthValue)
         viewModelScope.launch {
-            getMoodsByMonthUseCase(monthString).collect { moods ->
+            getMoodsByMonthUseCase(yearMonth).collect { moods ->
                 _uiState.update { it.copy(moodsForMonth = moods) }
             }
         }

@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -139,11 +140,18 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .widthIn(max = 500.dp)
                 ) {
+                    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+                    val headerBgColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
+                    val headerTextColor = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary
+
                     // Header Row (Left: Screen Title)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = horizontalPadding, end = horizontalPadding, top = 48.dp.scaled(), bottom = 16.dp.scaled()),
+                            .background(
+                                color = headerBgColor
+                            )
+                            .padding(start = horizontalPadding, end = horizontalPadding, top = 24.dp.scaled(), bottom = 24.dp.scaled()),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -151,7 +159,7 @@ fun ProfileScreen(
                             text = stringResource(R.string.profile_title),
                             fontSize = 24.sp.scaled(),
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = headerTextColor
                         )
                     }
 
