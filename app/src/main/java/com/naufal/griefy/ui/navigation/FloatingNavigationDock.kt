@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoAlbum
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -119,6 +120,22 @@ fun FloatingNavigationDock(
                         },
                         icon = Icons.Default.Bookmark,
                         contentDescription = stringResource(R.string.nav_saved)
+                    )
+
+                    // Photo Album Tab
+                    NavigationTabItem(
+                        selected = currentRoute == Screen.PhotoAlbum.route,
+                        onClick = {
+                            if (currentRoute != Screen.PhotoAlbum.route) {
+                                navController.navigate(Screen.PhotoAlbum.route) {
+                                    popUpTo(Screen.Home.route) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        },
+                        icon = Icons.Default.PhotoAlbum,
+                        contentDescription = "Album Foto" // hardcoded string for now or could use stringResource
                     )
 
                     // Profile Tab

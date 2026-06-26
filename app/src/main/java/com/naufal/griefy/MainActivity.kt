@@ -115,7 +115,8 @@ class MainActivity : AppCompatActivity() {
                             Screen.Home.route,
                             Screen.SearchMemory.route,
                             Screen.Saved.route,
-                            Screen.Profile.route
+                            Screen.Profile.route,
+                            Screen.PhotoAlbum.route
                         )
 
                         NavHost(
@@ -215,6 +216,10 @@ class MainActivity : AppCompatActivity() {
 
                             composable(Screen.Saved.route) {
                                 SavedScreen(navController = navController)
+                            }
+
+                            composable(Screen.PhotoAlbum.route) {
+                                com.naufal.griefy.ui.photoalbum.PhotoAlbumScreen()
                             }
 
                         }
