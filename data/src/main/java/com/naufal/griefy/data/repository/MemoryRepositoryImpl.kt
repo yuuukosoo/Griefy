@@ -396,8 +396,8 @@ class MemoryRepositoryImpl @Inject constructor(
     }
 
     private fun saveUriToLocalFile(context: Context, uriString: String, id: String): String? {
-        if (uriString.startsWith("file:/")) {
-            return uriString // Sudah berupa file lokal, tidak perlu disalin ulang
+        if (uriString.startsWith("file:/") || uriString.startsWith("http://") || uriString.startsWith("https://")) {
+            return uriString // Sudah berupa file lokal atau url remote, tidak perlu disalin ulang
         }
         return try {
             val dir = File(context.filesDir, "memory_images")

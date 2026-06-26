@@ -14,6 +14,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.naufal.griefy.data.repository.AuthRepositoryImpl
 import com.naufal.griefy.domain.repository.AuthRepository
+import com.naufal.griefy.data.repository.NetworkRepositoryImpl
+import com.naufal.griefy.domain.repository.NetworkRepository
 import com.naufal.griefy.BuildConfig
 import dagger.Module
 import dagger.Provides
@@ -132,5 +134,13 @@ object AppModule {
     @Singleton
     fun provideAudioPlayer(): com.naufal.griefy.domain.repository.AudioPlayer {
         return com.naufal.griefy.data.repository.AndroidAudioPlayer()
+    }
+
+    @Provides
+    @Singleton
+    fun provideNetworkRepository(
+        @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context
+    ): NetworkRepository {
+        return NetworkRepositoryImpl(context)
     }
 }

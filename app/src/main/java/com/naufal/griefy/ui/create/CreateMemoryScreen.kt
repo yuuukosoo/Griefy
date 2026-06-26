@@ -119,69 +119,38 @@ fun CreateMemoryScreen(
     }
 
     if (showExitDialog.value) {
-        Dialog(onDismissRequest = { showExitDialog.value = false }) {
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 6.dp
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+        AlertDialog(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = getAdaptiveHorizontalPadding()),
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+            onDismissRequest = { showExitDialog.value = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.dialog_discard_title),
+                    fontSize = 20.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            },
+            text = { Text(stringResource(R.string.dialog_discard_text), color = MaterialTheme.colorScheme.onBackground) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showExitDialog.value = false
+                        navController.navigateUp()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(
-                        text = stringResource(R.string.dialog_discard_title),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = stringResource(R.string.dialog_discard_text),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Button(
-                            onClick = { showExitDialog.value = false },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.cancel),
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                        Button(
-                            onClick = {
-                                showExitDialog.value = false
-                                navController.navigateUp()
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.dialog_discard_confirm),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
+                    Text(stringResource(R.string.dialog_discard_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog.value = false }) {
+                    Text(stringResource(R.string.cancel), color = Color(0xFF8C7D73))
                 }
             }
-        }
+        )
     }
 
     Box(
@@ -817,10 +786,17 @@ fun CreateMemoryScreen(
         AlertDialog(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = getAdaptiveHorizontalPadding() + 24.dp.scaled()),
+                .padding(horizontal = getAdaptiveHorizontalPadding()),
             properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
             onDismissRequest = { showAddLabelDialog.value = false },
-            title = { Text(stringResource(R.string.create_dialog_title), color = MaterialTheme.colorScheme.onBackground) },
+            title = { 
+                Text(
+                    text = stringResource(R.string.create_dialog_title), 
+                    fontSize = 20.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                ) 
+            },
             text = {
                 OutlinedTextField(
                     value = newLabelText,
@@ -848,6 +824,42 @@ fun CreateMemoryScreen(
             dismissButton = {
                 TextButton(onClick = { showAddLabelDialog.value = false }) {
                     Text(stringResource(R.string.cancel), color = Color(0xFF8C7D73))
+                }
+            }
+        )
+    }
+
+    if (state.showOfflineWarningDialog) {
+        AlertDialog(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = getAdaptiveHorizontalPadding()),
+            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+            onDismissRequest = { viewModel.dismissOfflineWarningDialog() },
+            title = {
+                Text(
+                    text = stringResource(R.string.offline_warning_title),
+                    fontSize = 20.sp.scaled(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            },
+            text = { Text(stringResource(R.string.offline_warning_message), color = MaterialTheme.colorScheme.onBackground) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.saveMemoryAnyway {
+                            navController.navigateUp()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.offline_warning_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.dismissOfflineWarningDialog() }) {
+                    Text(stringResource(R.string.offline_warning_cancel), color = Color(0xFF8C7D73))
                 }
             }
         )

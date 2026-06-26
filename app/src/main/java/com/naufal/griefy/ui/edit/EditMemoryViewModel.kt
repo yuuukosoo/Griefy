@@ -9,6 +9,7 @@ import com.naufal.griefy.domain.usecase.memory.memories.AddImagesUseCase
 import com.naufal.griefy.domain.usecase.memory.memories.AddTagUseCase
 import com.naufal.griefy.domain.usecase.memory.memories.GetMemoryDetailUseCase
 import com.naufal.griefy.domain.usecase.memory.memories.UpdateMemoryUseCase
+import com.naufal.griefy.domain.usecase.network.CheckNetworkUseCase
 import com.naufal.griefy.domain.usecase.memory.song.GetSongDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,7 @@ import javax.inject.Inject
 class EditMemoryViewModel @Inject constructor(
     private val getMemoryDetailUseCase: GetMemoryDetailUseCase,
     private val updateMemoryUseCase: UpdateMemoryUseCase,
+    private val checkNetworkUseCase: CheckNetworkUseCase,
     private val getSongDetailsUseCase: GetSongDetailsUseCase,
     private val addTagUseCase: AddTagUseCase,
     private val addImagesUseCase: AddImagesUseCase,
@@ -119,6 +121,24 @@ class EditMemoryViewModel @Inject constructor(
     }
 
     fun updateMemory(onUpdateSuccess: () -> Unit) {
+        val state = _uiState.value
+        if (state.selectedImageUris.isNotEmpty() && !checkNetworkUseCase()) {
+            _uiState.update { it.copy(showOfflineWarningDialog = true) }
+            return
+        }
+        performUpdate(onUpdateSuccess)
+    }
+
+    fun dismissOfflineWarningDialog() {
+        _uiState.update { it.copy(showOfflineWarningDialog = false) }
+    }
+
+    fun updateMemoryAnyway(onUpdateSuccess: () -> Unit) {
+        _uiState.update { it.copy(showOfflineWarningDialog = false) }
+        performUpdate(onUpdateSuccess)
+    }
+
+    private fun performUpdate(onUpdateSuccess: () -> Unit) {
         val state = _uiState.value
         viewModelScope.launch {
             state.currentMemory?.let { oldMemory ->

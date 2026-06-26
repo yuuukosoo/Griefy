@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import android.app.Application
 import com.naufal.griefy.R
 import com.naufal.griefy.domain.usecase.memory.memories.AddMemoryUseCase
+import com.naufal.griefy.domain.usecase.network.CheckNetworkUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CreateMemoryViewModel @Inject constructor(
     private val addMemoryUseCase: AddMemoryUseCase,
+    private val checkNetworkUseCase: CheckNetworkUseCase,
     private val application: Application
 ) : ViewModel() {
 
@@ -77,6 +79,25 @@ class CreateMemoryViewModel @Inject constructor(
     }
 
     fun saveMemory(onSaveSuccess: () -> Unit) {
+        val state = _uiState.value
+        // Periksa koneksi hanya jika ada foto yang dipilih
+        if (state.selectedImageUris.isNotEmpty() && !checkNetworkUseCase()) {
+            _uiState.update { it.copy(showOfflineWarningDialog = true) }
+            return
+        }
+        performSave(onSaveSuccess)
+    }
+
+    fun dismissOfflineWarningDialog() {
+        _uiState.update { it.copy(showOfflineWarningDialog = false) }
+    }
+
+    fun saveMemoryAnyway(onSaveSuccess: () -> Unit) {
+        _uiState.update { it.copy(showOfflineWarningDialog = false) }
+        performSave(onSaveSuccess)
+    }
+
+    private fun performSave(onSaveSuccess: () -> Unit) {
         val state = _uiState.value
         viewModelScope.launch {
             addMemoryUseCase(
