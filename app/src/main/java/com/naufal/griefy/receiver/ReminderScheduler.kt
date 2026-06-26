@@ -1,4 +1,4 @@
-package com.naufal.griefy.ui.settings
+package com.naufal.griefy.receiver
 
 import android.app.AlarmManager
 import android.app.PendingIntent

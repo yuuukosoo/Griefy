@@ -236,9 +236,11 @@
     <string name="ok">OK</string>
 
     <!-- Notification Strings -->
-    <string name="reminder_noti_default_title">Important Remembrance Day ✨</string>
+    <string name="reminder_noti_default_title">Important Remembrance Day</string>
     <string name="reminder_noti_default_desc">Let\'s take a moment to remember beautiful memories.</string>
     <string name="reminder_noti_channel_name">Remembrance Day Reminder</string>
     <string name="reminder_noti_channel_desc">Channel for Griefy reminder notifications</string>
+    <string name="home_mood_tracker_title">Daily Mood Tracker</string>
+    <string name="home_mood_tracker_desc">How are you feeling today?</string>
 </resources>
 

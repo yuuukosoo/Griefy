@@ -230,7 +230,7 @@
     <string name="dialog_discard_confirm">Buang</string>
 
     <!-- Notification Strings -->
-    <string name="reminder_noti_default_title">Hari Peringatan Penting ✨</string>
+    <string name="reminder_noti_default_title">Hari Peringatan Penting</string>
     <string name="reminder_noti_default_desc">Mari luangkan waktu sejenak untuk mengingat kenangan indah.</string>
     <string name="reminder_noti_channel_name">Pengingat Hari Peringatan</string>
     <string name="reminder_noti_channel_desc">Channel untuk notifikasi pengingat Griefy</string>
@@ -239,6 +239,9 @@
     <string name="offline_warning_message">Anda sedang offline. Foto yang dipilih tidak akan disinkronisasikan ke cloud, namun memori Anda akan tetap tersimpan secara lokal.</string>
     <string name="offline_warning_confirm">Simpan Tetap</string>
     <string name="offline_warning_cancel">Batal</string>
+
+    <string name="home_mood_tracker_title">Daily Mood Tracker</string>
+    <string name="home_mood_tracker_desc">Bagaimana perasaanmu hari ini?</string>
 </resources>
 
 

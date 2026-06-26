@@ -1,4 +1,4 @@
-package com.naufal.griefy.ui.settings
+package com.naufal.griefy.receiver
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

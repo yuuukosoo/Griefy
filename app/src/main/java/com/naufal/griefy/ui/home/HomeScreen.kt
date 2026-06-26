@@ -16,14 +16,14 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,17 +43,30 @@ import com.naufal.griefy.ui.navigation.Screen
 import androidx.compose.ui.text.TextStyle
 import java.text.SimpleDateFormat
 import java.util.*
+import com.naufal.griefy.ui.tracker.MoodTrackerScreen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val carouselBgColor = if (isDark) {
+        MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        MaterialTheme.colorScheme.primary
+    }
+
     val memories = state.memories
     val searchQuery = state.searchQuery
     val userProfile = state.userProfile
     val horizontalPadding = getAdaptiveHorizontalPadding()
+    
+    var showMoodTrackerModal by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
     Box(
         modifier = Modifier
@@ -166,6 +179,52 @@ fun HomeScreen(
                     }
                 }
 
+                item {
+                    Spacer(modifier = Modifier.height(16.dp.scaled()))
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp.scaled())
+                            .padding(horizontal = 4.dp.scaled())
+                            .clickable { showMoodTrackerModal = true },
+                        shape = RoundedCornerShape(16.dp.scaled()),
+                        colors = CardDefaults.cardColors(containerColor = carouselBgColor)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 24.dp.scaled()),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.logogriefy),
+                                contentDescription = "Griefy Logo",
+                                modifier = Modifier.size(64.dp.scaled())
+                            )
+                            
+                            Column(
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.home_mood_tracker_title),
+                                    fontSize = 20.sp.scaled(),
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary
+                                )
+                                Spacer(modifier = Modifier.height(2.dp.scaled()))
+                                Text(
+                                    text = stringResource(R.string.home_mood_tracker_desc),
+                                    fontSize = 12.sp.scaled(),
+                                    color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp.scaled()))
+                }
+
                 if (memories.isEmpty()) {
                     item {
                         Box(
@@ -210,8 +269,17 @@ fun HomeScreen(
                 }
             }
         }
-
-
+        if (showMoodTrackerModal) {
+            ModalBottomSheet(
+                onDismissRequest = { showMoodTrackerModal = false },
+                sheetState = sheetState,
+                containerColor = MaterialTheme.colorScheme.background
+            ) {
+                Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.85f)) {
+                    MoodTrackerScreen()
+                }
+            }
+        }
     }
 }
 

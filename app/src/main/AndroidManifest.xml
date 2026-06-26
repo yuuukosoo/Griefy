@@ -56,10 +56,10 @@
                 android:value="true" />
         </service>
 
-        <receiver android:name=".ui.settings.ReminderReceiver" android:exported="true" />
+        <receiver android:name=".receiver.ReminderReceiver" android:exported="true" />
         
         <receiver
-            android:name=".ui.settings.BootReceiver"
+            android:name=".receiver.BootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>

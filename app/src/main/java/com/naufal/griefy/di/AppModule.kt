@@ -60,6 +60,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideDailyMoodDao(database: GriefyDatabase): com.naufal.griefy.data.local.DailyMoodDao {
+        return database.dailyMoodDao
+    }
+
+    @Provides
+    @Singleton
     fun provideMemoryRepository(
         dao: MemoryDao,
         deezerApi: DeezerApi,
@@ -77,6 +83,15 @@ object AppModule {
         dao: RemembranceDayDao
     ): RemembranceRepository {
         return RemembranceRepositoryImpl(dao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDailyMoodRepository(
+        dao: com.naufal.griefy.data.local.DailyMoodDao,
+        firestore: FirebaseFirestore
+    ): com.naufal.griefy.domain.repository.DailyMoodRepository {
+        return com.naufal.griefy.data.repository.DailyMoodRepositoryImpl(dao, firestore)
     }
 
     @Provides
@@ -130,7 +145,7 @@ object AppModule {
     fun provideReminderScheduler(
         @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context
     ): com.naufal.griefy.domain.repository.ReminderScheduler {
-        return com.naufal.griefy.ui.settings.ReminderScheduler(context)
+        return com.naufal.griefy.receiver.ReminderScheduler(context)
     }
 
     @Provides
