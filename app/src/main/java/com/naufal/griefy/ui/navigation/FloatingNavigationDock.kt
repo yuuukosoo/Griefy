@@ -36,11 +36,13 @@ fun FloatingNavigationDock(
     currentRoute: String,
     onFabClick: (() -> Unit)? = null
 ) {
-    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val isDark = isSystemInDarkTheme() || MaterialTheme.colorScheme.background.luminance() < 0.5f
+    
+    val navBarColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.primary,
+        color = navBarColor,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         shadowElevation = 16.dp,
         tonalElevation = 8.dp
@@ -73,7 +75,8 @@ fun FloatingNavigationDock(
                         }
                     },
                     icon = Icons.Default.Home,
-                    contentDescription = stringResource(R.string.nav_home)
+                    contentDescription = stringResource(R.string.nav_home),
+                    isDark = isDark
                 )
 
                 // Search Tab
@@ -89,7 +92,8 @@ fun FloatingNavigationDock(
                         }
                     },
                     icon = Icons.Default.Search,
-                    contentDescription = stringResource(R.string.nav_search)
+                    contentDescription = stringResource(R.string.nav_search),
+                    isDark = isDark
                 )
 
                 // Saved Tab
@@ -105,7 +109,8 @@ fun FloatingNavigationDock(
                         }
                     },
                     icon = Icons.Default.Bookmark,
-                    contentDescription = stringResource(R.string.nav_saved)
+                    contentDescription = stringResource(R.string.nav_saved),
+                    isDark = isDark
                 )
 
                 // Photo Album Tab
@@ -121,7 +126,8 @@ fun FloatingNavigationDock(
                         }
                     },
                     icon = Icons.Default.PhotoAlbum,
-                    contentDescription = "Album Foto"
+                    contentDescription = "Album Foto",
+                    isDark = isDark
                 )
 
                 // Profile Tab
@@ -137,13 +143,14 @@ fun FloatingNavigationDock(
                         }
                     },
                     icon = Icons.Default.Person,
-                    contentDescription = stringResource(R.string.nav_profile)
+                    contentDescription = stringResource(R.string.nav_profile),
+                    isDark = isDark
                 )
             }
 
             // 2. Separate FAB (Add Button)
-            val createBgColor = MaterialTheme.colorScheme.surface
-            val createIconColor = MaterialTheme.colorScheme.primary
+            val createBgColor = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+            val createIconColor = if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
 
             Surface(
                 modifier = Modifier
@@ -182,18 +189,19 @@ private fun NavigationTabItem(
     onClick: () -> Unit,
     icon: ImageVector,
     contentDescription: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isDark: Boolean = isSystemInDarkTheme()
 ) {
     val backgroundColor = if (selected) {
-        MaterialTheme.colorScheme.surface
+        if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
     } else {
         Color.Transparent
     }
 
     val contentColor = if (selected) {
-        MaterialTheme.colorScheme.primary
+        if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+        if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
     }
 
     val animatedBgColor by animateColorAsState(

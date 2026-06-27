@@ -32,6 +32,7 @@ import com.naufal.griefy.domain.util.Resource
 
 import com.naufal.griefy.ui.components.ErrorBanner
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navController: NavController,
@@ -42,6 +43,7 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var showErrorResId by remember { mutableStateOf<Int?>(null) }
     var showErrorRawMsg by remember { mutableStateOf<String?>(null) }
+    var showForgotPasswordSheet by remember { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsState()
     val loginState = uiState.loginState
@@ -178,7 +180,7 @@ fun LoginScreen(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp.scaled(),
                     modifier = Modifier.clickable {
-                        navController.navigate(Screen.ForgotPassword.route)
+                        showForgotPasswordSheet = true
                     }
                 )
             }
@@ -249,6 +251,18 @@ fun LoginScreen(
             modifier = Modifier.align(Alignment.TopCenter)
         )
 
+        if (showForgotPasswordSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showForgotPasswordSheet = false },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+                containerColor = MaterialTheme.colorScheme.background,
+                dragHandle = { BottomSheetDefaults.DragHandle() }
+            ) {
+                com.naufal.griefy.ui.forgotpassword.ForgotPasswordScreen(
+                    onDismiss = { showForgotPasswordSheet = false }
+                )
+            }
+        }
 
     }
 }

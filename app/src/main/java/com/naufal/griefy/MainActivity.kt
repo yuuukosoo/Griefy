@@ -159,10 +159,6 @@ class MainActivity : AppCompatActivity() {
                                 LoginScreen(navController = navController)
                             }
 
-                            composable(Screen.ForgotPassword.route) {
-                                ForgotPasswordScreen(navController = navController)
-                            }
-
                             composable(Screen.Register.route) {
                                 RegisterScreen(navController = navController)
                             }
