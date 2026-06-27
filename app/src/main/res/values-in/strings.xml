@@ -248,6 +248,11 @@
     <string name="album_empty">Belum ada foto yang diupload.</string>
     <string name="album_photo_desc">Foto album</string>
     <string name="album_full_size_desc">Foto full size</string>
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_title">Lupa Password</string>
+    <string name="forgot_password_subtitle">Silakan masukkan alamat email Anda untuk menerima tautan reset kata sandi.</string>
+    <string name="forgot_password_email_hint">Masukkan alamat email Anda...</string>
+    <string name="forgot_password_btn_continue">Lanjutkan</string>
+    <string name="forgot_password_contact">Tidak ingat email Anda?\nHubungi kami di help@griefy.app</string>
+    <string name="error_forgot_password_failed">Gagal mengirim email reset password.</string>
 </resources>
-
-

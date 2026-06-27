@@ -248,4 +248,12 @@
     <string name="album_empty">No photos uploaded yet.</string>
     <string name="album_photo_desc">Album photo</string>
     <string name="album_full_size_desc">Full size photo</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="forgot_password_subtitle">Please enter your email address to receive a password reset link.</string>
+    <string name="forgot_password_email_hint">Enter your email address...</string>
+    <string name="forgot_password_btn_continue">Continue</string>
+    <string name="forgot_password_contact">Don\'t remember your email?\nContact us at help@griefy.app</string>
+    <string name="error_forgot_password_failed">Failed to send reset password email.</string>
 </resources>

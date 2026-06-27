@@ -47,12 +47,7 @@ fun LoginScreen(
     val loginState = uiState.loginState
     val context = LocalContext.current
 
-    var showForgotPasswordDialog by remember { mutableStateOf(false) }
-    var resetEmail by remember { mutableStateOf("") }
-    val forgotPasswordState = uiState.forgotPasswordState
-
     val successMessage = stringResource(id = R.string.login_success_toast)
-    val forgotPasswordSuccessMsg = stringResource(id = R.string.forgot_password_success)
 
     LaunchedEffect(loginState) {
         when (loginState) {
@@ -81,27 +76,7 @@ fun LoginScreen(
         }
     }
 
-    LaunchedEffect(forgotPasswordState) {
-        when (forgotPasswordState) {
-            is Resource.Success -> {
-                Toast.makeText(context, forgotPasswordSuccessMsg, Toast.LENGTH_LONG).show()
-                viewModel.resetForgotPasswordState()
-            }
-            is Resource.Error -> {
-                val msg = forgotPasswordState.message
-                if (msg != null) {
-                    when (msg) {
-                        "ERROR_EMAIL_EMPTY" -> showErrorResId = R.string.error_email_empty
-                        else -> showErrorRawMsg = msg
-                    }
-                } else {
-                    showErrorRawMsg = "Gagal mengirim email reset password."
-                }
-                viewModel.resetForgotPasswordState()
-            }
-            else -> {}
-        }
-    }
+
 
     Box(
         modifier = Modifier
@@ -203,8 +178,7 @@ fun LoginScreen(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp.scaled(),
                     modifier = Modifier.clickable {
-                        resetEmail = email
-                        showForgotPasswordDialog = true
+                        navController.navigate(Screen.ForgotPassword.route)
                     }
                 )
             }
@@ -254,7 +228,7 @@ fun LoginScreen(
             }
         }
 
-        if (loginState is Resource.Loading || forgotPasswordState is Resource.Loading) {
+        if (loginState is Resource.Loading) {
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.Center)
@@ -275,64 +249,6 @@ fun LoginScreen(
             modifier = Modifier.align(Alignment.TopCenter)
         )
 
-        if (showForgotPasswordDialog) {
-            AlertDialog(
-                onDismissRequest = { showForgotPasswordDialog = false },
-                title = {
-                    Text(
-                        text = stringResource(R.string.login_forgot_password),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp.scaled()
-                    )
-                },
-                text = {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.forgot_password_desc),
-                            fontSize = 14.sp.scaled(),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(12.dp.scaled()))
-                        OutlinedTextField(
-                            value = resetEmail,
-                            onValueChange = { resetEmail = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp.scaled()),
-                            singleLine = true,
-                            placeholder = { Text(text = "email@example.com", fontSize = 13.sp.scaled()) },
-                            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp.scaled()),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                            )
-                        )
-                    }
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.sendPasswordReset(resetEmail)
-                            showForgotPasswordDialog = false
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.send),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showForgotPasswordDialog = false }) {
-                        Text(
-                            text = stringResource(R.string.cancel),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            )
-        }
+
     }
 }
