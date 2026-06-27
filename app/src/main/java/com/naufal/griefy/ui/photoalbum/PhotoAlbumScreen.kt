@@ -24,6 +24,9 @@ import com.naufal.griefy.util.scaled
 import com.naufal.griefy.util.adaptiveWidth
 import androidx.compose.ui.unit.sp
 
+import androidx.compose.ui.res.stringResource
+import com.naufal.griefy.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoAlbumScreen(
@@ -62,7 +65,7 @@ fun PhotoAlbumScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Album Foto",
+                    text = stringResource(R.string.album_title),
                     fontSize = 24.sp.scaled(),
                     fontWeight = FontWeight.Bold,
                     color = headerTextColor
@@ -75,7 +78,7 @@ fun PhotoAlbumScreen(
                 }
             } else if (photoGroups.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Belum ada foto yang diupload.")
+                    Text(stringResource(R.string.album_empty))
                 }
             } else {
                 LazyVerticalGrid(
@@ -109,7 +112,7 @@ fun PhotoAlbumScreen(
                         items(group.photos) { photoUri ->
                             AsyncImage(
                                 model = photoUri,
-                                contentDescription = "Foto album",
+                                contentDescription = stringResource(R.string.album_photo_desc),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .aspectRatio(1f)
@@ -137,7 +140,7 @@ fun PhotoAlbumScreen(
             ) {
                 AsyncImage(
                     model = uri,
-                    contentDescription = "Foto full size",
+                    contentDescription = stringResource(R.string.album_full_size_desc),
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
                 )

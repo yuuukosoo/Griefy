@@ -7,10 +7,12 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 class GetMoodsByMonthUseCase @Inject constructor(
-    private val repository: DailyMoodRepository
+    private val repository: DailyMoodRepository,
+    private val authRepository: com.naufal.griefy.domain.repository.AuthRepository
 ) {
     operator fun invoke(yearMonth: YearMonth): Flow<List<DailyMood>> {
         val monthString = String.format(java.util.Locale.US, "%04d-%02d", yearMonth.year, yearMonth.monthValue)
-        return repository.getMoodsForMonth(monthString)
+        val currentUserId = authRepository.getCurrentUser()?.uid ?: ""
+        return repository.getMoodsForMonth(monthString, currentUserId)
     }
 }

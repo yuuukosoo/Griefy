@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DailyMoodDao {
-    @Query("SELECT * FROM daily_moods WHERE dateString LIKE :yearMonth || '%'")
-    fun getMoodsForMonth(yearMonth: String): Flow<List<DailyMoodEntity>>
+    @Query("SELECT * FROM daily_moods WHERE dateString LIKE :yearMonth || '%' AND userId = :userId")
+    fun getMoodsForMonth(yearMonth: String, userId: String): Flow<List<DailyMoodEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMood(dailyMood: DailyMoodEntity)

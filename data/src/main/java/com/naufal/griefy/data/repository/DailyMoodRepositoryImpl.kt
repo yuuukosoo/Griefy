@@ -5,8 +5,11 @@ import com.naufal.griefy.data.local.DailyMoodDao
 import com.naufal.griefy.data.local.DailyMoodEntity
 import com.naufal.griefy.domain.model.DailyMood
 import com.naufal.griefy.domain.repository.DailyMoodRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -16,10 +19,41 @@ class DailyMoodRepositoryImpl @Inject constructor(
 ) : DailyMoodRepository {
 
     private val collectionName = "daily_moods"
+    private val repositoryScope = CoroutineScope(Dispatchers.IO)
 
-    override fun getMoodsForMonth(yearMonth: String): Flow<List<DailyMood>> {
-        return dao.getMoodsForMonth(yearMonth).map { entities ->
+    override fun getMoodsForMonth(yearMonth: String, userId: String): Flow<List<DailyMood>> {
+        if (userId.isNotEmpty()) {
+            repositoryScope.launch {
+                syncUserMoodsFromFirestore(userId)
+            }
+        }
+        return dao.getMoodsForMonth(yearMonth, userId).map { entities ->
             entities.map { it.toDomain() }
+        }
+    }
+
+    private suspend fun syncUserMoodsFromFirestore(userId: String) {
+        try {
+            val snapshot = firestore.collection(collectionName)
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+            
+            for (doc in snapshot.documents) {
+                val id = doc.getString("id") ?: continue
+                val dateString = doc.getString("dateString") ?: continue
+                val moodValue = doc.getString("moodValue") ?: continue
+                
+                val dailyMood = DailyMood(
+                    id = id,
+                    dateString = dateString,
+                    moodValue = moodValue,
+                    userId = userId
+                )
+                dao.insertMood(dailyMood.toEntity())
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("DailyMoodRepository", "Failed to sync moods from Firebase: ${e.message}", e)
         }
     }
 

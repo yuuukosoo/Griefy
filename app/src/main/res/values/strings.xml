@@ -242,5 +242,10 @@
     <string name="reminder_noti_channel_desc">Channel for Griefy reminder notifications</string>
     <string name="home_mood_tracker_title">Daily Mood Tracker</string>
     <string name="home_mood_tracker_desc">How are you feeling today?</string>
-</resources>
 
+    <!-- Photo Album Screen -->
+    <string name="album_title">Photo Album</string>
+    <string name="album_empty">No photos uploaded yet.</string>
+    <string name="album_photo_desc">Album photo</string>
+    <string name="album_full_size_desc">Full size photo</string>
+</resources>
