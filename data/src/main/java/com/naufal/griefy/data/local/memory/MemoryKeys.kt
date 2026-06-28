@@ -1,4 +1,4 @@
-package com.naufal.griefy.data.local
+package com.naufal.griefy.data.local.memory
 
 data class MemoryKeys(
     val id: Int,

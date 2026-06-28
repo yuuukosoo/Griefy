@@ -1,6 +1,6 @@
 package com.naufal.griefy.data.repository
 
-import com.naufal.griefy.data.local.RemembranceDayDao
+import com.naufal.griefy.data.local.reminder.RemembranceDayDao
 import com.naufal.griefy.domain.model.RemembranceDay
 import com.naufal.griefy.domain.repository.RemembranceRepository
 import kotlinx.coroutines.flow.Flow

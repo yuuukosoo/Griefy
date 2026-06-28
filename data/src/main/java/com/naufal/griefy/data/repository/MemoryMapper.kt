@@ -1,6 +1,6 @@
 package com.naufal.griefy.data.repository
 
-import com.naufal.griefy.data.local.MemoryEntity
+import com.naufal.griefy.data.local.memory.MemoryEntity
 import com.naufal.griefy.domain.model.Memory
 
 fun MemoryEntity.toDomain(): Memory {

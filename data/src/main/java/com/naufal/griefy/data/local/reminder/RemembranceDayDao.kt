@@ -1,4 +1,4 @@
-package com.naufal.griefy.data.local
+package com.naufal.griefy.data.local.reminder
 
 import androidx.room.Dao
 import androidx.room.Delete

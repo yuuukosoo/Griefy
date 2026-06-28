@@ -1,6 +1,6 @@
 package com.naufal.griefy.data.repository
 
-import com.naufal.griefy.data.local.RemembranceDayEntity
+import com.naufal.griefy.data.local.reminder.RemembranceDayEntity
 import com.naufal.griefy.domain.model.RemembranceDay
 
 fun RemembranceDayEntity.toDomain(): RemembranceDay {

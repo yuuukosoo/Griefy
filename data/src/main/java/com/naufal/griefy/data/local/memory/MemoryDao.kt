@@ -1,4 +1,4 @@
-package com.naufal.griefy.data.local
+package com.naufal.griefy.data.local.memory
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -23,6 +23,9 @@ interface MemoryDao {
 
     @Query("SELECT * FROM memory_table WHERE id = :id")
     suspend fun getMemoryById(id: Int): MemoryEntity?
+
+    @Query("SELECT * FROM memory_table WHERE title = :title AND createdAt = :createdAt LIMIT 1")
+    suspend fun getMemoryByTitleAndDate(title: String, createdAt: Long): MemoryEntity?
 
     @Query("SELECT * FROM memory_table WHERE id = :id")
     fun getMemoryByIdAsFlow(id: Int): Flow<MemoryEntity?>

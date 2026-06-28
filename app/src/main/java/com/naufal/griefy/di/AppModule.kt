@@ -3,8 +3,8 @@ package com.naufal.griefy.di
 import android.app.Application
 import androidx.room.Room
 import com.naufal.griefy.data.local.GriefyDatabase
-import com.naufal.griefy.data.local.MemoryDao
-import com.naufal.griefy.data.local.RemembranceDayDao
+import com.naufal.griefy.data.local.memory.MemoryDao
+import com.naufal.griefy.data.local.reminder.RemembranceDayDao
 import com.naufal.griefy.data.remote.DeezerApi
 import com.naufal.griefy.data.repository.MemoryRepositoryImpl
 import com.naufal.griefy.data.repository.RemembranceRepositoryImpl
@@ -60,7 +60,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDailyMoodDao(database: GriefyDatabase): com.naufal.griefy.data.local.DailyMoodDao {
+    fun provideDailyMoodDao(database: GriefyDatabase): com.naufal.griefy.data.local.mood.DailyMoodDao {
         return database.dailyMoodDao
     }
 
@@ -88,7 +88,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDailyMoodRepository(
-        dao: com.naufal.griefy.data.local.DailyMoodDao,
+        dao: com.naufal.griefy.data.local.mood.DailyMoodDao,
         firestore: FirebaseFirestore
     ): com.naufal.griefy.domain.repository.DailyMoodRepository {
         return com.naufal.griefy.data.repository.DailyMoodRepositoryImpl(dao, firestore)

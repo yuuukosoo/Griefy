@@ -1,9 +1,10 @@
-package com.naufal.griefy.data.local
+package com.naufal.griefy.data.local.reminder
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.naufal.griefy.data.local.memory.MemoryEntity
 
 @Entity(
     tableName = "remembrance_days",

@@ -10,6 +10,8 @@ interface MemoryRepository {
     fun getPublicMemories(): Flow<List<Memory>>
 
     suspend fun getMemoryById(id: Int): Memory?
+    
+    suspend fun getMemoryByTitleAndDate(title: String, createdAt: Long): Memory?
 
     fun getMemoryByIdAsFlow(id: Int): Flow<Memory?>
 

@@ -1,8 +1,8 @@
 package com.naufal.griefy.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.naufal.griefy.data.local.DailyMoodDao
-import com.naufal.griefy.data.local.DailyMoodEntity
+import com.naufal.griefy.data.local.mood.DailyMoodDao
+import com.naufal.griefy.data.local.mood.DailyMoodEntity
 import com.naufal.griefy.domain.model.DailyMood
 import com.naufal.griefy.domain.repository.DailyMoodRepository
 import kotlinx.coroutines.CoroutineScope

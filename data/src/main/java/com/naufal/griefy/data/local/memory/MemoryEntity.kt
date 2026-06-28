@@ -1,4 +1,4 @@
-package com.naufal.griefy.data.local
+package com.naufal.griefy.data.local.memory
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

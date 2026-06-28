@@ -8,7 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import com.google.firebase.firestore.FirebaseFirestore
-import com.naufal.griefy.data.local.MemoryDao
+import com.naufal.griefy.data.local.memory.MemoryDao
 import com.naufal.griefy.data.remote.CloudinaryUploader
 import com.naufal.griefy.data.remote.DeezerApi
 import com.naufal.griefy.domain.model.Memory
@@ -132,6 +132,10 @@ class MemoryRepositoryImpl @Inject constructor(
 
     override suspend fun getMemoryById(id: Int): Memory? {
         return dao.getMemoryById(id)?.toDomain()
+    }
+
+    override suspend fun getMemoryByTitleAndDate(title: String, createdAt: Long): Memory? {
+        return dao.getMemoryByTitleAndDate(title, createdAt)?.toDomain()
     }
 
     override fun getMemoryByIdAsFlow(id: Int): Flow<Memory?> {
