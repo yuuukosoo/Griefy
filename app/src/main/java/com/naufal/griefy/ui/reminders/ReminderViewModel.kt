@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.reminders
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.RemembranceDay
@@ -16,7 +15,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 class ReminderViewModel @Inject constructor(
     getRemembranceDaysUseCase: GetRemembranceDaysUseCase,
@@ -26,9 +24,7 @@ class ReminderViewModel @Inject constructor(
     getMyUserIdUseCase: GetMyUserIdUseCase,
     getMemoriesUseCase: GetMemoriesUseCase
 ) : ViewModel() {
-
     private val currentUserId = getMyUserIdUseCase()
-
     val uiState: StateFlow<ReminderState> = combine(
         getRemembranceDaysUseCase(),
         getMemoriesUseCase("", currentUserId)
@@ -42,7 +38,6 @@ class ReminderViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ReminderState()
     )
-
     fun addReminder(title: String, description: String, dateTime: Long, memoryId: Int?) {
         viewModelScope.launch {
             val newDay = RemembranceDay(
@@ -55,13 +50,11 @@ class ReminderViewModel @Inject constructor(
             addRemembranceDayUseCase(newDay)
         }
     }
-
     fun updateReminder(day: RemembranceDay) {
         viewModelScope.launch {
             updateRemembranceDayUseCase(day)
         }
     }
-
     fun deleteReminder(day: RemembranceDay) {
         viewModelScope.launch {
             deleteRemembranceDayUseCase(day)

@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.trash
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,10 +30,8 @@ import coil.compose.AsyncImage
 import com.naufal.griefy.R
 import com.naufal.griefy.domain.model.Memory
 import com.naufal.griefy.util.toImageModel
-
 import com.naufal.griefy.util.scaled
 import com.naufal.griefy.util.getAdaptiveHorizontalPadding
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrashScreen(
@@ -43,12 +40,10 @@ fun TrashScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val trashedMemories = uiState.trashedMemories
-
     val showEmptyTrashDialog = remember { mutableStateOf(false) }
     val showDeleteSingleDialog = remember { mutableStateOf(false) }
     val memoryToDeleteId = remember { mutableStateOf<Int?>(null) }
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     if (showEmptyTrashDialog.value) {
         Dialog(
             onDismissRequest = { showEmptyTrashDialog.value = false },
@@ -104,7 +99,6 @@ fun TrashScreen(
             }
         }
     }
-
     if (showDeleteSingleDialog.value) {
         Dialog(
             onDismissRequest = {
@@ -169,7 +163,6 @@ fun TrashScreen(
             }
         }
     }
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -219,7 +212,6 @@ fun TrashScreen(
                     .fillMaxSize()
                     .widthIn(max = 500.dp)
             ) {
-
                 Text(
                     text = stringResource(R.string.trash_subtitle),
                     style = MaterialTheme.typography.bodySmall,
@@ -227,7 +219,6 @@ fun TrashScreen(
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(horizontal = horizontalPadding, vertical = 8.dp.scaled())
                 )
-
                 if (trashedMemories.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
@@ -269,7 +260,6 @@ fun TrashScreen(
         }
     }
 }
-
 @Composable
 fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Unit, onProfileClick: () -> Unit) {
     Card(
@@ -279,7 +269,6 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(24.dp.scaled())) {
-            // Profile Header Row
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -315,7 +304,6 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first().toImageModel(),
@@ -325,13 +313,10 @@ fun TrashedMemoryCard(memory: Memory, onRestore: () -> Unit, onDelete: () -> Uni
                 )
                 Spacer(modifier = Modifier.height(16.dp.scaled()))
             }
-
             Text(text = memory.title, fontSize = 18.sp.scaled(), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
             Spacer(modifier = Modifier.height(6.dp.scaled()))
             Text(text = memory.content, fontSize = 14.sp.scaled(), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
-
             Spacer(modifier = Modifier.height(20.dp.scaled()))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,

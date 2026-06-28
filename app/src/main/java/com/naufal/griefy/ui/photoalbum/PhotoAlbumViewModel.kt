@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.photoalbum
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.PhotoAlbumGroup
@@ -16,14 +15,11 @@ import javax.inject.Inject
 class PhotoAlbumViewModel @Inject constructor(
     private val getPhotoAlbumUseCase: GetPhotoAlbumUseCase
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(PhotoAlbumState())
     val uiState: StateFlow<PhotoAlbumState> = _uiState.asStateFlow()
-
     init {
         fetchPhotoAlbum()
     }
-
     private fun fetchPhotoAlbum() {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         viewModelScope.launch {

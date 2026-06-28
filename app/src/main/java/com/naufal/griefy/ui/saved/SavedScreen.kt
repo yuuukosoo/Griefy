@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.saved
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,7 +24,6 @@ import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.home.MemoryCard
 import com.naufal.griefy.ui.navigation.Screen
-
 @Composable
 fun SavedScreen(
     navController: NavController,
@@ -34,7 +32,6 @@ fun SavedScreen(
     val uiState by viewModel.uiState.collectAsState()
     val savedMemories = uiState.savedMemories
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -50,7 +47,6 @@ fun SavedScreen(
             val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
             val headerBgColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
             val headerTextColor = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,13 +64,11 @@ fun SavedScreen(
                     color = headerTextColor
                 )
             }
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding, top = 24.dp.scaled(), bottom = 100.dp.scaled()),
                 verticalArrangement = Arrangement.spacedBy(16.dp.scaled())
             ) {
-
                 if (savedMemories.isEmpty()) {
                     item {
                         Box(
@@ -119,6 +113,5 @@ fun SavedScreen(
                 }
             }
         }
-
     }
 }

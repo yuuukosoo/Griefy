@@ -1,8 +1,6 @@
 package com.naufal.griefy.ui.edit
-
 import android.net.Uri
 import com.naufal.griefy.domain.model.Memory
-
 data class EditMemoryState(
     val titleText: String = "",
     val contentText: String = "",

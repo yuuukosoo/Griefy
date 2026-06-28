@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.otherprofile
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -33,7 +32,6 @@ import com.naufal.griefy.domain.util.Resource
 import com.naufal.griefy.util.scaled
 import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 import com.naufal.griefy.util.toImageModel
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OtherProfileScreen(
@@ -43,7 +41,6 @@ fun OtherProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
     val profileState = uiState.profileState
     val displayName = (profileState as? Resource.Success)?.data?.displayName
-
     Scaffold(
         topBar = {
             Box(
@@ -131,12 +128,10 @@ fun OtherProfileScreen(
         }
     }
 }
-
 @Composable
 private fun OtherProfileContent(profile: UserProfile, memoryCount: Int) {
     val profileImageModel = profile.avatarBase64?.toImageModel()
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -144,7 +139,6 @@ private fun OtherProfileContent(profile: UserProfile, memoryCount: Int) {
             .padding(horizontal = horizontalPadding, vertical = 24.dp.scaled()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Avatar Box
         Box(
             modifier = Modifier.size(100.dp.scaled())
         ) {
@@ -167,9 +161,7 @@ private fun OtherProfileContent(profile: UserProfile, memoryCount: Int) {
                 }
             }
         }
-
         Spacer(modifier = Modifier.height(32.dp.scaled()))
-
         if (profile.email == "deleted") {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -202,9 +194,7 @@ private fun OtherProfileContent(profile: UserProfile, memoryCount: Int) {
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-
             Spacer(modifier = Modifier.height(16.dp.scaled()))
-
             OtherProfileInfoItem(
                 icon = Icons.Default.Person,
                 label = stringResource(R.string.profile_username_label),
@@ -225,7 +215,6 @@ private fun OtherProfileContent(profile: UserProfile, memoryCount: Int) {
         }
     }
 }
-
 @Composable
 private fun OtherProfileInfoItem(
     icon: ImageVector,

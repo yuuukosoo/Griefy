@@ -1,6 +1,7 @@
 package com.naufal.griefy.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.naufal.griefy.data.local.mood.DailyMoodDao
 import com.naufal.griefy.data.local.mood.DailyMoodEntity
 import com.naufal.griefy.domain.model.DailyMood
@@ -54,6 +55,7 @@ class DailyMoodRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             android.util.Log.e("DailyMoodRepository", "Failed to sync moods from Firebase: ${e.message}", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 
@@ -75,6 +77,7 @@ class DailyMoodRepositoryImpl @Inject constructor(
                     .await()
             } catch (e: Exception) {
                 android.util.Log.e("DailyMoodRepository", "Failed to sync mood to Firebase: ${e.message}", e)
+                FirebaseCrashlytics.getInstance().recordException(e)
             }
         }
     }
@@ -89,6 +92,7 @@ class DailyMoodRepositoryImpl @Inject constructor(
             firestore.collection(collectionName).document(id).delete().await()
         } catch (e: Exception) {
             android.util.Log.e("DailyMoodRepository", "Failed to delete mood from Firebase: ${e.message}", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 

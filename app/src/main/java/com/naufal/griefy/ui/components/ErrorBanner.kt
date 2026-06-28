@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.components
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.naufal.griefy.R
 import kotlinx.coroutines.delay
-
 @Composable
 fun ErrorBanner(
     message: String,
@@ -29,14 +27,12 @@ fun ErrorBanner(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Auto-dismiss after 4 seconds
     LaunchedEffect(visible) {
         if (visible) {
             delay(4000)
             onDismiss()
         }
     }
-
     AnimatedVisibility(
         visible = visible,
         enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),

@@ -45,7 +45,6 @@ import com.naufal.griefy.ui.searchmemory.SearchMemoryScreen
 import com.naufal.griefy.ui.reminders.ReminderScreen
 import com.naufal.griefy.ui.settings.SettingsScreen
 import androidx.appcompat.app.AppCompatDelegate
-import com.naufal.griefy.ui.forgotpassword.ForgotPasswordScreen
 import com.naufal.griefy.ui.theme.GriefyTheme
 import com.naufal.griefy.ui.trash.TrashScreen
 import com.naufal.griefy.ui.saved.SavedScreen

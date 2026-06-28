@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.profile
-
 data class ProfileState(
     val isEditing: Boolean = false,
     val username: String = "",

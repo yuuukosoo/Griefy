@@ -1,6 +1,7 @@
 package com.naufal.griefy.data.repository
 
 import android.content.Context
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import android.util.Base64
 import androidx.core.net.toUri
 import com.google.android.gms.tasks.Task
@@ -58,6 +59,7 @@ class MemoryRepositoryImpl @Inject constructor(
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     android.util.Log.e(TAG_FIRESTORE_ERROR, "Error fetching public memories: ${error.message}", error)
+                    FirebaseCrashlytics.getInstance().recordException(error)
                     close(error)
                     return@addSnapshotListener
                 }
@@ -120,6 +122,7 @@ class MemoryRepositoryImpl @Inject constructor(
                             }
                         } catch (e: Exception) {
                             android.util.Log.e(TAG_ROOM_CACHE_ERROR, "Gagal menyimpan cache ke Room: ${e.message}", e)
+                            FirebaseCrashlytics.getInstance().recordException(e)
                         }
                     }
 
@@ -211,6 +214,7 @@ class MemoryRepositoryImpl @Inject constructor(
                 }
                 .addOnFailureListener { e ->
                     android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to save bookmark to Firestore: ${e.message}")
+                    FirebaseCrashlytics.getInstance().recordException(e)
                 }
         } else {
             firestore.collection(COLLECTION_SAVED_MEMORIES)
@@ -221,6 +225,7 @@ class MemoryRepositoryImpl @Inject constructor(
                 }
                 .addOnFailureListener { e ->
                     android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to delete bookmark from Firestore: ${e.message}")
+                    FirebaseCrashlytics.getInstance().recordException(e)
                 }
         }
     }
@@ -241,6 +246,7 @@ class MemoryRepositoryImpl @Inject constructor(
                 }
                 .addOnFailureListener { e ->
                     android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to delete memory from Firestore: ${e.message}")
+                    FirebaseCrashlytics.getInstance().recordException(e)
                 }
         }
     }
@@ -277,6 +283,7 @@ class MemoryRepositoryImpl @Inject constructor(
                 }
                 .addOnFailureListener { e ->
                     android.util.Log.e(TAG_FIRESTORE_SYNC, "Failed to delete memory from Firestore: ${e.message}")
+                    FirebaseCrashlytics.getInstance().recordException(e)
                 }
         }
     }
@@ -295,6 +302,7 @@ class MemoryRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             android.util.Log.e(TAG_DEEZER_ERROR, "Gagal ambil lagu dari Deezer: ${e.message}", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
             emptyList()
         }
     }
@@ -330,6 +338,7 @@ class MemoryRepositoryImpl @Inject constructor(
             "Gagal ambil detail lagu dari Deezer setelah $MAX_DEEZER_RETRIES percobaan: ${lastError?.message}",
             lastError
         )
+        lastError?.let { FirebaseCrashlytics.getInstance().recordException(it) }
         return songDetailsCache[trackId]
     }
 
@@ -364,6 +373,7 @@ class MemoryRepositoryImpl @Inject constructor(
             file.toURI().toString()
         } catch (e: Exception) {
             android.util.Log.e("LOCAL_IMAGE_SAVE", "Gagal menyimpan file gambar lokal: ${e.message}", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
             null
         }
     }
@@ -398,6 +408,7 @@ class MemoryRepositoryImpl @Inject constructor(
             }
             .addOnFailureListener { e ->
                 android.util.Log.e(TAG_FIRESTORE_SYNC, "Gagal sinkronisasi ke Firestore: ${e.message}", e)
+                FirebaseCrashlytics.getInstance().recordException(e)
             }
     }
 
@@ -522,6 +533,7 @@ class MemoryRepositoryImpl @Inject constructor(
                     }
                 } catch (e: Exception) {
                     android.util.Log.e(TAG_FIRESTORE_ERROR, "Gagal ambil detail memori yang di-save: ${e.message}")
+                    FirebaseCrashlytics.getInstance().recordException(e)
                 }
             }
 
@@ -562,6 +574,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
         } catch (e: Exception) {
             android.util.Log.e(TAG_FIRESTORE_ERROR, "Gagal sinkronisasi data user dari Firestore: ${e.message}", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 

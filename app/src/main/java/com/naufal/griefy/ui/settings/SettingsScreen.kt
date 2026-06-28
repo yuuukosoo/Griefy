@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.settings
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,12 +63,10 @@ import androidx.navigation.NavController
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 import androidx.compose.ui.platform.LocalContext
-
 import com.naufal.griefy.util.scaled
 import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.widthIn
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -85,7 +82,6 @@ fun SettingsScreen(
     val showDeleteLoading = remember { mutableStateOf(false) }
     val deleteErrorMessage = remember { mutableStateOf<String?>(null) }
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     LaunchedEffect(uiState.deleteAccountResult) {
         val result = uiState.deleteAccountResult
         if (result != null) {
@@ -109,15 +105,12 @@ fun SettingsScreen(
             }
         }
     }
-
     val currentLanguageName = if (currentLangCode == "in" || currentLangCode == "id") {
         stringResource(R.string.settings_language_indonesian)
     } else {
         stringResource(R.string.settings_language_english)
     }
-
     val showLanguageDialog = remember { mutableStateOf(false) }
-
     if (showLanguageDialog.value) {
         Dialog(
             onDismissRequest = { showLanguageDialog.value = false },
@@ -217,7 +210,6 @@ fun SettingsScreen(
             }
         }
     }
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -268,7 +260,6 @@ fun SettingsScreen(
                     .padding(horizontal = horizontalPadding)
                     .verticalScroll(rememberScrollState())
             ) {
-
                 SettingsCategoryTitle(stringResource(R.string.settings_pref_display))
                 Card(
                     modifier = Modifier
@@ -294,9 +285,7 @@ fun SettingsScreen(
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(12.dp.scaled()))
-
                 SettingsCategoryTitle(stringResource(R.string.settings_pref_memory))
                 Card(
                     modifier = Modifier
@@ -332,9 +321,7 @@ fun SettingsScreen(
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(12.dp.scaled()))
-
                 SettingsCategoryTitle(stringResource(R.string.settings_pref_account))
                 Card(
                     modifier = Modifier
@@ -368,7 +355,6 @@ fun SettingsScreen(
             }
         }
     }
-
     if (showLogoutDialog.value) {
         Dialog(
             onDismissRequest = { showLogoutDialog.value = false },
@@ -428,7 +414,6 @@ fun SettingsScreen(
             }
         }
     }
-
     if (showDeleteAccountDialog.value) {
         Dialog(
             onDismissRequest = { showDeleteAccountDialog.value = false },
@@ -484,7 +469,6 @@ fun SettingsScreen(
             }
         }
     }
-
     if (showDeleteLoading.value) {
         AlertDialog(
             onDismissRequest = { },
@@ -504,7 +488,6 @@ fun SettingsScreen(
             confirmButton = { }
         )
     }
-
     if (deleteErrorMessage.value != null) {
         AlertDialog(
             onDismissRequest = { deleteErrorMessage.value = null },
@@ -526,7 +509,6 @@ fun SettingsScreen(
         )
     }
 }
-
 @Composable
 fun SettingsCategoryTitle(title: String) {
     Text(
@@ -538,7 +520,6 @@ fun SettingsCategoryTitle(title: String) {
         modifier = Modifier.padding(start = 8.dp.scaled(), end = 8.dp.scaled(), top = 8.dp.scaled(), bottom = 4.dp.scaled())
     )
 }
-
 @Composable
 fun SettingsItem(
     icon: ImageVector,
@@ -583,7 +564,6 @@ fun SettingsItem(
         )
     }
 }
-
 @Composable
 fun SettingsSwitchItem(
     icon: ImageVector,

@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.navigation
-
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -29,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.naufal.griefy.R
-
 @Composable
 fun FloatingNavigationDock(
     navController: NavController,
@@ -37,9 +35,7 @@ fun FloatingNavigationDock(
     onFabClick: (() -> Unit)? = null
 ) {
     val isDark = isSystemInDarkTheme() || MaterialTheme.colorScheme.background.luminance() < 0.5f
-    
     val navBarColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
-
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = navBarColor,
@@ -56,7 +52,6 @@ fun FloatingNavigationDock(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. Grouped Navigation Icons
             Row(
                 modifier = Modifier
                     .weight(1f)
@@ -64,7 +59,6 @@ fun FloatingNavigationDock(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Home Tab
                 NavigationTabItem(
                     selected = currentRoute == Screen.Home.route,
                     onClick = {
@@ -78,8 +72,6 @@ fun FloatingNavigationDock(
                     contentDescription = stringResource(R.string.nav_home),
                     isDark = isDark
                 )
-
-                // Search Tab
                 NavigationTabItem(
                     selected = currentRoute == Screen.SearchMemory.route,
                     onClick = {
@@ -95,8 +87,6 @@ fun FloatingNavigationDock(
                     contentDescription = stringResource(R.string.nav_search),
                     isDark = isDark
                 )
-
-                // Saved Tab
                 NavigationTabItem(
                     selected = currentRoute == Screen.Saved.route,
                     onClick = {
@@ -112,8 +102,6 @@ fun FloatingNavigationDock(
                     contentDescription = stringResource(R.string.nav_saved),
                     isDark = isDark
                 )
-
-                // Photo Album Tab
                 NavigationTabItem(
                     selected = currentRoute == Screen.PhotoAlbum.route,
                     onClick = {
@@ -129,8 +117,6 @@ fun FloatingNavigationDock(
                     contentDescription = "Album Foto",
                     isDark = isDark
                 )
-
-                // Profile Tab
                 NavigationTabItem(
                     selected = currentRoute == Screen.Profile.route,
                     onClick = {
@@ -147,11 +133,8 @@ fun FloatingNavigationDock(
                     isDark = isDark
                 )
             }
-
-            // 2. Separate FAB (Add Button)
             val createBgColor = if (isDark) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
             val createIconColor = if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
-
             Surface(
                 modifier = Modifier
                     .size(56.dp)
@@ -182,7 +165,6 @@ fun FloatingNavigationDock(
         }
     }
 }
-
 @Composable
 private fun NavigationTabItem(
     selected: Boolean,
@@ -197,13 +179,11 @@ private fun NavigationTabItem(
     } else {
         Color.Transparent
     }
-
     val contentColor = if (selected) {
         if (isDark) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
     } else {
         if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
     }
-
     val animatedBgColor by animateColorAsState(
         targetValue = backgroundColor,
         animationSpec = tween(durationMillis = 300),
@@ -214,7 +194,6 @@ private fun NavigationTabItem(
         animationSpec = tween(durationMillis = 300),
         label = "tab_content_color"
     )
-
     val iconScale by animateFloatAsState(
         targetValue = if (selected) 1.15f else 1.0f,
         animationSpec = spring(
@@ -223,7 +202,6 @@ private fun NavigationTabItem(
         ),
         label = "icon_scale"
     )
-
     Box(
         modifier = modifier
             .size(48.dp)

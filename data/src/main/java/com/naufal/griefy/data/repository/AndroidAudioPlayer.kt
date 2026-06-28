@@ -1,5 +1,7 @@
 package com.naufal.griefy.data.repository
 
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+
 import android.media.MediaPlayer
 import com.naufal.griefy.domain.repository.AudioPlayer
 import kotlinx.coroutines.*
@@ -54,6 +56,7 @@ class AndroidAudioPlayer @Inject constructor() : AudioPlayer {
                     startProgressTracker()
                 } catch (e: Exception) {
                     android.util.Log.e("AUDIO_PLAYER", "Gagal memulai playback setelah prepared", e)
+                    FirebaseCrashlytics.getInstance().recordException(e)
                     resetStates()
                 }
             }
@@ -64,17 +67,20 @@ class AndroidAudioPlayer @Inject constructor() : AudioPlayer {
                     _isPlaying.value = true
                 } catch (e: Exception) {
                     android.util.Log.e("AUDIO_PLAYER", "Gagal memutar ulang track", e)
+                    FirebaseCrashlytics.getInstance().recordException(e)
                     resetStates()
                 }
             }
             player.setOnErrorListener { _, what, extra ->
                 android.util.Log.e("AUDIO_PLAYER", "MediaPlayer error: what=$what, extra=$extra")
+                FirebaseCrashlytics.getInstance().recordException(RuntimeException("MediaPlayer error: what=$what, extra=$extra"))
                 resetStates()
                 true
             }
             player.prepareAsync()
         } catch (e: Exception) {
             android.util.Log.e("AUDIO_PLAYER", "Gagal memutar track: $trackId", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
             resetStates()
         }
     }
@@ -90,6 +96,7 @@ class AndroidAudioPlayer @Inject constructor() : AudioPlayer {
             }
         } catch (e: Exception) {
             android.util.Log.e("AUDIO_PLAYER", "Gagal menjeda playback", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 
@@ -102,6 +109,7 @@ class AndroidAudioPlayer @Inject constructor() : AudioPlayer {
             }
         } catch (e: Exception) {
             android.util.Log.e("AUDIO_PLAYER", "Gagal melanjutkan playback", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
 
@@ -123,11 +131,13 @@ class AndroidAudioPlayer @Inject constructor() : AudioPlayer {
                         player.release()
                     } catch (e: Exception) {
                         android.util.Log.e("AUDIO_PLAYER", "Gagal menghentikan/me-release player di background", e)
+                        FirebaseCrashlytics.getInstance().recordException(e)
                     }
                 }
             }
         } catch (e: Exception) {
             android.util.Log.e("AUDIO_PLAYER", "Gagal menghentikan playback", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
         } finally {
             resetStates()
         }

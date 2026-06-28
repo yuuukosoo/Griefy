@@ -1,6 +1,4 @@
 package com.naufal.griefy.ui.search
-
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.BasicTextField
@@ -43,7 +41,6 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchSongScreen(
@@ -54,10 +51,8 @@ fun SearchSongScreen(
     val searchQuery = uiState.searchQuery
     val searchResults = uiState.searchResults
     val isLoading = uiState.isLoading
-
     val playingTrackId by viewModel.playingTrackId.collectAsState()
     val isMediaPlaying by viewModel.isMediaPlaying.collectAsState()
-
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -71,13 +66,10 @@ fun SearchSongScreen(
             viewModel.stopPlayback()
         }
     }
-
     val onCardClick = { song: Song ->
         viewModel.onSongClick(song)
     }
-
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -106,9 +98,7 @@ fun SearchSongScreen(
                         modifier = Modifier.size(24.dp.scaled())
                     )
                 }
-
                 Spacer(modifier = Modifier.width(16.dp.scaled()))
-
                 Text(
                     text = stringResource(R.string.search_song_title),
                     fontSize = 20.sp.scaled(),
@@ -116,9 +106,7 @@ fun SearchSongScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-
             Spacer(modifier = Modifier.height(16.dp.scaled()))
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -139,7 +127,6 @@ fun SearchSongScreen(
                         modifier = Modifier.size(22.dp.scaled())
                     )
                     Spacer(modifier = Modifier.width(12.dp.scaled()))
-                    
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                         if (searchQuery.isEmpty()) {
                             Text(
@@ -159,7 +146,6 @@ fun SearchSongScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
-                    
                     if (searchQuery.isNotEmpty()) {
                         Spacer(modifier = Modifier.width(8.dp.scaled()))
                         Icon(
@@ -173,9 +159,7 @@ fun SearchSongScreen(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp.scaled()))
-
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -194,7 +178,6 @@ fun SearchSongScreen(
                             )
                         }
                     }
-
                     items(searchResults) { song ->
                         SongCard(
                             song = song,
@@ -215,7 +198,6 @@ fun SearchSongScreen(
         }
     }
 }
-
 @Composable
 fun SongCard(
     song: Song,
@@ -266,9 +248,7 @@ fun SongCard(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.width(16.dp.scaled()))
-
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = song.title, 
@@ -293,7 +273,6 @@ fun SongCard(
                     )
                 )
             }
-
             if (isSelected) {
                 Spacer(modifier = Modifier.width(8.dp.scaled()))
                 Box(

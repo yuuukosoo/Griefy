@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.settings
-
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
@@ -17,16 +16,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val deleteAccountUseCase: DeleteAccountUseCase,
     private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
-
     private val sharedPreferences = context.getSharedPreferences("settings_pref", Context.MODE_PRIVATE)
-
     private val _uiState = MutableStateFlow(
         SettingsState(
             isDarkMode = sharedPreferences.getBoolean("dark_mode", false),
@@ -34,7 +30,6 @@ class SettingsViewModel @Inject constructor(
         )
     )
     val uiState: StateFlow<SettingsState> = _uiState.asStateFlow()
-
     fun deleteAccount() {
         viewModelScope.launch {
             _uiState.update { it.copy(deleteAccountResult = Resource.Loading()) }
@@ -42,14 +37,12 @@ class SettingsViewModel @Inject constructor(
             _uiState.update { it.copy(deleteAccountResult = result) }
         }
     }
-
     fun logout(onComplete: () -> Unit) {
         viewModelScope.launch {
             logoutUseCase()
             onComplete()
         }
     }
-
     fun setDarkMode(enabled: Boolean) {
         _uiState.update { it.copy(isDarkMode = enabled) }
         sharedPreferences.edit {
@@ -59,17 +52,14 @@ class SettingsViewModel @Inject constructor(
             if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
     }
-
     fun changeLanguage(langCode: String) {
         _uiState.update { it.copy(currentLanguageCode = langCode) }
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(langCode))
     }
-
     private fun getCurrentLanguage(): String {
         val currentLocale = AppCompatDelegate.getApplicationLocales().get(0)
         return currentLocale?.language ?: "en"
     }
-
     fun resetDeleteAccountResult() {
         _uiState.update { it.copy(deleteAccountResult = null) }
     }

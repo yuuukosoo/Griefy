@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.forgotpassword
-
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,7 +26,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.naufal.griefy.R
 import com.naufal.griefy.ui.components.ErrorBanner
 import com.naufal.griefy.util.scaled
-
 @Composable
 fun ForgotPasswordScreen(
     onDismiss: () -> Unit,
@@ -37,8 +35,6 @@ fun ForgotPasswordScreen(
     val forgotPasswordState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val successMsg = stringResource(id = R.string.forgot_password_success)
-
-    // Observe success state
     LaunchedEffect(forgotPasswordState.isSuccess) {
         if (forgotPasswordState.isSuccess) {
             Toast.makeText(context, successMsg, Toast.LENGTH_LONG).show()
@@ -46,7 +42,6 @@ fun ForgotPasswordScreen(
             onDismiss()
         }
     }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -59,7 +54,6 @@ fun ForgotPasswordScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo Griefy
             Box(
                 modifier = Modifier
                     .size(100.dp.scaled())
@@ -75,30 +69,21 @@ fun ForgotPasswordScreen(
                     modifier = Modifier.size(60.dp.scaled())
                 )
             }
-
             Spacer(modifier = Modifier.height(24.dp.scaled()))
-
-            // Title
             Text(
                 text = stringResource(id = R.string.forgot_password_title),
                 fontSize = 22.sp.scaled(),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-
             Spacer(modifier = Modifier.height(12.dp.scaled()))
-
-            // Description text
             Text(
                 text = stringResource(id = R.string.forgot_password_subtitle),
                 fontSize = 14.sp.scaled(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
-
             Spacer(modifier = Modifier.height(24.dp.scaled()))
-
-            // Email Input
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -129,10 +114,7 @@ fun ForgotPasswordScreen(
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 )
             )
-
             Spacer(modifier = Modifier.height(24.dp.scaled()))
-
-            // Continue Button
             Button(
                 onClick = { viewModel.sendPasswordReset(email) },
                 modifier = Modifier
@@ -157,12 +139,9 @@ fun ForgotPasswordScreen(
                 }
             }
         }
-
-        // Error display
         val displayErrorMsg = forgotPasswordState.errorMessageRes?.let { stringResource(id = it) }
             ?: forgotPasswordState.errorMessage
             ?: ""
-
         ErrorBanner(
             message = displayErrorMsg,
             visible = displayErrorMsg.isNotEmpty(),

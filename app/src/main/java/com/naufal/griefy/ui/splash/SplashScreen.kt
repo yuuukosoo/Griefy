@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.splash
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
@@ -14,22 +13,16 @@ import com.naufal.griefy.ui.navigation.Screen
 import com.naufal.griefy.util.scaled
 import kotlinx.coroutines.delay
 import androidx.hilt.navigation.compose.hiltViewModel
-
 @Composable
 fun SplashScreen(
     navController: NavController,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
-
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.logo_animation))
-    
-
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever
     )
-
-
     LaunchedEffect(Unit) {
         delay(3000)
         val startRoute = if (viewModel.isLoggedIn) Screen.Home.route else Screen.Login.route
@@ -37,7 +30,6 @@ fun SplashScreen(
             popUpTo(Screen.Splash.route) { inclusive = true }
         }
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()

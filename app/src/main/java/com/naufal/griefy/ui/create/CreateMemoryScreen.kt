@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.create
-
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -49,8 +48,6 @@ import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 import android.content.res.Configuration
 import androidx.compose.ui.platform.LocalConfiguration
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateMemoryScreen(
@@ -65,16 +62,13 @@ fun CreateMemoryScreen(
     val selectedImageUris = state.selectedImageUris
     val tagsList = state.tagsList
     val selectedSongTrackId = state.selectedSongTrackId
-
     val showAddLabelDialog = remember { mutableStateOf(false) }
     var newLabelText by remember { mutableStateOf("") }
-
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val returnedTrackId by savedStateHandle?.getStateFlow<String?>("selected_song_track_id", null)?.collectAsState() ?: remember { mutableStateOf(null) }
     val returnedTitle by savedStateHandle?.getStateFlow<String?>("selected_song_title", null)?.collectAsState() ?: remember { mutableStateOf(null) }
     val returnedArtist by savedStateHandle?.getStateFlow<String?>("selected_song_artist", null)?.collectAsState() ?: remember { mutableStateOf(null) }
     val returnedImageUrl by savedStateHandle?.getStateFlow<String?>("selected_song_image_url", null)?.collectAsState() ?: remember { mutableStateOf(null) }
-
     LaunchedEffect(returnedTrackId) {
         returnedTrackId?.let { trackId ->
             viewModel.setSelectedSong(
@@ -83,14 +77,12 @@ fun CreateMemoryScreen(
                 artist = returnedArtist,
                 imageUrl = returnedImageUrl
             )
-
             savedStateHandle?.set("selected_song_track_id", null)
             savedStateHandle?.set("selected_song_title", null)
             savedStateHandle?.set("selected_song_artist", null)
             savedStateHandle?.set("selected_song_image_url", null)
         }
     }
-
     val multiplePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5)
     ) { uris ->
@@ -106,16 +98,12 @@ fun CreateMemoryScreen(
             viewModel.addImages(uris)
         }
     }
-
     val horizontalPadding = getAdaptiveHorizontalPadding()
     val scrollState = rememberScrollState()
-
     val showExitDialog = remember { mutableStateOf(false) }
-
     BackHandler(enabled = state.hasChanges) {
         showExitDialog.value = true
     }
-
     if (showExitDialog.value) {
         AlertDialog(
             modifier = Modifier
@@ -150,7 +138,6 @@ fun CreateMemoryScreen(
             }
         )
     }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -189,18 +176,14 @@ fun CreateMemoryScreen(
                         modifier = Modifier.size(24.dp.scaled())
                     )
                 }
-
                 Spacer(modifier = Modifier.width(16.dp.scaled()))
-
                 Text(
                     text = stringResource(R.string.create_title),
                     fontSize = 20.sp.scaled(),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-
                 Spacer(modifier = Modifier.weight(1f))
-
                 IconButton(
                     onClick = {
                         if (titleText.isNotBlank() || contentText.isNotBlank() || selectedImageUris.isNotEmpty()) {
@@ -223,12 +206,9 @@ fun CreateMemoryScreen(
                     )
                 }
             }
-
             val configuration = LocalConfiguration.current
             val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
             if (isLandscape) {
-                    // Photo Box - smaller height for landscape
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -301,10 +281,7 @@ fun CreateMemoryScreen(
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(16.dp.scaled()))
-
-                    // Privacy, Music & Add Label Row
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -326,9 +303,7 @@ fun CreateMemoryScreen(
                                 modifier = Modifier.size(20.dp.scaled())
                             )
                         }
-
                         Spacer(modifier = Modifier.weight(1f))
-
                         Box(
                             modifier = Modifier
                                 .size(36.dp.scaled())
@@ -344,11 +319,8 @@ fun CreateMemoryScreen(
                                 modifier = Modifier.size(20.dp.scaled())
                             )
                         }
-
                         Spacer(modifier = Modifier.width(8.dp.scaled()))
-
                         var showMusicMenu by remember { mutableStateOf(false) }
-
                         Box {
                             Box(
                                 modifier = Modifier
@@ -379,7 +351,6 @@ fun CreateMemoryScreen(
                                     modifier = Modifier.size(20.dp.scaled())
                                 )
                             }
-
                             DropdownMenu(
                                 expanded = showMusicMenu,
                                 onDismissRequest = { showMusicMenu = false }
@@ -401,10 +372,7 @@ fun CreateMemoryScreen(
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(8.dp.scaled()))
-
-                    // Title Input Field
                     TextField(
                         value = titleText,
                         onValueChange = { viewModel.onTitleChange(it) },
@@ -430,13 +398,10 @@ fun CreateMemoryScreen(
                             unfocusedIndicatorColor = Color.Transparent
                         )
                     )
-
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 4.dp.scaled()),
                         color = MaterialTheme.colorScheme.outline
                     )
-
-                    // Content Input Field
                     TextField(
                         value = contentText,
                         onValueChange = { viewModel.onContentChange(it) },
@@ -461,10 +426,7 @@ fun CreateMemoryScreen(
                             unfocusedIndicatorColor = Color.Transparent
                         )
                     )
-
                     Spacer(modifier = Modifier.height(12.dp.scaled()))
-
-                    // Tags Display
                     if (tagsList.isNotEmpty()) {
                         LazyRow(
                             modifier = Modifier
@@ -495,10 +457,8 @@ fun CreateMemoryScreen(
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(16.dp.scaled()))
             } else {
-                // Portrait layout (original)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -571,17 +531,13 @@ fun CreateMemoryScreen(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp.scaled()))
-
-                // Privacy, Music & Add Label Row
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp.scaled()),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Add Label Icon (Align Left)
                     Box(
                         modifier = Modifier
                             .size(36.dp.scaled())
@@ -597,10 +553,7 @@ fun CreateMemoryScreen(
                             modifier = Modifier.size(20.dp.scaled())
                         )
                     }
-
                     Spacer(modifier = Modifier.weight(1f))
-
-                    // Privacy Toggle Button (Internet/Language icon if public, Lock icon if private)
                     Box(
                         modifier = Modifier
                             .size(36.dp.scaled())
@@ -616,11 +569,8 @@ fun CreateMemoryScreen(
                             modifier = Modifier.size(20.dp.scaled())
                         )
                     }
-
                     Spacer(modifier = Modifier.width(8.dp.scaled()))
-
                     var showMusicMenu by remember { mutableStateOf(false) }
-
                     Box {
                         Box(
                             modifier = Modifier
@@ -651,7 +601,6 @@ fun CreateMemoryScreen(
                                 modifier = Modifier.size(20.dp.scaled())
                             )
                         }
-
                         DropdownMenu(
                             expanded = showMusicMenu,
                             onDismissRequest = { showMusicMenu = false }
@@ -673,10 +622,7 @@ fun CreateMemoryScreen(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(8.dp.scaled()))
-
-                // Title Input Field
                 TextField(
                     value = titleText,
                     onValueChange = { viewModel.onTitleChange(it) },
@@ -702,13 +648,10 @@ fun CreateMemoryScreen(
                         unfocusedIndicatorColor = Color.Transparent
                     )
                 )
-
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp.scaled()),
                     color = MaterialTheme.colorScheme.outline
                 )
-
-                // Content Input Field - takes remaining space and internally scrollable
                 TextField(
                     value = contentText,
                     onValueChange = { viewModel.onContentChange(it) },
@@ -733,10 +676,7 @@ fun CreateMemoryScreen(
                         unfocusedIndicatorColor = Color.Transparent
                     )
                 )
-
                 Spacer(modifier = Modifier.height(12.dp.scaled()))
-
-                // Tags Display (Chips) if any custom tags exist
                 if (tagsList.isNotEmpty()) {
                     LazyRow(
                         modifier = Modifier
@@ -767,19 +707,11 @@ fun CreateMemoryScreen(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp.scaled()))
             }
-
-
-
-
-            // Removed bottom label button
             Spacer(modifier = Modifier.height(16.dp.scaled()))
         }
     }
-
-
     if (showAddLabelDialog.value) {
         AlertDialog(
             modifier = Modifier
@@ -826,7 +758,6 @@ fun CreateMemoryScreen(
             }
         )
     }
-
     if (state.showOfflineWarningDialog) {
         AlertDialog(
             modifier = Modifier

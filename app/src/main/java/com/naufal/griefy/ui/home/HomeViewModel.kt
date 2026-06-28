@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.home
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.Memory
@@ -13,7 +12,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -22,19 +20,15 @@ class HomeViewModel @Inject constructor(
     private val toggleSaveLocalMemoryUseCase: ToggleSaveLocalMemoryUseCase,
     getMyUserIdUseCase: GetMyUserIdUseCase
 ) : ViewModel() {
-
     private val _searchQuery = MutableStateFlow("")
-
     private val userProfileFlow: Flow<UserProfile?> = getMyUserProfileUseCase().map { resource ->
         if (resource is Resource.Success) resource.data else null
     }
-
     private val memoriesFlow: Flow<List<Memory>> = _searchQuery
         .flatMapLatest { query ->
             val currentUserId = getMyUserIdUseCase()
             getMemoriesUseCase(query, currentUserId)
         }
-
     val uiState: StateFlow<HomeState> = combine(
         _searchQuery,
         userProfileFlow,
@@ -50,11 +44,9 @@ class HomeViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeState()
     )
-
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
     }
-
     fun toggleSaveMemory(memory: Memory) {
         viewModelScope.launch {
             toggleSaveLocalMemoryUseCase(memory)

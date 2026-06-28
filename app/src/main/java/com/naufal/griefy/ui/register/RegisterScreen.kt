@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.register
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,9 +27,7 @@ import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.naufal.griefy.domain.util.Resource
-
 import com.naufal.griefy.ui.components.ErrorBanner
-
 @Composable
 fun RegisterScreen(
     navController: NavController,
@@ -40,18 +37,14 @@ fun RegisterScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
     var showErrorResId by remember { mutableStateOf<Int?>(null) }
     var showErrorRawMsg by remember { mutableStateOf<String?>(null) }
-
     val uiState by viewModel.uiState.collectAsState()
     val registerState = uiState.registerState
     val context = LocalContext.current
-
     val successMessage = stringResource(id = R.string.register_success_toast)
-
     LaunchedEffect(registerState) {
         when (registerState) {
             is Resource.Success -> {
@@ -78,8 +71,6 @@ fun RegisterScreen(
             else -> {}
         }
     }
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,10 +93,7 @@ fun RegisterScreen(
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
             )
-
             Spacer(modifier = Modifier.height(24.dp.scaled()))
-
-            // Username input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.register_username),
@@ -131,10 +119,7 @@ fun RegisterScreen(
                     )
                 )
             }
-
             Spacer(modifier = Modifier.height(12.dp.scaled()))
-
-            // Email input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.register_email),
@@ -160,10 +145,7 @@ fun RegisterScreen(
                     )
                 )
             }
-
             Spacer(modifier = Modifier.height(12.dp.scaled()))
-
-            // Password input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.register_password),
@@ -196,10 +178,7 @@ fun RegisterScreen(
                     )
                 )
             }
-
             Spacer(modifier = Modifier.height(12.dp.scaled()))
-
-            // Confirm Password input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.register_confirm_password),
@@ -232,9 +211,7 @@ fun RegisterScreen(
                     )
                 )
             }
-
             Spacer(modifier = Modifier.height(24.dp.scaled()))
-
             Button(
                 onClick = {
                     viewModel.register(name, email, password, confirmPassword)
@@ -253,9 +230,7 @@ fun RegisterScreen(
                     fontSize = 16.sp.scaled()
                 )
             }
-
             Spacer(modifier = Modifier.height(24.dp.scaled()))
-
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -269,7 +244,6 @@ fun RegisterScreen(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-
                     Text(
                         text = stringResource(R.string.register_login_here),
                         color = MaterialTheme.colorScheme.primary,
@@ -284,18 +258,15 @@ fun RegisterScreen(
                 }
             }
         }
-
         if (registerState is Resource.Loading) {
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-
         val displayErrorMsg = if (showErrorResId != null || showErrorRawMsg != null) {
             showErrorResId?.let { stringResource(id = it) } ?: showErrorRawMsg ?: ""
         } else ""
-
         ErrorBanner(
             message = displayErrorMsg,
             visible = displayErrorMsg.isNotEmpty(),

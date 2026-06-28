@@ -1,9 +1,7 @@
 package com.naufal.griefy.ui.tracker
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -29,20 +27,17 @@ import com.naufal.griefy.util.adaptiveWidth
 import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 import com.naufal.griefy.util.scaled
 import java.time.LocalDate
-
 import java.time.format.TextStyle
 import java.util.Locale
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-
 val Mood.icon: ImageVector
     get() = when (this) {
         Mood.POSITIVE -> Icons.Outlined.SentimentSatisfied
         Mood.NEUTRAL -> Icons.Outlined.SentimentNeutral
         Mood.NEGATIVE -> Icons.Outlined.SentimentDissatisfied
     }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoodTrackerScreen(
@@ -50,7 +45,6 @@ fun MoodTrackerScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     if (state.showMoodSelector && state.selectedDate != null) {
         AlertDialog(
             onDismissRequest = { viewModel.onDismissMoodSelector() },
@@ -102,11 +96,9 @@ fun MoodTrackerScreen(
             }
         )
     }
-
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val bgColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
     val textColor = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -130,7 +122,6 @@ fun MoodTrackerScreen(
                 IconButton(onClick = { viewModel.onPreviousMonth() }) {
                     Icon(imageVector = Icons.Default.ChevronLeft, contentDescription = "Previous Month", tint = textColor)
                 }
-
                 val monthText = state.currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
                 Text(
                     text = "$monthText ${state.currentMonth.year}",
@@ -138,12 +129,10 @@ fun MoodTrackerScreen(
                     fontWeight = FontWeight.Bold,
                     color = textColor
                 )
-
                 IconButton(onClick = { viewModel.onNextMonth() }) {
                     Icon(imageVector = Icons.Default.ChevronRight, contentDescription = "Next Month", tint = textColor)
                 }
             }
-
             val daysOfWeek = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
             Row(modifier = Modifier.fillMaxWidth()) {
                 daysOfWeek.forEach { day ->
@@ -156,13 +145,11 @@ fun MoodTrackerScreen(
                     )
                 }
             }
-            
             Spacer(modifier = Modifier.height(16.dp.scaled()))
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f) // Take remaining space
+                    .weight(1f) 
                     .verticalScroll(rememberScrollState())
             ) {
                 for (row in state.calendarGrid) {
@@ -179,7 +166,6 @@ fun MoodTrackerScreen(
                                     val moodForDay = state.moodsForMonth.find { it.dateString == dateString }
                                     val moodEnum = Mood.fromString(moodForDay?.moodValue)
                                     val isToday = date == LocalDate.now()
-
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -215,7 +201,7 @@ fun MoodTrackerScreen(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp.scaled())) // extra padding at bottom
+                Spacer(modifier = Modifier.height(24.dp.scaled())) 
             }
         }
     }

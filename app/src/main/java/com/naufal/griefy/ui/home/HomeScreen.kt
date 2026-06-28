@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.home
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.BasicTextField
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.TextStyle
 import java.text.SimpleDateFormat
 import java.util.*
 import com.naufal.griefy.ui.tracker.MoodTrackerScreen
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -52,22 +50,18 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
-    
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val carouselBgColor = if (isDark) {
         MaterialTheme.colorScheme.surfaceVariant
     } else {
         MaterialTheme.colorScheme.primary
     }
-
     val memories = state.memories
     val searchQuery = state.searchQuery
     val userProfile = state.userProfile
     val horizontalPadding = getAdaptiveHorizontalPadding()
-    
     var showMoodTrackerModal by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -80,7 +74,6 @@ fun HomeScreen(
                 .fillMaxSize()
                 .adaptiveWidth()
         ) {
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding, top = 8.dp.scaled(), bottom = 100.dp.scaled()),
@@ -107,7 +100,6 @@ fun HomeScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-
                         IconButton(
                             onClick = { navController.navigate(Screen.Settings.route) },
                             modifier = Modifier
@@ -122,9 +114,7 @@ fun HomeScreen(
                         }
                     }
                 }
-
                 item {
-
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -145,7 +135,6 @@ fun HomeScreen(
                                 modifier = Modifier.size(22.dp.scaled())
                             )
                             Spacer(modifier = Modifier.width(12.dp.scaled()))
-                            
                             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                                 if (searchQuery.isEmpty()) {
                                     Text(
@@ -163,7 +152,6 @@ fun HomeScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
-                            
                             if (searchQuery.isNotEmpty()) {
                                 Spacer(modifier = Modifier.width(8.dp.scaled()))
                                 Icon(
@@ -178,7 +166,6 @@ fun HomeScreen(
                         }
                     }
                 }
-
                 item {
                     Spacer(modifier = Modifier.height(16.dp.scaled()))
                     Card(
@@ -202,7 +189,6 @@ fun HomeScreen(
                                 contentDescription = "Griefy Logo",
                                 modifier = Modifier.size(64.dp.scaled())
                             )
-                            
                             Column(
                                 horizontalAlignment = Alignment.End,
                                 verticalArrangement = Arrangement.Center
@@ -224,7 +210,6 @@ fun HomeScreen(
                     }
                     Spacer(modifier = Modifier.height(16.dp.scaled()))
                 }
-
                 if (memories.isEmpty()) {
                     item {
                         Box(
@@ -282,7 +267,6 @@ fun HomeScreen(
         }
     }
 }
-
 @Composable
 fun MemoryCard(
     memory: Memory,
@@ -292,7 +276,6 @@ fun MemoryCard(
 ) {
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
     val dateString = formatter.format(Date(memory.createdAt))
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -302,7 +285,6 @@ fun MemoryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -348,8 +330,6 @@ fun MemoryCard(
                         )
                     }
                 }
-
-
                 val isSaved = memory.isSaved
                 IconButton(
                     onClick = { onSaveClick() },
@@ -372,8 +352,6 @@ fun MemoryCard(
                     }
                 }
             }
-
-
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first().toImageModel(),
@@ -384,8 +362,6 @@ fun MemoryCard(
                     contentScale = ContentScale.Crop
                 )
             }
-
-
             Column(modifier = Modifier.padding(16.dp.scaled())) {
                 Text(
                     text = memory.title,
@@ -393,8 +369,6 @@ fun MemoryCard(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-
-
                 if (!memory.songTrackId.isNullOrEmpty()) {
                     Spacer(modifier = Modifier.height(4.dp.scaled()))
                     Row(
@@ -418,9 +392,7 @@ fun MemoryCard(
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(8.dp.scaled()))
-
                 Text(
                     text = memory.content,
                     fontSize = 14.sp.scaled(),
@@ -428,8 +400,6 @@ fun MemoryCard(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-
-
                 if (memory.tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp.scaled()))
                     Row(

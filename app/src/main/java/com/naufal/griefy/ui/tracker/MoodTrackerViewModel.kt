@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.tracker
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.domain.model.Mood
@@ -16,8 +15,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
-
-
 @HiltViewModel
 class MoodTrackerViewModel @Inject constructor(
     private val getMoodsByMonthUseCase: GetMoodsByMonthUseCase,
@@ -25,15 +22,12 @@ class MoodTrackerViewModel @Inject constructor(
     private val deleteDailyMoodUseCase: DeleteDailyMoodUseCase,
     private val generateCalendarGridUseCase: GenerateCalendarGridUseCase
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(MoodTrackerState())
     val uiState: StateFlow<MoodTrackerState> = _uiState.asStateFlow()
-
     init {
         _uiState.update { it.copy(calendarGrid = generateCalendarGridUseCase(it.currentMonth)) }
         loadMoodsForMonth(_uiState.value.currentMonth)
     }
-
     fun onPreviousMonth() {
         val newMonth = _uiState.value.currentMonth.minusMonths(1)
         _uiState.update { 
@@ -44,7 +38,6 @@ class MoodTrackerViewModel @Inject constructor(
         }
         loadMoodsForMonth(newMonth)
     }
-
     fun onNextMonth() {
         val newMonth = _uiState.value.currentMonth.plusMonths(1)
         _uiState.update { 
@@ -55,7 +48,6 @@ class MoodTrackerViewModel @Inject constructor(
         }
         loadMoodsForMonth(newMonth)
     }
-
     fun onDateClicked(date: LocalDate) {
         _uiState.update { 
             it.copy(
@@ -64,35 +56,27 @@ class MoodTrackerViewModel @Inject constructor(
             ) 
         }
     }
-
     fun onDismissMoodSelector() {
         _uiState.update { it.copy(showMoodSelector = false, selectedDate = null) }
     }
-
     fun onMoodSelected(mood: Mood) {
         val date = _uiState.value.selectedDate ?: return
         val currentMonth = _uiState.value.currentMonth
-        
         viewModelScope.launch {
             saveDailyMoodUseCase(date, mood.stringValue)
             loadMoodsForMonth(currentMonth)
         }
-        
         onDismissMoodSelector()
     }
-
     fun onMoodDeleted() {
         val date = _uiState.value.selectedDate ?: return
         val currentMonth = _uiState.value.currentMonth
-        
         viewModelScope.launch {
             deleteDailyMoodUseCase(date)
             loadMoodsForMonth(currentMonth)
         }
-        
         onDismissMoodSelector()
     }
-
     private fun loadMoodsForMonth(yearMonth: YearMonth) {
         viewModelScope.launch {
             getMoodsByMonthUseCase(yearMonth).collect { moods ->

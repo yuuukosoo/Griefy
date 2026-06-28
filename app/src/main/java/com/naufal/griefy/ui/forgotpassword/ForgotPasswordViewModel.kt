@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.forgotpassword
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.naufal.griefy.R
@@ -12,15 +11,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 class ForgotPasswordViewModel @Inject constructor(
     private val sendPasswordResetUseCase: SendPasswordResetUseCase
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(ForgotPasswordState())
     val uiState: StateFlow<ForgotPasswordState> = _uiState.asStateFlow()
-
     fun sendPasswordReset(email: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessageRes = null, errorMessage = null) }
@@ -46,7 +42,6 @@ class ForgotPasswordViewModel @Inject constructor(
             }
         }
     }
-
     fun resetState() {
         _uiState.update { ForgotPasswordState() }
     }

@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.photoalbum
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,10 +22,8 @@ import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 import com.naufal.griefy.util.scaled
 import com.naufal.griefy.util.adaptiveWidth
 import androidx.compose.ui.unit.sp
-
 import androidx.compose.ui.res.stringResource
 import com.naufal.griefy.R
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoAlbumScreen(
@@ -35,9 +32,7 @@ fun PhotoAlbumScreen(
     val uiState by viewModel.uiState.collectAsState()
     val photoGroups = uiState.photoGroups
     val selectedPhotoUri = remember { mutableStateOf<String?>(null) }
-
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -53,7 +48,6 @@ fun PhotoAlbumScreen(
             val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
             val headerBgColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
             val headerTextColor = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -71,7 +65,6 @@ fun PhotoAlbumScreen(
                     color = headerTextColor
                 )
             }
-
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -125,7 +118,6 @@ fun PhotoAlbumScreen(
             }
         }
     }
-
     selectedPhotoUri.value?.let { uri ->
         Dialog(
             onDismissRequest = { selectedPhotoUri.value = null },

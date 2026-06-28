@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.profile
-
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -46,7 +45,6 @@ import com.airbnb.lottie.compose.*
 import com.naufal.griefy.util.toImageModel
 import com.naufal.griefy.util.scaled
 import com.naufal.griefy.util.getAdaptiveHorizontalPadding
-
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
@@ -58,35 +56,29 @@ fun ProfileScreen(
     val gender = uiState.gender
     val profileImageUriString = uiState.profileImageUriString
     val profileImageModel = profileImageUriString?.toImageModel()
-
     val context = LocalContext.current
     val isLoading = uiState.isLoading
     val isSaving = uiState.isSaving
     val errorMessage = uiState.errorMessage
     val saveSuccess = uiState.saveSuccess
-
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.logo_animation))
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever
     )
-
     LaunchedEffect(Unit) {
         viewModel.loadUserProfile()
     }
-
     LaunchedEffect(saveSuccess) {
         if (saveSuccess) {
             Toast.makeText(context, context.getString(R.string.profile_success_toast), Toast.LENGTH_SHORT).show()
             viewModel.clearSaveSuccess()
         }
     }
-
     val errorTextAuth = stringResource(R.string.profile_error_auth)
     val errorTextProcessImage = stringResource(R.string.profile_error_image)
     val errorTextSaveProfile = stringResource(R.string.profile_error_save)
     val errorTextLoadProfile = stringResource(R.string.profile_load_failed)
-
     LaunchedEffect(errorMessage) {
         errorMessage?.let { msg ->
             val displayMsg = when (msg) {
@@ -100,7 +92,6 @@ fun ProfileScreen(
             viewModel.clearErrorMessage()
         }
     }
-
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -108,9 +99,7 @@ fun ProfileScreen(
             viewModel.onProfileImagePicked(uri.toString())
         }
     }
-
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -143,8 +132,6 @@ fun ProfileScreen(
                     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
                     val headerBgColor = if (isDark) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
                     val headerTextColor = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary
-
-                    // Header Row (Left: Screen Title)
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -162,9 +149,7 @@ fun ProfileScreen(
                             color = headerTextColor
                         )
                     }
-
                     Spacer(modifier = Modifier.height(32.dp.scaled()))
-
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -174,7 +159,6 @@ fun ProfileScreen(
                         Box(
                             modifier = Modifier.size(100.dp.scaled())
                         ) {
-                            // Profile Avatar
                             Box(
                                 modifier = Modifier
                                     .size(100.dp.scaled())
@@ -193,8 +177,6 @@ fun ProfileScreen(
                                     Text("👤", fontSize = 48.sp.scaled())
                                 }
                             }
-
-                            // Edit Pen Icon Button on the bottom-right
                             if (isEditing) {
                                 IconButton(
                                     onClick = { photoPickerLauncher.launch("image/*") },
@@ -213,9 +195,7 @@ fun ProfileScreen(
                                 }
                             }
                         }
-
                         Spacer(modifier = Modifier.height(32.dp.scaled()))
-
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -235,9 +215,7 @@ fun ProfileScreen(
                                 )
                             }
                         }
-
                         Spacer(modifier = Modifier.height(16.dp.scaled()))
-
                         ProfileInfoItem(
                             icon = Icons.Default.Person,
                             label = stringResource(R.string.profile_username_label),
@@ -271,7 +249,6 @@ fun ProfileScreen(
                             },
                             options = listOf(maleLabel, femaleLabel)
                         )
-
                         if (isEditing) {
                             Spacer(modifier = Modifier.height(24.dp.scaled()))
                             Button(
@@ -294,13 +271,12 @@ fun ProfileScreen(
                 }
             }
         }
-
         if (isSaving) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.4f))
-                    .clickable(enabled = false) {}, // consume clicks
+                    .clickable(enabled = false) {}, 
                 contentAlignment = Alignment.Center
             ) {
                 LottieAnimation(
@@ -310,10 +286,8 @@ fun ProfileScreen(
                 )
             }
         }
-
     }
 }
-
 @Composable
 private fun ProfileInfoItem(
     icon: ImageVector,
@@ -324,7 +298,6 @@ private fun ProfileInfoItem(
     options: List<String>? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp.scaled()),

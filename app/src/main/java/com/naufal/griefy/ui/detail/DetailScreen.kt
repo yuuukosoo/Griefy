@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.detail
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -63,7 +62,6 @@ import com.naufal.griefy.R
 import com.naufal.griefy.ui.navigation.Screen
 import java.text.SimpleDateFormat
 import java.util.*
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
@@ -80,11 +78,9 @@ fun DetailScreen(
     val showDeleteDialog = remember { mutableStateOf(false) }
     val selectedImageIndexForFullScreen = remember { mutableStateOf<Int?>(null) }
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy", Locale("id", "ID")) }
-
     val isPlaying = state.isPlaying
     val currentPosition = state.currentPosition
     val duration = state.duration
-
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -100,11 +96,9 @@ fun DetailScreen(
     }
     val coroutineScope = rememberCoroutineScope()
     var isVisible by remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         isVisible = true
     }
-
     val handleBack = {
         coroutineScope.launch {
             isVisible = false
@@ -112,11 +106,9 @@ fun DetailScreen(
             navController.navigateUp()
         }
     }
-
     BackHandler {
         handleBack()
     }
-
     AnimatedVisibility(
         visible = isVisible,
         enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -164,7 +156,6 @@ fun DetailScreen(
                                 modifier = Modifier.size(20.dp.scaled())
                             )
                         }
-
                         Text(
                             text = stringResource(R.string.detail_title),
                             color = MaterialTheme.colorScheme.onBackground,
@@ -175,7 +166,6 @@ fun DetailScreen(
                             modifier = Modifier.offset(x = (-4).dp.scaled())
                         )
                     }
-
                     if (isOwnMemory) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -194,7 +184,6 @@ fun DetailScreen(
                                     modifier = Modifier.size(20.dp.scaled())
                                 )
                             }
-
                             IconButton(
                                 onClick = {
                                     memory?.let { mem ->
@@ -210,7 +199,6 @@ fun DetailScreen(
                                     modifier = Modifier.size(20.dp.scaled())
                                 )
                             }
-
                             IconButton(
                                 onClick = {
                                     showDeleteDialog.value = true
@@ -263,7 +251,6 @@ fun DetailScreen(
                                     )
                                     Spacer(modifier = Modifier.width(12.dp.scaled()))
                                 }
-
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = song.title,
@@ -281,7 +268,6 @@ fun DetailScreen(
                                         overflow = TextOverflow.Ellipsis
                                     )
                                 }
-
                                 IconButton(
                                     onClick = {
                                         val webIntent = Intent(Intent.ACTION_VIEW, "https://www.deezer.com/track/${song.trackId}".toUri())
@@ -297,9 +283,7 @@ fun DetailScreen(
                                     )
                                 }
                             }
-
                             Spacer(modifier = Modifier.height(12.dp.scaled()))
-
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth()
@@ -321,9 +305,7 @@ fun DetailScreen(
                                             modifier = Modifier.size(28.dp.scaled())
                                         )
                                     }
-
                                     Spacer(modifier = Modifier.width(8.dp.scaled()))
-
                                     val progress = if (duration > 0) currentPosition / duration else 0f
                                     LinearProgressIndicator(
                                         progress = { progress },
@@ -366,7 +348,6 @@ fun DetailScreen(
                         .adaptiveWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    // Profile Header Row
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -414,10 +395,8 @@ fun DetailScreen(
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
-
                     if (mem.imageUris.isNotEmpty()) {
                         val pagerState = rememberPagerState(initialPage = 0) { mem.imageUris.size }
-                        
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -436,7 +415,6 @@ fun DetailScreen(
                                     .aspectRatio(1f)
                                     .clip(RoundedCornerShape(16.dp.scaled()))
                             }
-
                             HorizontalPager(
                                 state = pagerState,
                                 modifier = pagerModifier
@@ -454,7 +432,6 @@ fun DetailScreen(
                                     contentScale = ContentScale.Crop
                                 )
                             }
-
                             if (mem.imageUris.size > 1) {
                                 Row(
                                     Modifier
@@ -476,9 +453,7 @@ fun DetailScreen(
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(12.dp.scaled()))
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -491,18 +466,14 @@ fun DetailScreen(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-
                         Spacer(modifier = Modifier.width(12.dp.scaled()))
-
                         Box(
                             modifier = Modifier
                                 .size(12.dp.scaled())
                                 .clip(CircleShape)
                                 .background(if (mem.isPublic) Color(0xFF81C784) else MaterialTheme.colorScheme.outline)
                         )
-
                         Spacer(modifier = Modifier.width(16.dp.scaled()))
-
                         if (mem.tags.isNotEmpty()) {
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp.scaled(), Alignment.End),
@@ -526,9 +497,7 @@ fun DetailScreen(
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.height(16.dp.scaled()))
-
                     Text(
                         text = mem.title,
                         fontSize = 22.sp.scaled(),
@@ -536,9 +505,7 @@ fun DetailScreen(
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(horizontal = horizontalPadding)
                     )
-
                     Spacer(modifier = Modifier.height(12.dp.scaled()))
-
                     Text(
                         text = mem.content,
                         fontSize = 16.sp.scaled(),
@@ -549,7 +516,6 @@ fun DetailScreen(
                             .padding(horizontal = horizontalPadding)
                     )
                 }
-
                 if (isLandscape && songDetails != null) {
                     if (!songDetails.previewUrl.isNullOrEmpty()) {
                         IconButton(
@@ -607,7 +573,6 @@ fun DetailScreen(
                         contentScale = ContentScale.Fit
                     )
                 }
-
                 IconButton(
                     onClick = { selectedImageIndexForFullScreen.value = null },
                     modifier = Modifier
@@ -624,7 +589,6 @@ fun DetailScreen(
             }
         }
     }
-
     if (showDeleteDialog.value) {
         Dialog(
             onDismissRequest = { showDeleteDialog.value = false },

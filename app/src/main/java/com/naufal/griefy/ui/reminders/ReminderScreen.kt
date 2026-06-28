@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.reminders
-
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlarmManager
@@ -66,7 +65,6 @@ import com.naufal.griefy.util.getAdaptiveHorizontalPadding
 import com.naufal.griefy.util.scaled
 import java.text.SimpleDateFormat
 import java.util.*
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReminderScreen(
@@ -77,10 +75,8 @@ fun ReminderScreen(
     val uiState by viewModel.uiState.collectAsState()
     val remembranceDays = uiState.remembranceDays
     val memories = uiState.memories
-
     val alarmManager = remember { context.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
     val powerManager = remember { context.getSystemService(Context.POWER_SERVICE) as PowerManager }
-
     var hasExactAlarmPermission by remember {
         mutableStateOf(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -90,15 +86,12 @@ fun ReminderScreen(
             }
         )
     }
-
     var isBatteryOptimized by remember {
         mutableStateOf(!powerManager.isIgnoringBatteryOptimizations(context.packageName))
     }
-
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { _ -> }
-
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -116,7 +109,6 @@ fun ReminderScreen(
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
-
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
@@ -124,22 +116,18 @@ fun ReminderScreen(
             }
         }
     }
-
     val showDialog = remember { mutableStateOf(false) }
     val editingReminder = remember { mutableStateOf<RemembranceDay?>(null) }
     val showDeleteDialog = remember { mutableStateOf(false) }
     val reminderToDelete = remember { mutableStateOf<RemembranceDay?>(null) }
-
     var titleText by remember { mutableStateOf("") }
     var descText by remember { mutableStateOf("") }
     var selectedDateTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var selectedMemoryId by remember { mutableStateOf<Int?>(null) }
     var activePicker by remember { mutableStateOf("date") }
-
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
     val dialogDateFormatter = remember { SimpleDateFormat("MMMM d, yyyy", Locale("id", "ID")) }
     val dialogTimeFormatter = remember { SimpleDateFormat("h:mm a", Locale.US) }
-
     fun openDialog(reminder: RemembranceDay? = null) {
         editingReminder.value = reminder
         if (reminder != null) {
@@ -156,9 +144,7 @@ fun ReminderScreen(
         activePicker = "date"
         showDialog.value = true
     }
-
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -215,7 +201,6 @@ fun ReminderScreen(
                     } else if (isBatteryOptimized) {
                         BatteryOptimizationWarningCard(context)
                     }
-
                     Box(
                         modifier = Modifier.weight(1f)
                     ) {
@@ -256,7 +241,6 @@ fun ReminderScreen(
                         }
                     }
                 }
-
                 IconButton(
                     onClick = { openDialog() },
                     modifier = Modifier
@@ -275,7 +259,6 @@ fun ReminderScreen(
             }
         }
     }
-
         if (showDeleteDialog.value) {
             Dialog(
                 onDismissRequest = {
@@ -340,7 +323,6 @@ fun ReminderScreen(
                 }
             }
         }
-
         if (showDialog.value) {
             var isTitleFocused by remember { mutableStateOf(false) }
             var isDescFocused by remember { mutableStateOf(false) }
@@ -348,7 +330,6 @@ fun ReminderScreen(
             val titleFocusRequester = remember { FocusRequester() }
             val descFocusRequester = remember { FocusRequester() }
             val dummyFocusRequester = remember { FocusRequester() }
-
             AlertDialog(
                 onDismissRequest = { showDialog.value = false },
                 properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -371,7 +352,6 @@ fun ReminderScreen(
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp.scaled()
                         )
-                        
                         val canSave = titleText.isNotBlank()
                         Box(
                             modifier = Modifier
@@ -414,11 +394,9 @@ fun ReminderScreen(
                 text = {
                     val configuration = LocalConfiguration.current
                     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
                     val calendar = remember { Calendar.getInstance() }.apply {
                         timeInMillis = selectedDateTime
                     }
-
                     val titleInput = @Composable {
                         val isTitleActive = isTitleFocused || activePicker == "title"
                         Box(
@@ -484,7 +462,6 @@ fun ReminderScreen(
                             }
                         }
                     }
-
                     val descInput = @Composable {
                         val isDescActive = isDescFocused || activePicker == "desc"
                         Box(
@@ -550,7 +527,6 @@ fun ReminderScreen(
                             }
                         }
                     }
-
                     val dateInput = @Composable {
                         val isDateActive = activePicker == "date"
                         Box(
@@ -608,7 +584,6 @@ fun ReminderScreen(
                             }
                         }
                     }
-
                     val timeInput = @Composable {
                         val isTimeActive = activePicker == "time"
                         Box(
@@ -666,11 +641,9 @@ fun ReminderScreen(
                             }
                         }
                     }
-
                     var dropdownExpanded by remember { mutableStateOf(false) }
                     var anchorWidth by remember { mutableIntStateOf(0) }
                     val density = LocalDensity.current
-
                     val memoryInput = @Composable {
                         val isMemoryActive = activePicker == "memory"
                         Box(
@@ -749,7 +722,6 @@ fun ReminderScreen(
                             }
                         }
                     }
-
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -760,14 +732,12 @@ fun ReminderScreen(
                                 }
                             }
                     ) {
-                        // Dummy focusable component
                         Box(
                             modifier = Modifier
                                 .size(1.dp)
                                 .focusRequester(dummyFocusRequester)
                                 .focusable()
                         )
-
                         if (isLandscape) {
                             Row(
                                 modifier = Modifier
@@ -829,7 +799,6 @@ fun ReminderScreen(
             )
         }
     }
-
 @Composable
 fun ReminderCard(
     reminder: RemembranceDay,
@@ -839,7 +808,6 @@ fun ReminderCard(
     onDelete: () -> Unit
 ) {
     val isPast = reminder.dateTime < System.currentTimeMillis()
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp.scaled()),
@@ -890,7 +858,6 @@ fun ReminderCard(
                         }
                     }
                 }
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -910,9 +877,7 @@ fun ReminderCard(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(16.dp.scaled()))
-
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -929,7 +894,6 @@ fun ReminderCard(
                     color = if (isPast) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.SemiBold
                 )
-
                 if (isPast) {
                     Spacer(modifier = Modifier.width(8.dp.scaled()))
                     Surface(
@@ -949,7 +913,6 @@ fun ReminderCard(
         }
     }
 }
-
 @Composable
 fun ExactAlarmWarningCard(context: Context) {
     Card(
@@ -1017,7 +980,6 @@ fun ExactAlarmWarningCard(context: Context) {
         }
     }
 }
-
 @SuppressLint("BatteryLife")
 @Composable
 fun BatteryOptimizationWarningCard(context: Context) {

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.naufal.griefy.domain.repository.MemoryRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -32,6 +33,7 @@ class TrashCleanupWorker @AssistedInject constructor(
             Result.success()
         } catch (e: Exception) {
             android.util.Log.e("WORKER_ERROR", "Gagal membersihkan trash", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
             Result.retry()
         }
     }

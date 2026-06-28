@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.searchmemory
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.BasicTextField
@@ -38,7 +37,6 @@ import com.naufal.griefy.ui.navigation.Screen
 import androidx.compose.ui.text.TextStyle
 import java.text.SimpleDateFormat
 import java.util.*
-
 @Composable
 fun SearchMemoryScreen(
     navController: NavController,
@@ -48,7 +46,6 @@ fun SearchMemoryScreen(
     val memories = state.publicMemories
     val searchQuery = state.searchQuery
     val horizontalPadding = getAdaptiveHorizontalPadding()
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -61,7 +58,6 @@ fun SearchMemoryScreen(
                 .fillMaxSize()
                 .adaptiveWidth()
         ) {
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding, top = 8.dp.scaled(), bottom = 100.dp.scaled()),
@@ -88,7 +84,6 @@ fun SearchMemoryScreen(
                                 modifier = Modifier.size(22.dp.scaled())
                             )
                             Spacer(modifier = Modifier.width(12.dp.scaled()))
-                            
                             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                                 if (searchQuery.isEmpty()) {
                                     Text(
@@ -106,7 +101,6 @@ fun SearchMemoryScreen(
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
-                            
                             if (searchQuery.isNotEmpty()) {
                                 Spacer(modifier = Modifier.width(8.dp.scaled()))
                                 Icon(
@@ -121,7 +115,6 @@ fun SearchMemoryScreen(
                         }
                     }
                 }
-
                 if (memories.isEmpty()) {
                     item {
                         Box(
@@ -167,11 +160,8 @@ fun SearchMemoryScreen(
                 }
             }
         }
-
-
     }
 }
-
 @Composable
 fun PublicMemoryCard(
     memory: Memory,
@@ -181,7 +171,6 @@ fun PublicMemoryCard(
 ) {
     val formatter = remember { SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale("id", "ID")) }
     val dateString = formatter.format(Date(memory.createdAt))
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -191,7 +180,6 @@ fun PublicMemoryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Header Row (Padding 16.dp)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -237,8 +225,6 @@ fun PublicMemoryCard(
                         )
                     }
                 }
-
-                // Save/Bookmark button
                 val isSaved = memory.isSaved
                 IconButton(
                     onClick = { onSaveClick() },
@@ -261,8 +247,6 @@ fun PublicMemoryCard(
                     }
                 }
             }
-
-            // Media Section (Edge-to-Edge)
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first().toImageModel(),
@@ -273,8 +257,6 @@ fun PublicMemoryCard(
                     contentScale = ContentScale.Crop
                 )
             }
-
-            // Content Section (Padding 16.dp)
             Column(modifier = Modifier.padding(16.dp.scaled())) {
                 Text(
                     text = memory.title,
@@ -282,8 +264,6 @@ fun PublicMemoryCard(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-
-                // Subtitle: Pinned Song Details
                 if (!memory.songTrackId.isNullOrEmpty()) {
                     Spacer(modifier = Modifier.height(4.dp.scaled()))
                     Row(
@@ -307,9 +287,7 @@ fun PublicMemoryCard(
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(8.dp.scaled()))
-
                 Text(
                     text = memory.content,
                     fontSize = 14.sp.scaled(),
@@ -317,8 +295,6 @@ fun PublicMemoryCard(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-
-                // Tags Section
                 if (memory.tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp.scaled()))
                     Row(

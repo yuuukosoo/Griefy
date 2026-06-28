@@ -1,6 +1,4 @@
 package com.naufal.griefy.ui.theme
-
-
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -12,11 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import com.naufal.griefy.R
-
 @Composable
 fun GriefyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -36,7 +32,6 @@ fun GriefyTheme(
         error = colorResource(id = R.color.accent_error),
         onError = colorResource(id = R.color.neutral_surface)
     )
-
     val customDarkColorScheme = darkColorScheme(
         primary = colorResource(id = R.color.brand_primary),
         primaryContainer = colorResource(id = R.color.brand_primary_container),
@@ -53,7 +48,6 @@ fun GriefyTheme(
         error = colorResource(id = R.color.accent_error),
         onError = colorResource(id = R.color.neutral_surface)
     )
-
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
@@ -62,7 +56,6 @@ fun GriefyTheme(
         darkTheme -> customDarkColorScheme
         else -> customLightColorScheme
     }
-
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,

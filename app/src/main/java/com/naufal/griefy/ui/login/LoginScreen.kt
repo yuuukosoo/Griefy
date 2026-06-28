@@ -1,5 +1,4 @@
 package com.naufal.griefy.ui.login
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,9 +28,7 @@ import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.naufal.griefy.domain.util.Resource
-
 import com.naufal.griefy.ui.components.ErrorBanner
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
@@ -44,13 +41,10 @@ fun LoginScreen(
     var showErrorResId by remember { mutableStateOf<Int?>(null) }
     var showErrorRawMsg by remember { mutableStateOf<String?>(null) }
     var showForgotPasswordSheet by remember { mutableStateOf(false) }
-
     val uiState by viewModel.uiState.collectAsState()
     val loginState = uiState.loginState
     val context = LocalContext.current
-
     val successMessage = stringResource(id = R.string.login_success_toast)
-
     LaunchedEffect(loginState) {
         when (loginState) {
             is Resource.Success -> {
@@ -77,9 +71,6 @@ fun LoginScreen(
             else -> {}
         }
     }
-
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -102,10 +93,7 @@ fun LoginScreen(
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
             )
-
             Spacer(modifier = Modifier.height(24.dp.scaled()))
-
-
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.login_email),
@@ -131,10 +119,7 @@ fun LoginScreen(
                     )
                 )
             }
-
             Spacer(modifier = Modifier.height(16.dp.scaled()))
-
-            // Password input field group
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.login_password),
@@ -167,9 +152,7 @@ fun LoginScreen(
                     )
                 )
             }
-
             Spacer(modifier = Modifier.height(8.dp.scaled()))
-
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.CenterEnd
@@ -184,9 +167,7 @@ fun LoginScreen(
                     }
                 )
             }
-
             Spacer(modifier = Modifier.height(16.dp.scaled()))
-
             Button(
                 onClick = {
                     viewModel.login(email, password)
@@ -205,9 +186,7 @@ fun LoginScreen(
                     fontSize = 16.sp.scaled()
                 )
             }
-
             Spacer(modifier = Modifier.height(24.dp.scaled()))
-
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -229,18 +208,15 @@ fun LoginScreen(
                 )
             }
         }
-
         if (loginState is Resource.Loading) {
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-
         val displayErrorMsg = if (showErrorResId != null || showErrorRawMsg != null) {
             showErrorResId?.let { stringResource(id = it) } ?: showErrorRawMsg ?: ""
         } else ""
-
         ErrorBanner(
             message = displayErrorMsg,
             visible = displayErrorMsg.isNotEmpty(),
@@ -250,7 +226,6 @@ fun LoginScreen(
             },
             modifier = Modifier.align(Alignment.TopCenter)
         )
-
         if (showForgotPasswordSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showForgotPasswordSheet = false },
@@ -263,6 +238,5 @@ fun LoginScreen(
                 )
             }
         }
-
     }
 }

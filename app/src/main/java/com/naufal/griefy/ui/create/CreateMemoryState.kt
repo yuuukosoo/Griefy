@@ -1,7 +1,5 @@
 package com.naufal.griefy.ui.create
-
 import android.net.Uri
-
 data class CreateMemoryState(
     val titleText: String = "",
     val contentText: String = "",
