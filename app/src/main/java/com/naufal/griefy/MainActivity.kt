@@ -26,10 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.isSystemInDarkTheme
 import android.content.SharedPreferences
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.naufal.griefy.ui.navigation.GriefyNavHost
 import com.naufal.griefy.ui.navigation.FloatingNavigationDock
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.naufal.griefy.ui.create.CreateMemoryScreen
 import com.naufal.griefy.ui.detail.DetailScreen
 import com.naufal.griefy.ui.edit.EditMemoryScreen
@@ -48,9 +46,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.naufal.griefy.ui.theme.GriefyTheme
 import com.naufal.griefy.ui.trash.TrashScreen
 import com.naufal.griefy.ui.saved.SavedScreen
-import com.naufal.griefy.worker.TrashCleanupWorker
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -63,16 +59,6 @@ class MainActivity : AppCompatActivity() {
             )
         }
         super.onCreate(savedInstanceState)
-
-        val trashCleanupWorkRequest = PeriodicWorkRequestBuilder<TrashCleanupWorker>(
-            1, TimeUnit.DAYS 
-        ).build()
-
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "TrashCleanupWork",
-            ExistingPeriodicWorkPolicy.KEEP,
-            trashCleanupWorkRequest
-        )
         setContent {
             val context = LocalContext.current
             val sharedPreferencesCompose = remember { context.getSharedPreferences("settings_pref", MODE_PRIVATE) }
@@ -106,140 +92,8 @@ class MainActivity : AppCompatActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    val navController = rememberNavController()
+                    GriefyNavHost()
 
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        val navBackStackEntry by navController.currentBackStackEntryAsState()
-                        val currentRoute = navBackStackEntry?.destination?.route
-
-                        val showDock = currentRoute in listOf(
-                            Screen.Home.route,
-                            Screen.SearchMemory.route,
-                            Screen.Saved.route,
-                            Screen.Profile.route,
-                            Screen.PhotoAlbum.route
-                        )
-
-                        NavHost(
-                            navController = navController,
-                            startDestination = Screen.Splash.route,
-                            enterTransition = {
-                                slideInHorizontally(
-                                    initialOffsetX = { it },
-                                    animationSpec = tween(durationMillis = 350)
-                                ) + fadeIn(animationSpec = tween(350))
-                            },
-                            exitTransition = {
-                                slideOutHorizontally(
-                                    targetOffsetX = { -it },
-                                    animationSpec = tween(durationMillis = 350)
-                                ) + fadeOut(animationSpec = tween(350))
-                            },
-                            popEnterTransition = {
-                                slideInHorizontally(
-                                    initialOffsetX = { -it },
-                                    animationSpec = tween(durationMillis = 350)
-                                ) + fadeIn(animationSpec = tween(350))
-                            },
-                            popExitTransition = {
-                                slideOutHorizontally(
-                                    targetOffsetX = { it },
-                                    animationSpec = tween(durationMillis = 350)
-                                ) + fadeOut(animationSpec = tween(350))
-                            },
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-
-                            composable(Screen.Splash.route) {
-                                SplashScreen(navController = navController)
-                            }
-
-                            composable(Screen.Login.route) {
-                                LoginScreen(navController = navController)
-                            }
-
-                            composable(Screen.Register.route) {
-                                RegisterScreen(navController = navController)
-                            }
-
-                            composable(Screen.Home.route) {
-                                HomeScreen(navController = navController)
-                            }
-
-                            composable(Screen.Profile.route) {
-                                ProfileScreen()
-                            }
-
-                            composable(
-                                route = Screen.OtherProfile.route,
-                                arguments = listOf(navArgument("userId") { type = NavType.StringType })
-                            ) {
-                                OtherProfileScreen(navController = navController)
-                            }
-
-                            composable(Screen.Settings.route) {
-                                SettingsScreen(navController = navController)
-                            }
-                            
-                            composable(Screen.CreateMemory.route) {
-                                CreateMemoryScreen(navController = navController)
-                            }
-
-                            dialog(
-                                route = Screen.DetailMemory.route,
-                                arguments = listOf(navArgument("memoryId") { type = NavType.IntType }),
-                                dialogProperties = androidx.compose.ui.window.DialogProperties(
-                                    usePlatformDefaultWidth = false
-                                )
-                            ) {
-                                DetailScreen(navController = navController)
-                            }
-
-                            composable(
-                                route = Screen.EditMemory.route,
-                                arguments = listOf(navArgument("memoryId") { type = NavType.IntType })
-                            ) {
-                                EditMemoryScreen(navController = navController)
-                            }
-
-                            composable(Screen.SearchPublic.route) {
-                                SearchSongScreen(navController = navController)
-                            }
-
-                            composable(Screen.SearchMemory.route) {
-                                SearchMemoryScreen(navController = navController)
-                            }
-
-                            composable(Screen.Trash.route) {
-                                TrashScreen(navController = navController)
-                            }
-
-                            composable(Screen.Reminders.route) {
-                                ReminderScreen(navController = navController)
-                            }
-
-                            composable(Screen.Saved.route) {
-                                SavedScreen(navController = navController)
-                            }
-
-                            composable(Screen.PhotoAlbum.route) {
-                                com.naufal.griefy.ui.photoalbum.PhotoAlbumScreen()
-                            }
-
-                        }
-
-                        AnimatedVisibility(
-                            visible = showDock,
-                            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-                            modifier = Modifier.align(Alignment.BottomCenter)
-                        ) {
-                            FloatingNavigationDock(
-                                navController = navController,
-                                currentRoute = currentRoute ?: Screen.Home.route
-                            )
-                        }
-                    }
                 }
             }
         }
