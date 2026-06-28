@@ -20,7 +20,7 @@ class GenerateCalendarGridUseCase @Inject constructor() {
             gridItems.add(yearMonth.atDay(i))
         }
         
-        // Pad the end to ensure full rows
+
         val remaining = (rows * 7) - gridItems.size
         repeat(remaining) {
             gridItems.add(null)

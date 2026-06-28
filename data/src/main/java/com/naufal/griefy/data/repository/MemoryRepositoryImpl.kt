@@ -157,6 +157,12 @@ class MemoryRepositoryImpl @Inject constructor(
             val uploadMemory = finalLocalMemory.copy(imageUris = cloudinaryUris)
             uploadToFirestore(uploadMemory)
         }
+
+
+        if (currentUid != null && memory.isSaved) {
+            val idToSync = if (userId != currentUid) memory.id else localId
+            syncSavedStatusToFirestore(finalLocalMemory.copy(id = idToSync), currentUid)
+        }
     }
 
     override suspend fun updateMemory(memory: Memory) {

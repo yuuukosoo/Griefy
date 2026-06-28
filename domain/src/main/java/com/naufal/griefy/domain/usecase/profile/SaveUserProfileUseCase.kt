@@ -1,4 +1,4 @@
-﻿package com.naufal.griefy.domain.usecase.profile
+package com.naufal.griefy.domain.usecase.profile
 
 import com.naufal.griefy.domain.model.UserProfile
 import com.naufal.griefy.domain.repository.AuthRepository
@@ -9,10 +9,7 @@ class SaveUserProfileUseCase @Inject constructor(
     private val repository: AuthRepository
 ) {
     suspend operator fun invoke(profile: UserProfile): Resource<Unit> {
-        val currentUser = repository.getCurrentUser()
-        if (currentUser == null) {
-            return Resource.Error("ERROR_UNAUTHENTICATED")
-        }
+        if (repository.getCurrentUser() == null) return Resource.Error("ERROR_UNAUTHENTICATED")
         return repository.saveUserProfile(profile)
     }
 }

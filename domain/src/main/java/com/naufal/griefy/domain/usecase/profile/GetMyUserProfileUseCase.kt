@@ -1,4 +1,4 @@
-﻿package com.naufal.griefy.domain.usecase.profile
+package com.naufal.griefy.domain.usecase.profile
 
 import com.naufal.griefy.domain.model.UserProfile
 import com.naufal.griefy.domain.repository.AuthRepository
@@ -11,11 +11,8 @@ class GetMyUserProfileUseCase @Inject constructor(
     private val repository: AuthRepository
 ) {
     operator fun invoke(): Flow<Resource<UserProfile>> {
-        val currentUser = repository.getCurrentUser()
-        if (currentUser == null) {
-            return flow {
-                emit(Resource.Error("ERROR_UNAUTHENTICATED"))
-            }
+        val currentUser = repository.getCurrentUser() ?: return flow {
+            emit(Resource.Error("ERROR_UNAUTHENTICATED"))
         }
         return repository.getUserProfile(currentUser.uid)
     }

@@ -152,7 +152,7 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun saveUserProfile(profile: UserProfile): Resource<Unit> {
         return try {
-            // 1. Update display name in FirebaseAuth
+
             val firebaseUser = firebaseAuth.currentUser
             if (firebaseUser != null) {
                 val profileUpdates = UserProfileChangeRequest.Builder()
@@ -161,7 +161,7 @@ class AuthRepositoryImpl @Inject constructor(
                 firebaseUser.updateProfile(profileUpdates).await()
             }
             
-            // Upload image to Cloudinary if it's a local URI
+
             val avatarBase64 = profile.avatarBase64
             val avatarUrl = if (avatarBase64 != null && (avatarBase64.startsWith("content://") || avatarBase64.startsWith("file://"))) {
                 cloudinaryUploader.uploadImage(avatarBase64) ?: avatarBase64
