@@ -18,7 +18,7 @@ import javax.inject.Inject
 class SearchSongViewModel @Inject constructor(
     private val searchSongsUseCase: SearchSongsUseCase,
     private val manageAudioPlaybackUseCase: ManageAudioPlaybackUseCase,
-    private val observeAudioStateUseCase: ObserveAudioStateUseCase,
+    observeAudioStateUseCase: ObserveAudioStateUseCase,
     private val stopAudioUseCase: StopAudioUseCase
 ) : ViewModel() {
 

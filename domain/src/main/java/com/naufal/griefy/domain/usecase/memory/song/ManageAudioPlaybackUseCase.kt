@@ -19,7 +19,5 @@ class ManageAudioPlaybackUseCase @Inject constructor(
         }
     }
 
-    fun stop() {
-        audioPlayer.stop()
-    }
+
 }
