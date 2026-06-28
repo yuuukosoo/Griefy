@@ -97,7 +97,6 @@
     <string name="detail_play_desc">Play</string>
     <string name="detail_pause_desc">Pause</string>
     <string name="detail_preview_unavailable">Audio preview not available.</string>
-
     <!-- Search Song Screen -->
     <string name="search_song_title">Choose Memory Song</string>
     <string name="search_song_placeholder">Search song title or artist...</string>

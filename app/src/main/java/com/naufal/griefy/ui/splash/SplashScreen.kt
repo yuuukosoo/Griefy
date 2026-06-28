@@ -25,9 +25,11 @@ fun SplashScreen(
     )
     LaunchedEffect(Unit) {
         delay(3000)
-        val startRoute = if (viewModel.isLoggedIn) Screen.Home.route else Screen.Login.route
-        navController.navigate(startRoute) {
-            popUpTo(Screen.Splash.route) { inclusive = true }
+        if (navController.currentDestination?.route == Screen.Splash.route) {
+            val startRoute = if (viewModel.isLoggedIn) Screen.Home.route else Screen.Login.route
+            navController.navigate(startRoute) {
+                popUpTo(Screen.Splash.route) { inclusive = true }
+            }
         }
     }
     Box(

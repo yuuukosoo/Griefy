@@ -9,6 +9,7 @@
     <string name="edit">Edit</string>
     <string name="add">Tambah</string>
     <string name="clear">Hapus</string>
+    <string name="discard">Batal</string>
     <string name="private_text">Privat</string>
     <string name="public_text">Publik</string>
 
