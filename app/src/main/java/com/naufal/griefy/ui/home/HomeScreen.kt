@@ -124,7 +124,7 @@ fun HomeScreen(
                 }
 
                 item {
-                    // Local Search bar
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -302,7 +302,7 @@ fun MemoryCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Header Row (Padding 16.dp)
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -349,7 +349,7 @@ fun MemoryCard(
                     }
                 }
 
-                // Save/Bookmark button
+
                 val isSaved = memory.isSaved
                 IconButton(
                     onClick = { onSaveClick() },
@@ -373,7 +373,7 @@ fun MemoryCard(
                 }
             }
 
-            // Media Section (Edge-to-Edge)
+
             if (memory.imageUris.isNotEmpty()) {
                 AsyncImage(
                     model = memory.imageUris.first().toImageModel(),
@@ -385,7 +385,7 @@ fun MemoryCard(
                 )
             }
 
-            // Content Section (Padding 16.dp)
+
             Column(modifier = Modifier.padding(16.dp.scaled())) {
                 Text(
                     text = memory.title,
@@ -394,7 +394,7 @@ fun MemoryCard(
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
-                // Subtitle: Pinned Song Details
+
                 if (!memory.songTrackId.isNullOrEmpty()) {
                     Spacer(modifier = Modifier.height(4.dp.scaled()))
                     Row(
@@ -429,7 +429,7 @@ fun MemoryCard(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // Tags Section
+
                 if (memory.tags.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp.scaled()))
                     Row(

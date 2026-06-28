@@ -14,13 +14,6 @@ interface MemoryDao {
     @Query("SELECT * FROM memory_table WHERE isTrashed = 0 ORDER BY createdAt DESC")
     fun getAllMemories(): Flow<List<MemoryEntity>>
 
-    @Query("SELECT * FROM memory_table WHERE isTrashed = 0")
-    suspend fun getAllMemoriesOnce(): List<MemoryEntity>
-
-    @Query("SELECT * FROM memory_table")
-    suspend fun getAllLocalMemoriesIncludingTrashed(): List<MemoryEntity>
-
-
     @Query("SELECT * FROM memory_table WHERE id = :id")
     suspend fun getMemoryById(id: Int): MemoryEntity?
 

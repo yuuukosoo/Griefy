@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import com.naufal.griefy.data.BuildConfig
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -37,7 +38,6 @@ class CloudinaryUploader @Inject constructor(
 
                 if (originalBitmap == null) return@withContext null
 
-                // Resize to max 1080px before upload
                 val maxDimension = 1080
                 val width = originalBitmap.width
                 val height = originalBitmap.height
@@ -73,6 +73,7 @@ class CloudinaryUploader @Inject constructor(
                 }
             } catch (e: Exception) {
                 android.util.Log.e("CLOUDINARY_UPLOAD", "Error uploading to Cloudinary: ${e.message}", e)
+                FirebaseCrashlytics.getInstance().recordException(e)
                 null
             }
         }

@@ -53,7 +53,6 @@ class MemoryRepositoryImpl @Inject constructor(
     }
 
     override fun getPublicMemories(): Flow<List<Memory>> = callbackFlow {
-        // Real-time listener for Firestore public memories
         val listener = firestore.collection(COLLECTION_PUBLIC_MEMORIES)
             .whereEqualTo("isPublic", true)
             .addSnapshotListener { snapshot, error ->
@@ -98,7 +97,7 @@ class MemoryRepositoryImpl @Inject constructor(
                         }
                     }
 
-                    // Cache strategy: save/update remote memories to Room to allow offline viewing
+
                     repositoryScope.launch {
                         try {
                             val localMemories = dao.getAllMemoryKeysOnce()
@@ -108,10 +107,10 @@ class MemoryRepositoryImpl @Inject constructor(
                                     (it.createdAt == remote.createdAt && it.userId == remote.userId)
                                 }
                                 if (local == null) {
-                                    // Insert remote memory to Room database as cache
+
                                     dao.insertMemory(remote.toEntity())
                                 } else {
-                                    // Update existing cached memory with latest data from Firestore
+
                                     dao.updateMemory(remote.copy(
                                         id = local.id,
                                         isSaved = local.isSaved,
@@ -151,11 +150,11 @@ class MemoryRepositoryImpl @Inject constructor(
         }
         val localMemory = memory.copy(userId = userId, imageUris = localImageUris)
 
-        // Save locally and get the generated ID
+
         val localId = dao.insertMemory(localMemory.toEntity()).toInt()
         val finalLocalMemory = localMemory.copy(id = localId)
 
-        // Upload to Firestore if it belongs to the current user
+
         if (userId == currentUid && currentUid != null) {
             val cloudinaryUris = localImageUris.mapNotNull { cloudinaryUploader.uploadImage(it) }
             val uploadMemory = finalLocalMemory.copy(imageUris = cloudinaryUris)
@@ -180,14 +179,14 @@ class MemoryRepositoryImpl @Inject constructor(
 
         dao.updateMemory(localMemory.toEntity())
 
-        // Sync with Firestore if it belongs to the current user
+
         if (userId == currentUid && currentUid != null) {
             val cloudinaryUris = localImageUris.mapNotNull { cloudinaryUploader.uploadImage(it) }
             val uploadMemory = localMemory.copy(imageUris = cloudinaryUris)
             uploadToFirestore(uploadMemory)
         }
 
-        // Sync bookmark/saved status to Firestore
+
         if (currentUid != null) {
             syncSavedStatusToFirestore(localMemory, currentUid)
         }
