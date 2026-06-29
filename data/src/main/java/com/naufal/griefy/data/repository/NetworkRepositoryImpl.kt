@@ -6,8 +6,10 @@ import android.net.NetworkCapabilities
 import com.naufal.griefy.domain.repository.NetworkRepository
 import javax.inject.Inject
 
+import dagger.hilt.android.qualifiers.ApplicationContext
+
 class NetworkRepositoryImpl @Inject constructor(
-    private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : NetworkRepository {
 
     override fun isConnected(): Boolean {

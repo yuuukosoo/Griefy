@@ -349,7 +349,7 @@ class MemoryRepositoryImpl @Inject constructor(
 
     private fun saveUriToLocalFile(context: Context, uriString: String, id: String): String? {
         if (uriString.startsWith("file:/") || uriString.startsWith("http://") || uriString.startsWith("https://")) {
-            return uriString // Sudah berupa file lokal atau url remote, tidak perlu disalin ulang
+            return uriString
         }
         return try {
             val dir = File(context.filesDir, "memory_images")
@@ -378,7 +378,7 @@ class MemoryRepositoryImpl @Inject constructor(
         }
     }
 
-    // Helper to upload memory to Firestore
+
     private fun uploadToFirestore(memory: Memory) {
         val uid = memory.userId ?: firebaseAuth.currentUser?.uid ?: FALLBACK_USER_ID
         val docId = "${uid}_${memory.id}"

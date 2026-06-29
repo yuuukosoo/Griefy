@@ -13,7 +13,7 @@ class DeleteAccountUseCase @Inject constructor(
         try {
             memoryRepository.clearAllLocalMemories()
         } catch (_: Exception) {
-            // Ignore Room delete failure
+
         }
         return authRepository.deleteAccount()
     }

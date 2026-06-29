@@ -1,7 +1,6 @@
 package com.naufal.griefy.ui.photoalbum
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.naufal.griefy.domain.model.PhotoAlbumGroup
 import com.naufal.griefy.domain.usecase.memory.memories.GetPhotoAlbumUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

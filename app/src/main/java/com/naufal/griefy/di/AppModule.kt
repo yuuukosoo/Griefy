@@ -17,6 +17,14 @@ import com.naufal.griefy.domain.repository.AuthRepository
 import com.naufal.griefy.data.repository.NetworkRepositoryImpl
 import com.naufal.griefy.domain.repository.NetworkRepository
 import com.naufal.griefy.BuildConfig
+import com.naufal.griefy.data.local.mood.DailyMoodDao
+import com.naufal.griefy.data.remote.CloudinaryUploader
+import com.naufal.griefy.data.repository.AndroidAudioPlayer
+import com.naufal.griefy.data.repository.DailyMoodRepositoryImpl
+import com.naufal.griefy.domain.repository.AudioPlayer
+import com.naufal.griefy.domain.repository.DailyMoodRepository
+import com.naufal.griefy.domain.repository.ReminderScheduler
+import com.naufal.griefy.receiver.ReminderScheduler as ReceiverReminderScheduler
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -60,7 +68,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDailyMoodDao(database: GriefyDatabase): com.naufal.griefy.data.local.mood.DailyMoodDao {
+    fun provideDailyMoodDao(database: GriefyDatabase): DailyMoodDao {
         return database.dailyMoodDao
     }
 
@@ -72,7 +80,7 @@ object AppModule {
         app: Application,
         firestore: FirebaseFirestore,
         firebaseAuth: FirebaseAuth,
-        cloudinaryUploader: com.naufal.griefy.data.remote.CloudinaryUploader
+        cloudinaryUploader: CloudinaryUploader
     ): MemoryRepository {
         return MemoryRepositoryImpl(dao, deezerApi, app, firestore, firebaseAuth, cloudinaryUploader)
     }
@@ -88,10 +96,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideDailyMoodRepository(
-        dao: com.naufal.griefy.data.local.mood.DailyMoodDao,
+        dao: DailyMoodDao,
         firestore: FirebaseFirestore
-    ): com.naufal.griefy.domain.repository.DailyMoodRepository {
-        return com.naufal.griefy.data.repository.DailyMoodRepositoryImpl(dao, firestore)
+    ): DailyMoodRepository {
+        return DailyMoodRepositoryImpl(dao, firestore)
     }
 
     @Provides
@@ -128,10 +136,9 @@ object AppModule {
     fun provideAuthRepository(
         firebaseAuth: FirebaseAuth,
         firestore: FirebaseFirestore,
-        okHttpClient: OkHttpClient,
-        @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context
+        cloudinaryUploader: CloudinaryUploader
     ): AuthRepository {
-        return AuthRepositoryImpl(firebaseAuth, firestore, okHttpClient, context)
+        return AuthRepositoryImpl(firebaseAuth, firestore, cloudinaryUploader)
     }
 
     @Provides
@@ -143,22 +150,24 @@ object AppModule {
     @Provides
     @Singleton
     fun provideReminderScheduler(
-        @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context
-    ): com.naufal.griefy.domain.repository.ReminderScheduler {
-        return com.naufal.griefy.receiver.ReminderScheduler(context)
+        impl: ReceiverReminderScheduler
+    ): ReminderScheduler {
+        return impl
     }
 
     @Provides
     @Singleton
-    fun provideAudioPlayer(): com.naufal.griefy.domain.repository.AudioPlayer {
-        return com.naufal.griefy.data.repository.AndroidAudioPlayer()
+    fun provideAudioPlayer(
+        impl: AndroidAudioPlayer
+    ): AudioPlayer {
+        return impl
     }
 
     @Provides
     @Singleton
     fun provideNetworkRepository(
-        @dagger.hilt.android.qualifiers.ApplicationContext context: android.content.Context
+        impl: NetworkRepositoryImpl
     ): NetworkRepository {
-        return NetworkRepositoryImpl(context)
+        return impl
     }
 }

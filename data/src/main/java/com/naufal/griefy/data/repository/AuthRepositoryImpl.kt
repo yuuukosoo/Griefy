@@ -15,18 +15,13 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import com.naufal.griefy.data.remote.CloudinaryUploader
-import android.content.Context
-import okhttp3.OkHttpClient
 
 @Suppress("SpellCheckingInspection")
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
-    okHttpClient: OkHttpClient,
-    @dagger.hilt.android.qualifiers.ApplicationContext context: Context
+    private val cloudinaryUploader: CloudinaryUploader
 ) : AuthRepository {
-
-    private val cloudinaryUploader = CloudinaryUploader(okHttpClient, context)
 
     override fun login(email: String, password: String): Flow<Resource<User>> = flow {
         emit(Resource.Loading())
@@ -54,7 +49,7 @@ class AuthRepositoryImpl @Inject constructor(
             val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val firebaseUser = authResult.user
             if (firebaseUser != null) {
-                // Update profile display name
+
                 val profileUpdates = UserProfileChangeRequest.Builder()
                     .setDisplayName(name)
                     .build()
@@ -206,7 +201,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 }
 
-// Suspend helper to await Google Play Services / Firebase Tasks
+
 private suspend fun <T> Task<T>.await(): T {
     if (isComplete) {
         val e = exception

@@ -22,5 +22,4 @@ sealed class Screen(val route: String) {
     object Reminders : Screen("reminders")
     object Saved : Screen("saved")
     object PhotoAlbum : Screen("photo_album")
-    object ForgotPassword : Screen("forgot_password")
 }

@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 class ReminderScheduler @Inject constructor(
-    @field:ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : DomainReminderScheduler {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
